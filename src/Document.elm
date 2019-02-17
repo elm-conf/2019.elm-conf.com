@@ -3,6 +3,7 @@ module Document exposing (demo, document)
 -- TODO: those exports don't make any sense. Whatever.
 
 import Browser
+import Document.Heading as Heading
 import Html exposing (Html)
 import Html.Attributes as Attrs
 import Mark exposing (Block, Inline(..), Nested(..), Text(..))
@@ -145,7 +146,7 @@ type Content
     = Paragraph (List InlineContent)
       -- TODO: wow, this is a bit of a messy type. Could it be neater?
     | ContentList (List (Nested (List (List InlineContent))))
-    | Heading HeadingLevel (List InlineContent)
+    | Heading Heading.Level (List InlineContent)
 
 
 body : Block (List Content)
@@ -161,30 +162,9 @@ body =
                 )
         , Mark.record2 "Heading"
             Heading
-            (Mark.field "level" headingLevel)
+            (Mark.field "level" Heading.levelBlock)
             (Mark.field "title" text)
         , Mark.map Paragraph text
-        ]
-
-
-type HeadingLevel
-    = First
-    | Second
-    | Third
-    | Fourth
-    | Fifth
-    | Sixth
-
-
-headingLevel : Block HeadingLevel
-headingLevel =
-    -- Yes, I know there are more levels than this, but for this particular
-    -- case I want us never to explicitly use them!
-    Mark.oneOf
-        [ Mark.exactly "first" First
-        , Mark.exactly "second" Second
-        , Mark.exactly "third" Third
-        , Mark.exactly "fourth" Fourth
         ]
 
 
@@ -276,28 +256,9 @@ viewContent content =
             Html.ul [] (List.map viewItem items)
 
         Heading level title ->
-            let
-                headingFn =
-                    case level of
-                        First ->
-                            Html.h1
-
-                        Second ->
-                            Html.h2
-
-                        Third ->
-                            Html.h3
-
-                        Fourth ->
-                            Html.h4
-
-                        Fifth ->
-                            Html.h5
-
-                        Sixth ->
-                            Html.h6
-            in
-            headingFn [] (List.map viewInlineContent title)
+            Heading.viewAtLevel level
+                []
+                (List.map viewInlineContent title)
 
 
 viewInlineContent : InlineContent -> Html msg
