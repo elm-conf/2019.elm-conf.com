@@ -3,8 +3,8 @@ module Document exposing (demo, document)
 -- TODO: those exports don't make any sense. Whatever.
 
 import Browser
-import Html
-import Mark exposing (Block, Nested(..), Text)
+import Html exposing (Html)
+import Mark exposing (Block, Nested(..), Text(..))
 
 
 demo =
@@ -26,8 +26,10 @@ The quick facts:
     title = Talk Subjects and Format
 
 The quick facts:
-All talks submitted through the call for speakers will be 30 minutes long.
-Talks will be recorded, but you will have the final say before we publish.
+
+| List
+    - All talks submitted through the call for speakers will be 30 minutes long.
+    - Talks will be recorded, but you will have the final say before we publish.
     """
 
 
@@ -137,9 +139,88 @@ main =
                         |> Html.ul []
                     ]
 
-            Ok stuff ->
+            Ok page_ ->
                 Html.div []
                     [ Html.text "Success!"
-                    , Html.text (Debug.toString stuff)
+                    , view page_
                     ]
         ]
+
+
+
+-- VIEW
+
+
+view : Page -> Html msg
+view { title, contents } =
+    Html.div
+        []
+        (Html.h1 [] [ Html.text title ] :: List.map viewContent contents)
+
+
+viewContent : Content -> Html msg
+viewContent content =
+    case content of
+        Paragraph stuff ->
+            Html.p [] (List.map viewText stuff)
+
+        ContentList items ->
+            Html.ul [] (List.map viewItem items)
+
+        Heading level title ->
+            let
+                headingFn =
+                    case level of
+                        First ->
+                            Html.h1
+
+                        Second ->
+                            Html.h2
+
+                        Third ->
+                            Html.h3
+
+                        Fourth ->
+                            Html.h4
+
+                        Fifth ->
+                            Html.h5
+
+                        Sixth ->
+                            Html.h6
+            in
+            headingFn [] (List.map viewText title)
+
+
+viewText : Text -> Html msg
+viewText (Text formats content) =
+    List.foldl
+        (\format root ->
+            case format of
+                Mark.Bold ->
+                    Html.strong [] [ root ]
+
+                Mark.Italic ->
+                    Html.em [] [ root ]
+
+                Mark.Strike ->
+                    Html.del [] [ root ]
+        )
+        (Html.text content)
+        formats
+
+
+viewItem : Nested (List (List Text)) -> Html text
+viewItem (Nested { content, children }) =
+    let
+        contentView =
+            content
+                |> List.concat
+                |> List.map viewText
+
+        childrenView =
+            List.map
+                (\child -> Html.ul [] [ viewItem child ])
+                children
+    in
+    Html.li [] (contentView ++ childrenView)
