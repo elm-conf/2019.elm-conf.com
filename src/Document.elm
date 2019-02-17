@@ -1,5 +1,7 @@
 module Document exposing (demo, document)
 
+-- TODO: those exports don't make any sense. Whatever.
+
 import Browser
 import Html
 import Mark exposing (Block, Nested(..), Text)
