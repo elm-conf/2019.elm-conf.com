@@ -12,5 +12,7 @@ stdenv.mkDerivation {
     git
     elmPackages.elm
     elmPackages.elm-format
+    nodejs
+    nodePackages.npm
   ];
 }
