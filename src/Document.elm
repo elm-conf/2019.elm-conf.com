@@ -152,20 +152,35 @@ type Content
 body : Block (List Content)
 body =
     Mark.manyOf
-        [ Mark.map ContentList <|
-            Mark.block "List"
-                (List.map (nestedMap Tuple.second))
-                (Mark.nested
-                    { item = text
-                    , start = Mark.exactly "- " ()
-                    }
-                )
-        , Mark.record2 "Heading"
-            Heading
-            (Mark.field "level" Heading.levelBlock)
-            (Mark.field "title" text)
-        , Mark.map Paragraph text
+        [ list
+        , heading
+        , paragraph
         ]
+
+
+list : Block Content
+list =
+    Mark.map ContentList <|
+        Mark.block "List"
+            (List.map (nestedMap Tuple.second))
+            (Mark.nested
+                { item = text
+                , start = Mark.exactly "- " ()
+                }
+            )
+
+
+heading : Block Content
+heading =
+    Mark.record2 "Heading"
+        Heading
+        (Mark.field "level" Heading.levelBlock)
+        (Mark.field "title" text)
+
+
+paragraph : Block Content
+paragraph =
+    Mark.map Paragraph text
 
 
 nestedMap : (a -> b) -> Nested a -> Nested b
