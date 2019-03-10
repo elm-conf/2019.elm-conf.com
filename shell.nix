@@ -7,7 +7,7 @@ with import (builtins.fetchTarball rec {
 }) {};
 
 stdenv.mkDerivation {
-  name = "2019.elm-conf.us";
+  name = "2019.elm-conf.com";
   buildInputs = [
     git
     elmPackages.elm
