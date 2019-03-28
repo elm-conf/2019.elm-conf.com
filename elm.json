@@ -14,6 +14,7 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "mdgriffith/elm-markup": "2.0.6",
+            "pablohirafuji/elm-markdown": "2.0.5",
             "rtfeldman/elm-css": "16.0.0"
         },
         "indirect": {
