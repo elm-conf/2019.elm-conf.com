@@ -11,7 +11,10 @@ cat <<EOF
     <title>${TITLE}</title>
   </head>
   <body>
-    $(cat $SRC)
+    <script src="/index.min.js"></script>
+    <script>
+      Elm.Main.init();
+    </script>
   </body>
 </html>
 EOF
