@@ -15,5 +15,6 @@ stdenv.mkDerivation {
     gnumake
     nodePackages.npm
     nodejs
+    python3
   ];
 }

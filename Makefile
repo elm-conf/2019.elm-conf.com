@@ -1,14 +1,18 @@
 CONTENT_SRC=$(wildcard content/*.md content/**/*.md)
-CONTENT_PUBLIC=$(CONTENT_SRC:content/%=public/%)
-CONTENT_HTML=$(CONTENT_SRC:content/%.md=public/%.html)
 
-public: $(CONTENT_PUBLIC) $(CONTENT_HTML)
+# dependencies are generated!
+public:
 	touch -m $@
 
-public/%.md: content/%.md
-	@mkdir -p $(@D)
-	cp $< $@
+include Makefile.public
 
-public/%.html: content/%.md script/make-html-wrapper.sh
-	@mkdir -p $(@D)
-	script/make-html-wrapper.sh $< > $@
+Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
+	$< $(CONTENT_SRC) > $@
+
+# package management
+
+npm/default.nix: npm/package.json
+	cd npm; node2nix -i package.json
+
+clean:
+	rm -rf public Makefile.public
