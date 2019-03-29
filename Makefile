@@ -5,7 +5,7 @@ ELM_SRC=$(wildcard src/*.elm src/**/*.elm)
 public: public/index.min.js
 	touch -m $@
 
-public/index.js: elm.json $(ELM_SRC)
+public/index.js: elm.json $(ELM_SRC) src/Routes.elm
 	elm make src/Main.elm --output $@ --optimize
 
 public/index.min.js: public/index.js node_modules
