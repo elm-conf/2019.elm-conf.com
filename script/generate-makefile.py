@@ -56,7 +56,7 @@ def routes(sources):
             '%s=%s' % (source, dest)
             for (source, dest)
             in zip(
-                [ source.replace('content/', '') for source in sources ],
+                [ nice_url(source.replace('content/', '')) for source in sources ],
                 [ '/' + os.path.dirname(nice_url(source.replace('content/', ''))) for source in sources ]
             )
         )
