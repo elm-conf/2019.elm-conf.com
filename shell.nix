@@ -14,7 +14,7 @@ stdenv.mkDerivation {
     git
     gnumake
     nodePackages.npm
-    nodejs
+    nodejs-8_x
     python3
   ];
 }

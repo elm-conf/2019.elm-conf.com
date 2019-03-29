@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "xhr2": "^0.1.4"
+    "uglify-js": "^3.5.2"
   }
 }
