@@ -11,8 +11,6 @@ Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
 
 # package management
 
-npm/default.nix: npm/package.json
-	cd npm; node2nix -i package.json
 
 clean:
 	rm -rf public Makefile.public
