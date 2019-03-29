@@ -23,4 +23,4 @@ node_modules: package.json package-lock.json
 	@touch -m $@
 
 clean:
-	rm -rf public Makefile.public
+	rm -rf public Makefile.public src/Routes.elm
