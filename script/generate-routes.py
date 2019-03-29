@@ -23,6 +23,12 @@ markdown route =
         {markdown_cases}
 
 
+path : Route -> String
+path route =
+    case route of
+        {path_cases}
+
+
 parser : Parser (Route -> a) a
 parser =
   oneOf
@@ -60,20 +66,40 @@ markdown_cases = '\n        '.join(
     in routes_to_constructors.items()
 )
 
-parser_cases = '\n        , '.join(
-    'map {} ({})'.format(
-        constructor,
-        'top' if route == '/' else 'top </> {}'.format(
-            ' </> '.join('s "{}"'.format(part) for part in route.split('/') if part != '')
+path_cases = '\n        '.join(
+    '{} -> {}'.format(
+        route,
+        'absolute [ {} ] []'.format(
+            ','.join(
+                '"{}"'.format(part)
+                for part in path.split('/')
+                if part != ''
+            )
         )
     )
-    for (route, constructor)
+    for (path, route)
     in routes_to_constructors.items()
 )
+
+parser_cases = '\n        , '.join(sorted(
+    (
+        'map {} ({})'.format(
+            constructor,
+            'top' if route == '/' else 'top </> {}'.format(
+                ' </> '.join('s "{}"'.format(part) for part in route.split('/') if part != '')
+            )
+        )
+        for (route, constructor)
+        in routes_to_constructors.items()
+    ),
+    key=lambda c: c.count('/'),
+    reverse=True,
+))
 
 print(TEMPLATE.format(
     module_name = args.module_name,
     routes = ' | '.join(sorted(routes_to_constructors.values())),
     markdown_cases = markdown_cases,
+    path_cases = path_cases,
     parser_cases = parser_cases,
 ))
