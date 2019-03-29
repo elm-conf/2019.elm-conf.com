@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import os
 import argparse
+import os.path
 
 parser = argparse.ArgumentParser()
 parser.add_argument('source', nargs='+')
@@ -40,10 +40,33 @@ def generate_html(source):
         target=nice_url(source).replace('content', 'public').replace('.md', '.html')
     )
 
+# routes is more static than the rest of these, but it lives here so we can keep
+# the URL cleaning (`nice_url`) in one place
+
+ROUTES_RULE = """\
+src/Routes.elm: script/generate-routes.py {sources}
+	$< {source_dests} > $@
+"""
+
+def routes(sources):
+    return ROUTES_RULE.format(
+        sources=' '.join(sources),
+        source_dests=' '.join(
+            '%s=%s' % (source, dest)
+            for (source, dest)
+            in zip(
+                [ source.replace('content/', '') for source in sources ],
+                [ '/' + os.path.dirname(nice_url(source.replace('content/', ''))) for source in sources ]
+            )
+        )
+    )
+
 rules = []
 
 for source in args.source:
     rules.append(copy_source(source))
     rules.append(generate_html(source))
 
-print('\n\n'.join(rules))
+rules.append(routes(args.source))
+
+print('\n'.join(rules))
