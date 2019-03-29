@@ -40,3 +40,11 @@ This content is styled using the normal text styles.
 - in list pages (e.g. schedule) embedded page headings are decreased by one level (h1 -> h2, h2 -> h3, and so on) and the content is all styled as normal text.
 
 BUT we have until speakers are announced to implement list pages, so don't worry about it too much before the CFP opens.
+
+## Design
+
+There's a design (`website.sketch`) that has all the assets.
+The measurements there are not precise, though.
+Ask Brian if you want specific measurements, or just eyeball it.
+
+If it looks good to you, I'm not concerned about the design and implementation being pixel-perfect (in fact, it'd be better if they weren't; I didn't go over the design with a fine-tooth comb and a lot of it is a little rough.)
