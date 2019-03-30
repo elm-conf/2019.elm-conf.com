@@ -46,7 +46,7 @@ def generate_html(source):
 ROUTES_RULE = """\
 src/Routes.elm: script/generate-routes.py {sources}
 	$< {source_dests} > $@
-	elm-format --yes $@
+	npx elm-format --yes $@
 """
 
 def routes(sources):
