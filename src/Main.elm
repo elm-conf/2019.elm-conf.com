@@ -2,7 +2,9 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation exposing (Key)
-import Html exposing (Html)
+import Html as RootHtml exposing (Html)
+import Html.Styled as Html
+import Page.Index as Index
 import Routes exposing (Route)
 import Url exposing (Url)
 import Url.Parser exposing (parse)
@@ -46,15 +48,18 @@ view : Model -> Document Msg
 view model =
     { title = "TODO"
     , body =
-        [ Html.text "elm-conf 2019"
-        , case model.route of
+        [ case model.route of
             Routes.NotFound ->
                 -- TODO: nice thing here
                 Html.text "not found!"
 
+            Routes.Index ->
+                Index.view
+
             otherwise ->
                 Html.text <| Routes.path model.route
         ]
+            |> List.map Html.toUnstyled
     }
 
 
