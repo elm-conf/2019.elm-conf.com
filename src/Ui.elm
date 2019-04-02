@@ -1,18 +1,20 @@
-module Ui exposing (Page, page)
+module Ui exposing (Markdown(..), page)
 
 import Css
+import Css.Global as Global
 import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
+import Markdown
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as SvgAttributes
 
 
-type alias Page =
-    { title : String
-    }
+type Markdown
+    = Markdown String
 
 
-page : Page -> Html msg
-page data =
+page : Markdown -> Html msg
+page (Markdown markdown) =
     Html.styled Html.div
         [ Css.padding <| Css.px 100
         , Css.backgroundImage <| Css.url "/static/images/waves.svg"
@@ -25,45 +27,67 @@ page data =
         , Css.property "grid-column-gap" "48px"
         ]
         []
-        [ elmLogo
-        , Html.styled Html.div
-            [ Css.paddingTop <| Css.px 50 ]
-            []
-            [ Html.styled Html.h1
-                [ Css.color primaryColor
-                , Css.fontFamilies [ "Vollkorn" ]
-                , Css.fontSize <| Css.px 72
-                , Css.margin Css.zero
-                , Css.lineHeight <| Css.px 91
-                ]
-                []
-                [ Html.text data.title ]
+        [ Html.styled Html.img
+            [ Css.width <| Css.px 200
+            , Css.height <| Css.px 200
             ]
-        ]
-
-
-elmLogo : Html msg
-elmLogo =
-    Svg.styled Svg.svg
-        [ Css.fill primaryColor
-        , Css.width <| Css.px 200
-        , Css.height <| Css.px 200
-        ]
-        [ SvgAttributes.viewBox "0 0 324 324"
-        ]
-        [ Svg.g
-            [ SvgAttributes.fillRule "nonzero" ]
-            [ Svg.polygon [ SvgAttributes.points "162.000501 153 232 83 92 83" ] []
-            , Svg.polygon [ SvgAttributes.points "9 0 79.264979 70 232 70 161.734023 0" ] []
-            , Svg.polygon
-                [ SvgAttributes.transform "translate(247.311293, 161.311293) rotate(45.000000) translate(-247.311293, -161.311293)"
-                , SvgAttributes.points "193.473809 107.228311 301.473809 107.228311 301.473809 215.228311 193.473809 215.228311"
+            [ Attributes.src "/static/images/elm-logo.svg" ]
+            []
+        , Html.styled Html.div
+            [ Css.fontSize <| Css.px 18
+            , Css.lineHeight <| Css.px 30
+            , sansSerifFont
+            , Global.descendants
+                [ Global.each [ Global.h1, Global.h2 ]
+                    [ Css.margin Css.zero
+                    , serifFont
+                    , Css.fontWeight <| Css.int 500
+                    , Css.color primaryColor
+                    ]
+                , Global.h1
+                    [ Css.fontSize <| Css.px 72
+                    , Css.lineHeight <| Css.px 90
+                    , Css.paddingTop <| Css.px 50
+                    , Css.paddingBottom <| Css.px 25
+                    , Global.adjacentSiblings
+                        [ Global.p
+                            [ Css.lineHeight <| Css.px 40
+                            , Css.fontSize <| Css.px 24
+                            , Css.letterSpacing <| Css.px -0.8
+                            , Css.color <| Css.hex "444444"
+                            , Css.marginBottom Css.zero
+                            ]
+                        ]
+                    ]
+                , Global.h2
+                    [ Css.fontSize <| Css.px 36
+                    , Css.lineHeight <| Css.px 50
+                    , Css.paddingTop <| Css.px 90
+                    , Css.paddingBottom <| Css.px 10
+                    ]
+                , Global.p
+                    [ Css.margin Css.zero
+                    , Css.marginBottom <| Css.px 30
+                    ]
+                , Global.ul
+                    [ Css.paddingLeft <| Css.em 1
+                    , Css.marginBottom <| Css.px 30
+                    ]
                 ]
-                []
-            , Svg.polygon [ SvgAttributes.points "324 144 324 0 180 0" ] []
-            , Svg.polygon [ SvgAttributes.points "153 161.998999 0 9 0 315" ] []
-            , Svg.polygon [ SvgAttributes.points "256 246.999498 324 315 324 179" ] []
-            , Svg.polygon [ SvgAttributes.points "161.999499 171 9 324 315 324" ] []
+            ]
+            []
+            [ markdown
+                |> String.split "---"
+                |> List.drop 1
+                |> String.join "---"
+                |> Markdown.toHtmlWith
+                    { githubFlavored = Nothing
+                    , defaultHighlighting = Nothing
+                    , sanitize = False
+                    , smartypants = False
+                    }
+                    []
+                |> Html.fromUnstyled
             ]
         ]
 
@@ -71,3 +95,13 @@ elmLogo =
 primaryColor : Css.Color
 primaryColor =
     Css.hex "FF5F6D"
+
+
+serifFont : Css.Style
+serifFont =
+    Css.fontFamilies [ "Vollkorn" ]
+
+
+sansSerifFont : Css.Style
+sansSerifFont =
+    Css.fontFamilies [ "Work Sans" ]

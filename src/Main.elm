@@ -4,8 +4,9 @@ import Browser exposing (Document)
 import Browser.Navigation exposing (Key)
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
-import Page.Index as Index
+import Http
 import Routes exposing (Route)
+import Ui
 import Url exposing (Url)
 import Url.Parser exposing (parse)
 
@@ -13,6 +14,7 @@ import Url.Parser exposing (parse)
 type alias Model =
     { key : Key
     , route : Route
+    , markdown : Maybe String
     }
 
 
@@ -22,26 +24,59 @@ type alias Flags =
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init _ url key =
+    let
+        route =
+            parse Routes.parser url
+    in
     ( { key = key
-      , route =
-            url
-                |> parse Routes.parser
-                |> Maybe.withDefault Routes.NotFound
+      , markdown = Nothing
+      , route = Maybe.withDefault Routes.NotFound route
       }
-    , Cmd.none
+    , route
+        |> Maybe.map loadMarkdown
+        |> Maybe.withDefault Cmd.none
     )
 
 
 type Msg
     = UrlChange Url
     | UrlRequest Browser.UrlRequest
+    | MarkdownRequestFinished (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model
-    , Cmd.none
-    )
+    case msg of
+        UrlChange url ->
+            case parse Routes.parser url of
+                Just route ->
+                    ( { model
+                        | route = route
+                        , markdown = Nothing
+                      }
+                    , loadMarkdown route
+                    )
+
+                Nothing ->
+                    ( { model | route = Routes.NotFound }
+                    , Cmd.none
+                    )
+
+        MarkdownRequestFinished result ->
+            ( { model | markdown = Result.toMaybe result }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+loadMarkdown : Route -> Cmd Msg
+loadMarkdown route =
+    Http.get
+        { url = Routes.markdown route
+        , expect = Http.expectString MarkdownRequestFinished
+        }
 
 
 view : Model -> Document Msg
@@ -53,11 +88,11 @@ view model =
                 -- TODO: nice thing here
                 Html.text "not found!"
 
-            Routes.Index ->
-                Index.view
-
             otherwise ->
-                Html.text <| Routes.path model.route
+                model.markdown
+                    |> Maybe.withDefault ""
+                    |> Ui.Markdown
+                    |> Ui.page
         ]
             |> List.map Html.toUnstyled
     }

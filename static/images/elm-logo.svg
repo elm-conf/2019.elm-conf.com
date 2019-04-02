@@ -1,0 +1,13 @@
+<svg viewBox="0 0 324 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="elm-reddish" fill="#FF5F6D" fill-rule="nonzero">
+            <polygon id="Shape" points="162.000501 153 232 83 92 83"></polygon>
+            <polygon id="Shape" points="9 0 79.264979 70 232 70 161.734023 0"></polygon>
+            <polygon id="Rectangle-path" transform="translate(247.311293, 161.311293) rotate(45.000000) translate(-247.311293, -161.311293) " points="193.473809 107.228311 301.473809 107.228311 301.473809 215.228311 193.473809 215.228311"></polygon>
+            <polygon id="Shape" points="324 144 324 0 180 0"></polygon>
+            <polygon id="Shape" points="153 161.998999 0 9 0 315"></polygon>
+            <polygon id="Shape" points="256 246.999498 324 315 324 179"></polygon>
+            <polygon id="Shape" points="161.999499 171 9 324 315 324"></polygon>
+        </g>
+    </g>
+</svg>
