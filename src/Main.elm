@@ -5,16 +5,23 @@ import Browser.Navigation exposing (Key)
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Http
+import Json.Decode as Decode exposing (Decoder)
 import Routes exposing (Route)
 import Ui
 import Url exposing (Url)
 import Url.Parser exposing (parse)
 
 
+type alias Page =
+    { content : String
+    , title : String
+    }
+
+
 type alias Model =
     { key : Key
     , route : Route
-    , markdown : Maybe String
+    , page : Maybe Page
     }
 
 
@@ -26,15 +33,15 @@ init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init _ url key =
     let
         route =
-            parse Routes.parser url
+            url
+                |> parse Routes.parser
+                |> Maybe.withDefault Routes.NotFound
     in
     ( { key = key
-      , markdown = Nothing
-      , route = Maybe.withDefault Routes.NotFound route
+      , page = Nothing
+      , route = route
       }
-    , route
-        |> Maybe.map loadMarkdown
-        |> Maybe.withDefault Cmd.none
+    , loadMarkdown route
     )
 
 
@@ -48,22 +55,26 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlChange url ->
-            case parse Routes.parser url of
-                Just route ->
-                    ( { model
-                        | route = route
-                        , markdown = Nothing
-                      }
-                    , loadMarkdown route
-                    )
-
-                Nothing ->
-                    ( { model | route = Routes.NotFound }
-                    , Cmd.none
-                    )
+            let
+                route =
+                    url
+                        |> parse Routes.parser
+                        |> Maybe.withDefault Routes.NotFound
+            in
+            ( { model
+                | route = route
+                , page = Nothing
+              }
+            , loadMarkdown route
+            )
 
         MarkdownRequestFinished result ->
-            ( { model | markdown = Result.toMaybe result }
+            ( { model
+                | page =
+                    result
+                        |> Result.toMaybe
+                        |> Maybe.andThen parsePage
+              }
             , Cmd.none
             )
 
@@ -79,22 +90,33 @@ loadMarkdown route =
         }
 
 
+parsePage : String -> Maybe Page
+parsePage raw =
+    case String.split "---" raw of
+        frontMatter :: rest ->
+            frontMatter
+                |> Decode.decodeString (Decode.field "title" Decode.string)
+                |> Result.toMaybe
+                |> Maybe.map (Page (String.join "---" rest))
+
+        _ ->
+            Nothing
+
+
 view : Model -> Document Msg
 view model =
-    { title = "TODO"
+    { title =
+        model.page
+            |> Maybe.map .title
+            |> Maybe.withDefault ""
     , body =
-        [ case model.route of
-            Routes.NotFound ->
-                -- TODO: nice thing here
-                Html.text "not found!"
-
-            otherwise ->
-                model.markdown
-                    |> Maybe.withDefault ""
-                    |> Ui.Markdown
-                    |> Ui.page
+        [ model.page
+            |> Maybe.map .content
+            |> Maybe.withDefault ""
+            |> Ui.Markdown
+            |> Ui.page
+            |> Html.toUnstyled
         ]
-            |> List.map Html.toUnstyled
     }
 
 

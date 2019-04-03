@@ -73,13 +73,15 @@ page (Markdown markdown) =
                     [ Css.paddingLeft <| Css.em 1
                     , Css.marginBottom <| Css.px 30
                     ]
+                , Global.a
+                    [ Css.textDecoration Css.none
+                    , Css.color primaryColor
+                    , Css.hover [ Css.textDecoration Css.underline ]
+                    ]
                 ]
             ]
             []
             [ markdown
-                |> String.split "---"
-                |> List.drop 1
-                |> String.join "---"
                 |> Markdown.toHtmlWith
                     { githubFlavored = Nothing
                     , defaultHighlighting = Nothing
