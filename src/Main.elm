@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Browser exposing (Document)
-import Browser.Navigation exposing (Key)
+import Browser.Navigation as Navigation exposing (Key)
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Http
@@ -68,6 +68,16 @@ update msg model =
             , loadMarkdown route
             )
 
+        UrlRequest (Browser.Internal url) ->
+            ( model
+            , Navigation.pushUrl model.key (Url.toString url)
+            )
+
+        UrlRequest (Browser.External url) ->
+            ( model
+            , Navigation.load url
+            )
+
         MarkdownRequestFinished result ->
             ( { model
                 | page =
@@ -77,9 +87,6 @@ update msg model =
               }
             , Cmd.none
             )
-
-        _ ->
-            ( model, Cmd.none )
 
 
 loadMarkdown : Route -> Cmd Msg

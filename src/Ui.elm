@@ -47,23 +47,22 @@ page (Markdown markdown) =
                 , Global.h1
                     [ Css.fontSize <| Css.px 72
                     , Css.lineHeight <| Css.px 90
-                    , Css.paddingTop <| Css.px 50
-                    , Css.paddingBottom <| Css.px 25
+                    , Css.marginTop <| Css.px 50
+                    , Css.marginBottom <| Css.px 25
                     , Global.adjacentSiblings
                         [ Global.p
                             [ Css.lineHeight <| Css.px 40
                             , Css.fontSize <| Css.px 24
                             , Css.letterSpacing <| Css.px -0.8
                             , Css.color <| Css.hex "444444"
-                            , Css.marginBottom Css.zero
                             ]
                         ]
                     ]
                 , Global.h2
                     [ Css.fontSize <| Css.px 36
                     , Css.lineHeight <| Css.px 50
-                    , Css.paddingTop <| Css.px 90
-                    , Css.paddingBottom <| Css.px 10
+                    , Css.marginTop <| Css.px 90
+                    , Css.marginBottom <| Css.px 10
                     ]
                 , Global.p
                     [ Css.margin Css.zero
@@ -77,6 +76,20 @@ page (Markdown markdown) =
                     [ Css.textDecoration Css.none
                     , Css.color primaryColor
                     , Css.hover [ Css.textDecoration Css.underline ]
+                    , Global.withClass "button"
+                        [ Css.fontSize <| Css.px 18
+                        , Css.display Css.inlineBlock
+                        , Css.height <| Css.px 40
+                        , Css.lineHeight <| Css.px 40
+                        , Css.minWidth <| Css.px 250
+                        , Css.borderRadius <| Css.px 20
+                        , Css.border3 (Css.px 1) Css.solid primaryColor
+                        , Css.textAlign Css.center
+                        , Css.backgroundColor <| Css.hex "FFF"
+                        , Css.marginRight <| Css.px 25
+                        , Css.hover [ Css.textDecoration Css.none ]
+                        , Css.lastChild [ Css.marginRight Css.zero ]
+                        ]
                     ]
                 ]
             ]

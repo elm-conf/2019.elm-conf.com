@@ -19,9 +19,9 @@ The best elm-conf talks are a mix of practical and philosophical, and we'll be r
 - How has working with Elm made other people's lives better?
 - What do you wish you had known when you started working with Elm?
 
-And again, if you would like feedback on your idea before submitting, or would like to work through the brainstorming process with someone, please email us! elm-conf@thestrangeloop.com
+And again, if you would like feedback on your idea before submitting, or would like to work through the brainstorming process with someone, please email us! [elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com)
 
-TODO: button for starting submission
+<a class="button" href="https://cfp.elm-conf.com">Start your submission</a>
 
 ## We are looking for first-time speakers
 
@@ -31,7 +31,7 @@ As an accepted speaker, we will help you take your first conference talk from id
 
 You will also be invited to the speaker dinner. We encourage you to attend this; it's a nice time to get to know your fellow speakers better. You're likely to find out that they're just as nervous as you are!
 
-If you are new to writing conference proposals and would like to work with a more experienced speaker to get feedback prior to submitting, please email us at elm-conf@thestrangeloop.com or contact @brianhicks or @luke on the Elm Slack.
+If you are new to writing conference proposals and would like to work with a more experienced speaker to get feedback prior to submitting, please email us at [elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com) or contact @brianhicks or @luke on the Elm Slack.
 
 ## What do accepted speakers receive?
 
@@ -51,4 +51,4 @@ The first pass of talk evaluation is done anonymously by a group of Elm communit
 
 That said, we recognize that any process involving humans will be imperfect. The Elm community is small and sometimes it's impossible to avoid putting identifying information like a project name or description in a proposal. If you find yourself in that situation, focus on making a high-quality proposal over an anonymized one. We lean on the committee members outside the Elm community here; they can give these proposals a fair review.
 
-TODO: that button again
+<a class="button" href="https://cfp.elm-conf.com">Start your submission</a>
