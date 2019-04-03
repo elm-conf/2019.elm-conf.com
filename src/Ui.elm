@@ -88,6 +88,7 @@ type alias TextInput =
     { placeholder : String
     , name : String
     , label : Maybe String
+    , type_ : String
     }
 
 
@@ -124,7 +125,7 @@ textInput config value =
                 , Css.property "caret-color" <| primaryColor.value
                 ]
             ]
-            [ Attributes.type_ "text"
+            [ Attributes.type_ config.type_
             , Attributes.value value
             , Attributes.name config.name
             , Attributes.placeholder config.placeholder

@@ -110,6 +110,7 @@ viewNameInput =
             { name = "name"
             , label = Just "Your Name"
             , placeholder = "Cool Speaker Person"
+            , type_ = "text"
             }
 
 
@@ -120,6 +121,7 @@ viewEmailInput =
             { name = "email"
             , label = Just "Your Email Address"
             , placeholder = "you@awesomeperson.com"
+            , type_ = "email"
             }
 
 
