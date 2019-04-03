@@ -23,8 +23,9 @@ page (Markdown markdown) =
         , Css.backgroundSize Css.contain
         , Css.borderTop3 (Css.px 5) Css.solid primaryColor
         , Css.property "display" "grid"
-        , Css.property "grid-template-columns" "200px auto"
+        , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
         , Css.property "grid-column-gap" "48px"
+        , Css.justifyContent Css.center
         ]
         []
         [ Html.styled Html.img
