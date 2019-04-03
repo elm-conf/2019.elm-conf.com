@@ -6,6 +6,7 @@ import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import Page.Cfp as Cfp
 import Routes exposing (Route)
 import Ui
 import Url exposing (Url)
@@ -22,6 +23,7 @@ type alias Model =
     { key : Key
     , route : Route
     , page : Maybe Page
+    , cfp : Cfp.Model
     }
 
 
@@ -40,6 +42,7 @@ init _ url key =
     ( { key = key
       , page = Nothing
       , route = route
+      , cfp = Cfp.empty
       }
     , loadMarkdown route
     )
@@ -49,6 +52,7 @@ type Msg
     = UrlChange Url
     | UrlRequest Browser.UrlRequest
     | MarkdownRequestFinished (Result Http.Error String)
+    | CfpChanged Cfp.Model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,6 +92,11 @@ update msg model =
             , Cmd.none
             )
 
+        CfpChanged cfp ->
+            ( { model | cfp = cfp }
+            , Cmd.none
+            )
+
 
 loadMarkdown : Route -> Cmd Msg
 loadMarkdown route =
@@ -117,12 +126,23 @@ view model =
             |> Maybe.map .title
             |> Maybe.withDefault ""
     , body =
-        [ model.page
-            |> Maybe.map .content
-            |> Maybe.withDefault ""
-            |> Ui.Markdown
-            |> Ui.page
-            |> Html.toUnstyled
+        [ case model.route of
+            Routes.Cfp ->
+                model.page
+                    |> Maybe.map .content
+                    |> Maybe.withDefault ""
+                    |> Cfp.view model.cfp
+                    |> Ui.page
+                    |> Html.map CfpChanged
+                    |> Html.toUnstyled
+
+            _ ->
+                model.page
+                    |> Maybe.map .content
+                    |> Maybe.withDefault ""
+                    |> Ui.markdown
+                    |> Ui.page
+                    |> Html.toUnstyled
         ]
     }
 

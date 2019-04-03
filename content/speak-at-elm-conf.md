@@ -21,7 +21,7 @@ The best elm-conf talks are a mix of practical and philosophical, and we'll be r
 
 And again, if you would like feedback on your idea before submitting, or would like to work through the brainstorming process with someone, please email us! [elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com)
 
-<a class="button" href="https://cfp.elm-conf.com">Start your submission</a>
+<a class="button" href="/cfp">Start your submission</a>
 
 ## We are looking for first-time speakers
 
@@ -51,4 +51,4 @@ The first pass of talk evaluation is done anonymously by a group of Elm communit
 
 That said, we recognize that any process involving humans will be imperfect. The Elm community is small and sometimes it's impossible to avoid putting identifying information like a project name or description in a proposal. If you find yourself in that situation, focus on making a high-quality proposal over an anonymized one. We lean on the committee members outside the Elm community here; they can give these proposals a fair review.
 
-<a class="button" href="https://cfp.elm-conf.com">Start your submission</a>
+<a class="button" href="/cfp">Start your submission</a>
