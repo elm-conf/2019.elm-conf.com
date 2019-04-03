@@ -4,6 +4,9 @@ ELM_SRC=$(wildcard src/*.elm src/**/*.elm)
 IMAGES_SRC=$(shell find static/images -type f)
 IMAGES=$(IMAGES_SRC:static/%=public/static/%)
 
+src/Api: node_modules
+	npx elm-graphql https://cfp.elm-conf.com/graphql --base Api --output src/Api
+
 # content dependencies are generated!
 public: public/index.min.js $(IMAGES)
 	touch -m $@
