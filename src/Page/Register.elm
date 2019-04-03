@@ -15,7 +15,9 @@ type alias Model =
 
 
 type Msg
-    = TODO
+    = UpdateName String
+    | UpdateEmail String
+    | UpdatePassword String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,4 +43,50 @@ validator =
 view : Model -> String -> Html Msg
 view model topContent =
     Html.main_ []
-        [ Ui.markdown topContent ]
+        [ Ui.markdown topContent
+        , Html.form
+            []
+            [ viewNameInput model.name |> Html.map UpdateName
+            , viewEmailInput model.email |> Html.map UpdateEmail
+            , viewPasswordInput model.password |> Html.map UpdatePassword
+            ]
+        ]
+
+
+{-| TODO: should be shared with Cfp.elm
+-}
+viewNameInput : String -> Html String
+viewNameInput =
+    Lazy.lazy <|
+        Ui.textInput
+            { name = "name"
+            , label = Just "Your Name"
+            , placeholder = "Cool Speaker Person"
+            , type_ = "text"
+            }
+
+
+{-| TODO: should be shared with Cfp.elm
+-}
+viewEmailInput : String -> Html String
+viewEmailInput =
+    Lazy.lazy <|
+        Ui.textInput
+            { name = "email"
+            , label = Just "Your Email Address"
+            , placeholder = "you@awesomeperson.com"
+            , type_ = "email"
+            }
+
+
+{-| TODO: should be shared with Cfp.elm
+-}
+viewPasswordInput : String -> Html String
+viewPasswordInput =
+    Lazy.lazy <|
+        Ui.textInput
+            { name = "password"
+            , label = Just "Your Password"
+            , placeholder = ""
+            , type_ = "password"
+            }
