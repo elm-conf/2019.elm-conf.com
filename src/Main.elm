@@ -126,24 +126,24 @@ view model =
             |> Maybe.map .title
             |> Maybe.withDefault ""
     , body =
-        [ case model.route of
-            Routes.Cfp ->
+        let
+            content =
                 model.page
                     |> Maybe.map .content
                     |> Maybe.withDefault ""
-                    |> Cfp.view model.cfp
-                    |> Ui.page
-                    |> Html.map CfpChanged
-                    |> Html.toUnstyled
 
-            _ ->
-                model.page
-                    |> Maybe.map .content
-                    |> Maybe.withDefault ""
-                    |> Ui.markdown
-                    |> Ui.page
-                    |> Html.toUnstyled
-        ]
+            contentView =
+                case model.route of
+                    Routes.Cfp ->
+                        Cfp.view model.cfp >> Html.map CfpChanged
+
+                    _ ->
+                        Ui.markdown
+        in
+        contentView content
+            |> Ui.page
+            |> Html.toUnstyled
+            |> List.singleton
     }
 
 
