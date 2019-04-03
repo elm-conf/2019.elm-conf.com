@@ -1,4 +1,4 @@
-title: Page Not Found
+{ "title": "Page Not Found" }
 ---
 
 Some Content TODO!

@@ -1,15 +1,22 @@
 CONTENT_SRC=$(wildcard content/*.md content/**/*.md)
 ELM_SRC=$(wildcard src/*.elm src/**/*.elm)
 
+IMAGES_SRC=$(shell find static/images -type f)
+IMAGES=$(IMAGES_SRC:static/%=public/static/%)
+
 # content dependencies are generated!
-public: public/index.min.js
+public: public/index.min.js $(IMAGES)
 	touch -m $@
 
 public/index.js: elm.json $(ELM_SRC) src/Routes.elm
-	elm make src/Main.elm --output $@ --optimize
+	npx elm make src/Main.elm --output $@ --optimize
 
 public/index.min.js: public/index.js node_modules
 	./node_modules/.bin/uglifyjs $< --compress "pure_funcs=[F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9],pure_getters,keep_fargs=false,unsafe_comps,unsafe" | ./node_modules/.bin/uglifyjs --mangle > $@
+
+public/static/%: static/%
+	@mkdir -p $(@D)
+	cp $< $@
 
 include Makefile.public
 

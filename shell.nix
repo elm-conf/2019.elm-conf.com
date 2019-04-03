@@ -9,8 +9,6 @@ with import (builtins.fetchTarball rec {
 stdenv.mkDerivation {
   name = "2019.elm-conf.com";
   buildInputs = [
-    elmPackages.elm
-    elmPackages.elm-format
     git
     gnumake
     nodePackages.npm
