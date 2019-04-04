@@ -2,9 +2,8 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.RegisterPayload exposing (UserEdgeOptionalArguments, clientMutationId, query, user, userEdge)
+module Api.Object.RegisterPayload exposing (clientMutationId, jwtToken, query)
 
-import Api.Enum.UsersOrderBy
 import Api.InputObject
 import Api.Interface
 import Api.Object
@@ -27,9 +26,9 @@ clientMutationId =
     Object.selectionForField "(Maybe String)" "clientMutationId" [] (Decode.string |> Decode.nullable)
 
 
-user : SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) Api.Object.RegisterPayload
-user object_ =
-    Object.selectionForCompositeField "user" [] object_ (identity >> Decode.nullable)
+jwtToken : SelectionSet (Maybe Api.ScalarCodecs.JwtToken) Api.Object.RegisterPayload
+jwtToken =
+    Object.selectionForField "(Maybe ScalarCodecs.JwtToken)" "jwtToken" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecJwtToken |> .decoder |> Decode.nullable)
 
 
 {-| Our root query field type. Allows us to run any query from our mutation payload.
@@ -37,25 +36,3 @@ user object_ =
 query : SelectionSet decodesTo RootQuery -> SelectionSet (Maybe decodesTo) Api.Object.RegisterPayload
 query object_ =
     Object.selectionForCompositeField "query" [] object_ (identity >> Decode.nullable)
-
-
-type alias UserEdgeOptionalArguments =
-    { orderBy : OptionalArgument (List Api.Enum.UsersOrderBy.UsersOrderBy) }
-
-
-{-| An edge for our `User`. May be used by Relay 1.
-
-  - orderBy - The method to use when ordering `User`.
-
--}
-userEdge : (UserEdgeOptionalArguments -> UserEdgeOptionalArguments) -> SelectionSet decodesTo Api.Object.UsersEdge -> SelectionSet (Maybe decodesTo) Api.Object.RegisterPayload
-userEdge fillInOptionals object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { orderBy = Absent }
-
-        optionalArgs =
-            [ Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.UsersOrderBy.toString |> Encode.list) ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "userEdge" optionalArgs object_ (identity >> Decode.nullable)
