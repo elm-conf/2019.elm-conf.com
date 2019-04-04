@@ -1,5 +1,6 @@
 module Ui exposing
     ( Checkbox
+    , bodyCopyStyle
     , checkbox
     , markdown
     , page
@@ -82,12 +83,19 @@ checkbox config value =
         ]
 
 
-markdown : String -> Html msg
-markdown raw =
-    Html.styled Html.div
+bodyCopyStyle : Css.Style
+bodyCopyStyle =
+    Css.batch
         [ Css.fontSize <| Css.px 18
         , Css.lineHeight <| Css.px 30
         , sansSerifFont
+        ]
+
+
+markdown : String -> Html msg
+markdown raw =
+    Html.styled Html.div
+        [ bodyCopyStyle
         , Global.descendants
             [ Global.each [ Global.h1, Global.h2 ]
                 [ Css.margin Css.zero
