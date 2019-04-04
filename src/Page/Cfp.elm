@@ -6,6 +6,7 @@ import Html.Styled.Lazy as Lazy
 import Regex
 import String.Verify
 import Ui
+import Ui.TextInput as TextInput exposing (textInput)
 import Verify
 
 
@@ -89,10 +90,19 @@ view model topContent =
                 , description = "The talk selection team will not be able to see your name or email address. We would like to consider if you're a first-time speaker or a member of an underrepresented group, though, so we will be able to see that. If you're not comfortable revealing those things, please leave them unchecked."
                 , hasBorder = True
                 , inputs =
-                    [ viewNameInput model.name
-                        |> Html.map (\name -> { model | name = name })
-                    , viewEmailInput model.email
-                        |> Html.map (\email -> { model | email = email })
+                    [ textInput "name"
+                        |> TextInput.withLabel "Your Name"
+                        |> TextInput.withPlaceholder "Cool Speaker Person"
+                        |> TextInput.withValue model.name
+                        |> TextInput.onInput (\name -> { model | name = name })
+                        |> TextInput.view
+                    , textInput "email"
+                        |> TextInput.withLabel "Your Email Address"
+                        |> TextInput.withPlaceholder "you@awesomeperson.com"
+                        |> TextInput.withType TextInput.Email
+                        |> TextInput.withValue model.email
+                        |> TextInput.onInput (\email -> { model | email = email })
+                        |> TextInput.view
                     , viewFirstTimeInput model.firstTime
                         |> Html.map (\firstTime -> { model | firstTime = firstTime })
                     , viewUnderrepresentedInput model.underrepresentedGroup
@@ -101,28 +111,6 @@ view model topContent =
                 }
             ]
         ]
-
-
-viewNameInput : String -> Html String
-viewNameInput =
-    Lazy.lazy <|
-        Ui.textInput
-            { name = "name"
-            , label = Just "Your Name"
-            , placeholder = "Cool Speaker Person"
-            , type_ = "text"
-            }
-
-
-viewEmailInput : String -> Html String
-viewEmailInput =
-    Lazy.lazy <|
-        Ui.textInput
-            { name = "email"
-            , label = Just "Your Email Address"
-            , placeholder = "you@awesomeperson.com"
-            , type_ = "email"
-            }
 
 
 viewFirstTimeInput : Bool -> Html Bool
