@@ -1,13 +1,11 @@
 module Ui exposing
     ( Checkbox
-    , TextInput
     , checkbox
     , markdown
     , page
     , primaryColor
     , sansSerifFont
     , serifFont
-    , textInput
     )
 
 import Css
@@ -81,57 +79,6 @@ checkbox config value =
                 []
                 [ Html.text config.label ]
             ]
-        ]
-
-
-type alias TextInput =
-    { placeholder : String
-    , name : String
-    , label : Maybe String
-    , type_ : String
-    }
-
-
-textInput : TextInput -> String -> Html String
-textInput config value =
-    Html.div []
-        [ case config.label of
-            Just label ->
-                Html.styled Html.label
-                    [ sansSerifFont
-                    , Css.color <| Css.hex "444444"
-                    , Css.fontSize <| Css.px 14
-                    , Css.display Css.block
-                    , Css.marginBottom <| Css.px 4
-                    ]
-                    [ Attributes.for config.name ]
-                    [ Html.text label ]
-
-            Nothing ->
-                Html.text ""
-        , Html.styled Html.input
-            [ Css.height <| Css.px 40
-            , Css.border3 (Css.px 1) Css.solid (Css.hex "444444")
-            , Css.borderRadius <| Css.px 5
-            , Css.lineHeight <| Css.px 38
-            , Css.paddingLeft <| Css.px 16
-            , Css.fontSize <| Css.px 18
-            , Css.width <| Css.pct 100
-            , Css.display Css.block
-            , Css.outline Css.zero
-            , sansSerifFont
-            , Css.focus
-                [ Css.borderColor primaryColor
-                , Css.property "caret-color" <| primaryColor.value
-                ]
-            ]
-            [ Attributes.type_ config.type_
-            , Attributes.value value
-            , Attributes.name config.name
-            , Attributes.placeholder config.placeholder
-            , Events.onInput identity
-            ]
-            []
         ]
 
 
