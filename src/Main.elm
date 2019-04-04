@@ -45,6 +45,7 @@ type alias Model =
 
     -- application-y pages
     , register : Register.Model
+    , cfp : Cfp.Model
     }
 
 
@@ -72,9 +73,10 @@ init { graphqlEndpoint, session } url key =
             session
                 |> Decode.decodeValue
                     (Decode.map2 Session
-                        (Decode.index 0 Decode.int)
-                        (Decode.index 1 Decode.string)
+                        (Decode.field "userId" Decode.int)
+                        (Decode.field "token" Decode.string)
                     )
+                |> Debug.log "session"
                 |> Result.toMaybe
 
         -- graphql information
@@ -82,6 +84,7 @@ init { graphqlEndpoint, session } url key =
 
         -- application-y pages
         , register = Register.empty
+        , cfp = Cfp.empty
         }
 
 
@@ -91,6 +94,7 @@ type Msg
     | MarkdownRequestFinished (Result Http.Error String)
     | RegisterChanged Register.Msg
     | SessionChanged (Maybe Session)
+    | CfpMsg Cfp.Msg
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -105,6 +109,32 @@ onUrlChange url model =
         ( Nothing, Routes.Cfp ) ->
             ( model
             , Navigation.replaceUrl model.key <| Routes.path Routes.Register
+            )
+
+        ( Just session, Routes.Cfp ) ->
+            let
+                ( newCfp, cmd ) =
+                    Cfp.init
+                        { graphqlUrl = model.graphqlEndpoint
+                        , token = session.token
+                        , userId = session.userId
+                        }
+                        Nothing
+            in
+            ( { model
+                | cfp = newCfp
+                , page = Nothing
+                , route = route
+              }
+            , Cmd.batch
+                [ loadMarkdown route
+                , Cmd.map CfpMsg cmd
+                ]
+            )
+
+        ( Just _, Routes.Register ) ->
+            ( model
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp
             )
 
         _ ->
@@ -176,6 +206,26 @@ update msg model =
                     Cmd.none
             )
 
+        CfpMsg cfpMsg ->
+            case model.session of
+                Just session ->
+                    let
+                        ( newCfp, cmd ) =
+                            Cfp.update
+                                { graphqlUrl = model.graphqlEndpoint
+                                , token = session.token
+                                , userId = session.userId
+                                }
+                                cfpMsg
+                                model.cfp
+                    in
+                    ( { model | cfp = newCfp }
+                    , Cmd.map CfpMsg cmd
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
 
 loadMarkdown : Route -> Cmd Msg
 loadMarkdown route =
@@ -214,7 +264,7 @@ view model =
             contentView =
                 case model.route of
                     Routes.Cfp ->
-                        \_ -> Html.text ""
+                        Cfp.view model.cfp >> Html.map CfpMsg
 
                     Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged

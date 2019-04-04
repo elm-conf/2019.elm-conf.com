@@ -1,4 +1,4 @@
-module Page.Cfp exposing (Msg(..), Proposal, viewEditor)
+module Page.Cfp exposing (Env, Model, Msg(..), empty, init, update, view)
 
 import Api.Object as ApiObject
 import Api.Object.Proposal as ApiProposal
@@ -21,6 +21,7 @@ import Verify
 type Msg
     = UpdateProposal Proposal
     | UpdateAuthor Author
+    | PageLoaded (Maybe ( Proposal, Author ))
     | Submit
 
 
@@ -77,7 +78,12 @@ type Model
     | Failed
 
 
-loadPage : Env -> Maybe Int -> Cmd Model
+empty : Model
+empty =
+    Loading
+
+
+loadPage : Env -> Maybe Int -> Cmd (Maybe ( Proposal, Author ))
 loadPage env currentId =
     let
         proposalSelection : SelectionSet Proposal ApiObject.Proposal
@@ -102,35 +108,49 @@ loadPage env currentId =
                 |> SelectionSet.with ApiUser.firstTimeSpeaker
                 |> SelectionSet.with ApiUser.speakerUnderrepresented
     in
-    SelectionSet.succeed
-        (\author ->
-            case author of
-                Just a ->
-                    Loaded
-                        { current = newProposal
-                        , errors = []
-                        , available = []
-                        , author = a
-                        }
-
-                Nothing ->
-                    Failed
-        )
+    SelectionSet.succeed (Maybe.map (Tuple.pair newProposal))
         |> SelectionSet.with (ApiQuery.user { id = env.userId } authorSelection)
         |> Http.queryRequest env.graphqlUrl
-        |> Http.withHeader "Authoriaztion" ("Bearer " ++ env.token)
-        |> Http.send identity
-        |> Cmd.map (Result.withDefault Failed)
+        |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
+        |> Http.send (Result.toMaybe >> Maybe.andThen identity)
 
 
-init : Proposal
-init =
-    { abstract = ""
-    , title = ""
-    , pitch = ""
-    , outline = ""
-    , feedback = ""
-    }
+init : Env -> Maybe Int -> ( Model, Cmd Msg )
+init env currentId =
+    ( Loading
+    , loadPage env currentId
+        |> Cmd.map PageLoaded
+    )
+
+
+update : Env -> Msg -> Model -> ( Model, Cmd Msg )
+update env msg model =
+    case ( model, msg ) of
+        ( Loading, PageLoaded Nothing ) ->
+            ( Failed, Cmd.none )
+
+        ( Loading, PageLoaded (Just ( p, a )) ) ->
+            ( Loaded
+                { current = p
+                , errors = []
+                , available = []
+                , author = a
+                }
+            , Cmd.none
+            )
+
+        ( Loaded m, UpdateProposal p ) ->
+            ( Loaded { m | current = p }
+            , Cmd.none
+            )
+
+        ( Loaded m, UpdateAuthor a ) ->
+            ( Loaded { m | author = a }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 boundedWords : Bool -> Int -> error -> Verify.Validator error String String
@@ -176,6 +196,16 @@ validator =
                 (boundedWords False 50 "Please give some more detail in your talk outline.")
             )
         |> Verify.keep .feedback
+
+
+view : Model -> String -> Html Msg
+view pageModel topContent =
+    case pageModel of
+        Loaded model ->
+            viewEditor model.current model.author topContent
+
+        _ ->
+            Html.text ""
 
 
 viewEditor : Proposal -> Author -> String -> Html Msg

@@ -16,13 +16,13 @@ cat <<EOF
       var app = Elm.Main.init({
         flags: {
           graphqlEndpoint: "${GRAPHQL_ENDPOINT:-https://cfp.elm-conf.com/graphql}",
-          token: parseToken(localStorage.getItem('token'))
+          session: parseToken(localStorage.getItem('token'))
         }
       });
       function parseToken(token) {
         if (token === null) return null
-        var userId = JSON.parse(btoa(token.split('.')[1])).user_id
-        return [userId, token]
+        var userId = JSON.parse(atob(token.split('.')[1])).user_id
+        return { userId, token }
       }
       app.ports.setToken.subscribe(function (token) {
         localStorage.setItem('token', token)
