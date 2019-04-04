@@ -13,7 +13,7 @@ cat <<EOF
   <body>
     <script src="/index.min.js"></script>
     <script>
-      Elm.Main.init();
+      Elm.Main.init({ flags: { graphqlEndpoint: "${GRAPHQL_ENDPOINT:-http://localhost:5100/graphql}" }});
     </script>
   </body>
 </html>
