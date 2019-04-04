@@ -1,5 +1,5 @@
 module Ui.TextInput exposing
-    ( Input, input, view
+    ( TextInput, textInput, view
     , withValue, onInput
     , withPlaceholder, withLabel
     , InputType(..), withType
@@ -8,7 +8,7 @@ module Ui.TextInput exposing
 
 {-|
 
-@docs Input, input, view
+@docs TextInput, textInput, view
 
 @docs withValue, onInput
 
@@ -28,8 +28,8 @@ import Html.Styled.Lazy as Lazy
 import Ui
 
 
-type Input msg
-    = Input
+type TextInput msg
+    = TextInput
         { name : String
         , value : Maybe String
         , placeholder : String
@@ -40,9 +40,9 @@ type Input msg
         }
 
 
-input : String -> Input String
-input name =
-    Input
+textInput : String -> TextInput String
+textInput name =
+    TextInput
         { name = name
         , value = Nothing
         , placeholder = ""
@@ -53,19 +53,19 @@ input name =
         }
 
 
-withValue : String -> Input msg -> Input msg
-withValue value (Input config) =
-    Input { config | value = Just value }
+withValue : String -> TextInput msg -> TextInput msg
+withValue value (TextInput config) =
+    TextInput { config | value = Just value }
 
 
-withPlaceholder : String -> Input msg -> Input msg
-withPlaceholder placeholder (Input config) =
-    Input { config | placeholder = placeholder }
+withPlaceholder : String -> TextInput msg -> TextInput msg
+withPlaceholder placeholder (TextInput config) =
+    TextInput { config | placeholder = placeholder }
 
 
-withLabel : String -> Input msg -> Input msg
-withLabel label (Input config) =
-    Input { config | label = Just label }
+withLabel : String -> TextInput msg -> TextInput msg
+withLabel label (TextInput config) =
+    TextInput { config | label = Just label }
 
 
 type InputType
@@ -74,14 +74,14 @@ type InputType
     | Password
 
 
-withType : InputType -> Input msg -> Input msg
-withType type_ (Input config) =
-    Input { config | type_ = type_ }
+withType : InputType -> TextInput msg -> TextInput msg
+withType type_ (TextInput config) =
+    TextInput { config | type_ = type_ }
 
 
-onInput : (String -> msgB) -> Input msgA -> Input msgB
-onInput onInput_ (Input config) =
-    Input
+onInput : (String -> msgB) -> TextInput msgA -> TextInput msgB
+onInput onInput_ (TextInput config) =
+    TextInput
         { name = config.name
         , value = config.value
         , placeholder = config.placeholder
@@ -94,13 +94,13 @@ onInput onInput_ (Input config) =
         }
 
 
-withStyle : List Style -> Input msg -> Input msg
-withStyle style (Input config) =
-    Input { config | style = style }
+withStyle : List Style -> TextInput msg -> TextInput msg
+withStyle style (TextInput config) =
+    TextInput { config | style = style }
 
 
-view : Input msg -> Html msg
-view ((Input config) as input_) =
+view : TextInput msg -> Html msg
+view ((TextInput config) as input_) =
     case config.value of
         Just value ->
             Lazy.lazy (baseView input_) value
@@ -109,8 +109,8 @@ view ((Input config) as input_) =
             baseView input_ ""
 
 
-baseView : Input msg -> String -> Html msg
-baseView (Input config) value =
+baseView : TextInput msg -> String -> Html msg
+baseView (TextInput config) value =
     Html.styled Html.div
         config.style
         []
