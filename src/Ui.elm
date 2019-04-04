@@ -1,6 +1,7 @@
 module Ui exposing
     ( Checkbox
     , bodyCopyStyle
+    , buttonStyle
     , checkbox
     , markdown
     , page
@@ -92,6 +93,25 @@ bodyCopyStyle =
         ]
 
 
+buttonStyle : Css.Style
+buttonStyle =
+    Css.batch
+        [ Css.color primaryColor
+        , Css.fontSize <| Css.px 18
+        , Css.display Css.inlineBlock
+        , Css.height <| Css.px 40
+        , Css.lineHeight <| Css.px 40
+        , Css.minWidth <| Css.px 250
+        , Css.borderRadius <| Css.px 20
+        , Css.border3 (Css.px 1) Css.solid primaryColor
+        , Css.textAlign Css.center
+        , Css.backgroundColor <| Css.hex "FFF"
+        , Css.marginRight <| Css.px 25
+        , Css.hover [ Css.textDecoration Css.none ]
+        , Css.lastChild [ Css.marginRight Css.zero ]
+        ]
+
+
 markdown : String -> Html msg
 markdown raw =
     Html.styled Html.div
@@ -135,20 +155,7 @@ markdown raw =
                 [ Css.textDecoration Css.none
                 , Css.color primaryColor
                 , Css.hover [ Css.textDecoration Css.underline ]
-                , Global.withClass "button"
-                    [ Css.fontSize <| Css.px 18
-                    , Css.display Css.inlineBlock
-                    , Css.height <| Css.px 40
-                    , Css.lineHeight <| Css.px 40
-                    , Css.minWidth <| Css.px 250
-                    , Css.borderRadius <| Css.px 20
-                    , Css.border3 (Css.px 1) Css.solid primaryColor
-                    , Css.textAlign Css.center
-                    , Css.backgroundColor <| Css.hex "FFF"
-                    , Css.marginRight <| Css.px 25
-                    , Css.hover [ Css.textDecoration Css.none ]
-                    , Css.lastChild [ Css.marginRight Css.zero ]
-                    ]
+                , Global.withClass "button" [ buttonStyle ]
                 ]
             ]
         ]

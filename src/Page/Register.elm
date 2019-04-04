@@ -116,7 +116,8 @@ view model topContent =
                 |> TextInput.withValue model.inputs.password
                 |> TextInput.onInput UpdatePassword
                 |> TextInput.view
-            , Html.input
+            , Html.styled Html.input
+                [ Ui.buttonStyle ]
                 [ Attributes.type_ "submit" ]
                 [ Html.text "Register" ]
             ]
