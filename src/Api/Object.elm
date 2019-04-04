@@ -2,11 +2,15 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object exposing (AuthenticatePayload(..), PageInfo(..), Proposal(..), RegisterPayload(..), UpdateProposalPayload(..), UpdateUserPayload(..), User(..), UsersConnection(..), UsersEdge(..))
+module Api.Object exposing (AuthenticatePayload(..), CreateProposalPayload(..), PageInfo(..), Proposal(..), RegisterPayload(..), UpdateProposalPayload(..), UpdateUserPayload(..), User(..), UsersConnection(..), UsersEdge(..))
 
 
 type AuthenticatePayload
     = AuthenticatePayload
+
+
+type CreateProposalPayload
+    = CreateProposalPayload
 
 
 type PageInfo

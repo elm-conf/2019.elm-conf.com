@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.InputObject exposing (AuthenticateInput, AuthenticateInputOptionalFields, AuthenticateInputRequiredFields, ProposalPatch, ProposalPatchOptionalFields, RegisterInput, RegisterInputOptionalFields, RegisterInputRequiredFields, UpdateProposalByNodeIdInput, UpdateProposalByNodeIdInputOptionalFields, UpdateProposalByNodeIdInputRequiredFields, UpdateProposalInput, UpdateProposalInputOptionalFields, UpdateProposalInputRequiredFields, UpdateUserByNodeIdInput, UpdateUserByNodeIdInputOptionalFields, UpdateUserByNodeIdInputRequiredFields, UpdateUserInput, UpdateUserInputOptionalFields, UpdateUserInputRequiredFields, UserCondition, UserConditionOptionalFields, UserPatch, UserPatchOptionalFields, buildAuthenticateInput, buildProposalPatch, buildRegisterInput, buildUpdateProposalByNodeIdInput, buildUpdateProposalInput, buildUpdateUserByNodeIdInput, buildUpdateUserInput, buildUserCondition, buildUserPatch, encodeAuthenticateInput, encodeProposalPatch, encodeRegisterInput, encodeUpdateProposalByNodeIdInput, encodeUpdateProposalInput, encodeUpdateUserByNodeIdInput, encodeUpdateUserInput, encodeUserCondition, encodeUserPatch)
+module Api.InputObject exposing (AuthenticateInput, AuthenticateInputOptionalFields, AuthenticateInputRequiredFields, CreateProposalInput, CreateProposalInputOptionalFields, CreateProposalInputRequiredFields, ProposalInput, ProposalInputOptionalFields, ProposalInputRequiredFields, ProposalPatch, ProposalPatchOptionalFields, RegisterInput, RegisterInputOptionalFields, RegisterInputRequiredFields, UpdateProposalByNodeIdInput, UpdateProposalByNodeIdInputOptionalFields, UpdateProposalByNodeIdInputRequiredFields, UpdateProposalInput, UpdateProposalInputOptionalFields, UpdateProposalInputRequiredFields, UpdateUserByNodeIdInput, UpdateUserByNodeIdInputOptionalFields, UpdateUserByNodeIdInputRequiredFields, UpdateUserInput, UpdateUserInputOptionalFields, UpdateUserInputRequiredFields, UserCondition, UserConditionOptionalFields, UserPatch, UserPatchOptionalFields, buildAuthenticateInput, buildCreateProposalInput, buildProposalInput, buildProposalPatch, buildRegisterInput, buildUpdateProposalByNodeIdInput, buildUpdateProposalInput, buildUpdateUserByNodeIdInput, buildUpdateUserInput, buildUserCondition, buildUserPatch, encodeAuthenticateInput, encodeCreateProposalInput, encodeProposalInput, encodeProposalPatch, encodeRegisterInput, encodeUpdateProposalByNodeIdInput, encodeUpdateProposalInput, encodeUpdateUserByNodeIdInput, encodeUpdateUserInput, encodeUserCondition, encodeUserPatch)
 
 import Api.Interface
 import Api.Object
@@ -52,6 +52,90 @@ encodeAuthenticateInput : AuthenticateInput -> Value
 encodeAuthenticateInput input =
     Encode.maybeObject
         [ ( "clientMutationId", Encode.string |> Encode.optional input.clientMutationId ), ( "email", Encode.string input.email |> Just ), ( "password", Encode.string input.password |> Just ) ]
+
+
+buildCreateProposalInput : CreateProposalInputRequiredFields -> (CreateProposalInputOptionalFields -> CreateProposalInputOptionalFields) -> CreateProposalInput
+buildCreateProposalInput required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { clientMutationId = Absent }
+    in
+    { clientMutationId = optionals.clientMutationId, proposal = required.proposal }
+
+
+type alias CreateProposalInputRequiredFields =
+    { proposal : ProposalInput }
+
+
+type alias CreateProposalInputOptionalFields =
+    { clientMutationId : OptionalArgument String }
+
+
+{-| Type for the CreateProposalInput input object.
+-}
+type alias CreateProposalInput =
+    { clientMutationId : OptionalArgument String
+    , proposal : ProposalInput
+    }
+
+
+{-| Encode a CreateProposalInput into a value that can be used as an argument.
+-}
+encodeCreateProposalInput : CreateProposalInput -> Value
+encodeCreateProposalInput input =
+    Encode.maybeObject
+        [ ( "clientMutationId", Encode.string |> Encode.optional input.clientMutationId ), ( "proposal", encodeProposalInput input.proposal |> Just ) ]
+
+
+buildProposalInput : ProposalInputRequiredFields -> (ProposalInputOptionalFields -> ProposalInputOptionalFields) -> ProposalInput
+buildProposalInput required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { id = Absent, createdAt = Absent, updatedAt = Absent }
+    in
+    { id = optionals.id, authorId = required.authorId, title = required.title, abstract = required.abstract, pitch = required.pitch, outline = required.outline, feedback = required.feedback, createdAt = optionals.createdAt, updatedAt = optionals.updatedAt }
+
+
+type alias ProposalInputRequiredFields =
+    { authorId : Int
+    , title : String
+    , abstract : String
+    , pitch : String
+    , outline : String
+    , feedback : String
+    }
+
+
+type alias ProposalInputOptionalFields =
+    { id : OptionalArgument Int
+    , createdAt : OptionalArgument Api.ScalarCodecs.Datetime
+    , updatedAt : OptionalArgument Api.ScalarCodecs.Datetime
+    }
+
+
+{-| Type for the ProposalInput input object.
+-}
+type alias ProposalInput =
+    { id : OptionalArgument Int
+    , authorId : Int
+    , title : String
+    , abstract : String
+    , pitch : String
+    , outline : String
+    , feedback : String
+    , createdAt : OptionalArgument Api.ScalarCodecs.Datetime
+    , updatedAt : OptionalArgument Api.ScalarCodecs.Datetime
+    }
+
+
+{-| Encode a ProposalInput into a value that can be used as an argument.
+-}
+encodeProposalInput : ProposalInput -> Value
+encodeProposalInput input =
+    Encode.maybeObject
+        [ ( "id", Encode.int |> Encode.optional input.id ), ( "authorId", Encode.int input.authorId |> Just ), ( "title", Encode.string input.title |> Just ), ( "abstract", Encode.string input.abstract |> Just ), ( "pitch", Encode.string input.pitch |> Just ), ( "outline", Encode.string input.outline |> Just ), ( "feedback", Encode.string input.feedback |> Just ), ( "createdAt", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDatetime) |> Encode.optional input.createdAt ), ( "updatedAt", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDatetime) |> Encode.optional input.updatedAt ) ]
 
 
 buildProposalPatch : (ProposalPatchOptionalFields -> ProposalPatchOptionalFields) -> ProposalPatch

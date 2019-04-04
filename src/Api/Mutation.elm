@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Mutation exposing (AuthenticateRequiredArguments, RegisterRequiredArguments, UpdateProposalByNodeIdRequiredArguments, UpdateProposalRequiredArguments, UpdateUserByNodeIdRequiredArguments, UpdateUserRequiredArguments, authenticate, register, updateProposal, updateProposalByNodeId, updateUser, updateUserByNodeId)
+module Api.Mutation exposing (AuthenticateRequiredArguments, CreateProposalRequiredArguments, RegisterRequiredArguments, UpdateProposalByNodeIdRequiredArguments, UpdateProposalRequiredArguments, UpdateUserByNodeIdRequiredArguments, UpdateUserRequiredArguments, authenticate, createProposal, register, updateProposal, updateProposalByNodeId, updateUser, updateUserByNodeId)
 
 import Api.InputObject
 import Api.Interface
@@ -17,6 +17,20 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode exposing (Decoder)
+
+
+type alias CreateProposalRequiredArguments =
+    { input : Api.InputObject.CreateProposalInput }
+
+
+{-| Creates a single `Proposal`.
+
+  - input - The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+
+-}
+createProposal : CreateProposalRequiredArguments -> SelectionSet decodesTo Api.Object.CreateProposalPayload -> SelectionSet (Maybe decodesTo) RootMutation
+createProposal requiredArgs object_ =
+    Object.selectionForCompositeField "createProposal" [ Argument.required "input" requiredArgs.input Api.InputObject.encodeCreateProposalInput ] object_ (identity >> Decode.nullable)
 
 
 type alias UpdateProposalByNodeIdRequiredArguments =
