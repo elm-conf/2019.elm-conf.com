@@ -1,0 +1,6 @@
+[build]
+command = "make public"
+publish = "public"
+
+[context.production.environment]
+GRAPHQL_ENDPOINT = "https://cfp.elm-conf.com/graphql"

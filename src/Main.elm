@@ -25,6 +25,9 @@ type alias Model =
     , route : Route
     , page : Maybe Page
 
+    -- graphql information
+    , graphqlEndpoint : String
+
     -- application-y pages
     , cfp : Cfp.Model
     , register : Register.Model
@@ -32,11 +35,11 @@ type alias Model =
 
 
 type alias Flags =
-    ()
+    { graphqlEndpoint : String }
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init _ url key =
+init { graphqlEndpoint } url key =
     let
         route =
             url
@@ -46,6 +49,11 @@ init _ url key =
     ( { key = key
       , page = Nothing
       , route = route
+
+      -- graphql information
+      , graphqlEndpoint = graphqlEndpoint
+
+      -- application-y pages
       , cfp = Cfp.empty
       , register = Register.empty
       }
