@@ -8,7 +8,7 @@ IMAGES=$(IMAGES_SRC:static/%=public/static/%)
 public: public/index.min.js $(IMAGES)
 	touch -m $@
 
-public/index.js: elm.json $(ELM_SRC) src/Routes.elm
+public/index.js: elm.json src/Api $(ELM_SRC) src/Routes.elm
 	npx elm make src/Main.elm --output $@ --debug
 
 public/index.min.js: public/index.js node_modules
@@ -17,6 +17,9 @@ public/index.min.js: public/index.js node_modules
 public/static/%: static/%
 	@mkdir -p $(@D)
 	cp $< $@
+
+src/Api: node_modules
+	npx elm-graphql https://cfp.elm-conf.com/graphql --base Api
 
 include Makefile.public
 

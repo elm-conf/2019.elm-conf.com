@@ -14,7 +14,7 @@ import Url exposing (Url)
 import Url.Parser exposing (parse)
 
 
-port tokenChanges : (Maybe String -> msg) -> Sub msg
+port tokenChanges : (Maybe Session -> msg) -> Sub msg
 
 
 port setToken : Maybe String -> Cmd msg
@@ -26,31 +26,36 @@ type alias Page =
     }
 
 
+type alias Session =
+    { userId : Int
+    , token : String
+    }
+
+
 type alias Model =
     { key : Key
     , route : Route
     , page : Maybe Page
 
     -- JWT
-    , token : Maybe String
+    , session : Maybe Session
 
     -- graphql information
     , graphqlEndpoint : String
 
     -- application-y pages
-    , cfp : Cfp.Model
     , register : Register.Model
     }
 
 
 type alias Flags =
     { graphqlEndpoint : String
-    , token : Value
+    , session : Value
     }
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init { graphqlEndpoint, token } url key =
+init { graphqlEndpoint, session } url key =
     let
         route =
             url
@@ -63,16 +68,19 @@ init { graphqlEndpoint, token } url key =
         , route = Routes.NotFound
 
         -- JWT
-        , token =
-            token
-                |> Decode.decodeValue Decode.string
+        , session =
+            session
+                |> Decode.decodeValue
+                    (Decode.map2 Session
+                        (Decode.index 0 Decode.int)
+                        (Decode.index 1 Decode.string)
+                    )
                 |> Result.toMaybe
 
         -- graphql information
         , graphqlEndpoint = graphqlEndpoint
 
         -- application-y pages
-        , cfp = Cfp.empty
         , register = Register.empty
         }
 
@@ -81,9 +89,8 @@ type Msg
     = UrlChange Url
     | UrlRequest Browser.UrlRequest
     | MarkdownRequestFinished (Result Http.Error String)
-    | CfpChanged Cfp.Msg
     | RegisterChanged Register.Msg
-    | TokenChanged (Maybe String)
+    | SessionChanged (Maybe Session)
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -94,7 +101,7 @@ onUrlChange url model =
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
     in
-    case ( model.token, route ) of
+    case ( model.session, route ) of
         ( Nothing, Routes.Cfp ) ->
             ( model
             , Navigation.replaceUrl model.key <| Routes.path Routes.Register
@@ -135,14 +142,6 @@ update msg model =
             , Cmd.none
             )
 
-        CfpChanged (Cfp.Update cfp) ->
-            ( { model | cfp = cfp }
-            , Cmd.none
-            )
-
-        CfpChanged Cfp.Submit ->
-            ( model, Cmd.none )
-
         RegisterChanged registerMsg ->
             let
                 ( newRegister, cmds, result ) =
@@ -162,13 +161,13 @@ update msg model =
                     , setToken (Just token)
                     )
 
-        TokenChanged (Just token) ->
-            ( { model | token = Just token }
+        SessionChanged (Just session) ->
+            ( { model | session = Just session }
             , Navigation.pushUrl model.key <| Routes.path Routes.Cfp
             )
 
-        TokenChanged Nothing ->
-            ( { model | token = Nothing }
+        SessionChanged Nothing ->
+            ( { model | session = Nothing }
             , case model.route of
                 Routes.Cfp ->
                     Navigation.pushUrl model.key <| Routes.path Routes.Register
@@ -215,7 +214,7 @@ view model =
             contentView =
                 case model.route of
                     Routes.Cfp ->
-                        Cfp.view model.cfp >> Html.map CfpChanged
+                        \_ -> Html.text ""
 
                     Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
@@ -232,7 +231,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    tokenChanges TokenChanged
+    tokenChanges SessionChanged
 
 
 main : Program Flags Model Msg

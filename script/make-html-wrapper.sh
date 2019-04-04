@@ -16,16 +16,21 @@ cat <<EOF
       var app = Elm.Main.init({
         flags: {
           graphqlEndpoint: "${GRAPHQL_ENDPOINT:-https://cfp.elm-conf.com/graphql}",
-          token: localStorage.getItem('token')
+          token: parseToken(localStorage.getItem('token'))
         }
       });
+      function parseToken(token) {
+        if (token === null) return null
+        var userId = JSON.parse(btoa(token.split('.')[1])).user_id
+        return [userId, token]
+      }
       app.ports.setToken.subscribe(function (token) {
         localStorage.setItem('token', token)
-        setTimeout(function() { app.ports.tokenChanges.send(token); }, 0);
+        setTimeout(function() { app.ports.tokenChanges.send(parseToken(token)); }, 0);
       })
       window.addEventListener('storage', function (event) {
         if (event.storageArea === localStorage && event.key === 'token') {
-          app.ports.tokenChanges.send(event.newValue)
+          app.ports.tokenChanges.send(parseToken(event.newValue))
         }
       })
     </script>

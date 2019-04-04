@@ -1,6 +1,12 @@
-module Page.Cfp exposing (Model, Msg(..), empty, view)
+module Page.Cfp exposing (Msg(..), Proposal, viewEditor)
 
+import Api.Object as ApiObject
+import Api.Object.Proposal as ApiProposal
+import Api.Object.User as ApiUser
+import Api.Query as ApiQuery
 import Css
+import Graphql.Http as Http
+import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Lazy as Lazy
 import Regex
@@ -13,34 +19,117 @@ import Verify
 
 
 type Msg
-    = Update Model
+    = UpdateProposal Proposal
+    | UpdateAuthor Author
     | Submit
 
 
-type alias Model =
+type alias Author =
     { name : String
-    , email : String
     , firstTime : Bool
-    , underrepresentedGroup : Bool
-    , abstract : String
-    , title : String
-    , pitch : String
-    , outline : String
-    , feedbackRequest : String
+    , underrepresented : Bool
     }
 
 
-empty : Model
-empty =
-    { name = ""
-    , email = ""
-    , firstTime = False
-    , underrepresentedGroup = False
-    , abstract = ""
+type alias Proposal =
+    { abstract : String
+    , title : String
+    , pitch : String
+    , outline : String
+    , feedback : String
+    }
+
+
+newProposal : Proposal
+newProposal =
+    { abstract = ""
     , title = ""
     , pitch = ""
     , outline = ""
-    , feedbackRequest = ""
+    , feedback = ""
+    }
+
+
+type alias AvailableProposal =
+    { id : Int
+    , title : String
+    }
+
+
+type alias LoadedModel =
+    { current : Proposal
+    , errors : List String
+    , available : List AvailableProposal
+    , author : Author
+    }
+
+
+type alias Env =
+    { graphqlUrl : String
+    , userId : Int
+    , token : String
+    }
+
+
+type Model
+    = Loading
+    | Loaded LoadedModel
+    | Failed
+
+
+loadPage : Env -> Maybe Int -> Cmd Model
+loadPage env currentId =
+    let
+        proposalSelection : SelectionSet Proposal ApiObject.Proposal
+        proposalSelection =
+            SelectionSet.succeed Proposal
+                |> SelectionSet.with ApiProposal.abstract
+                |> SelectionSet.with ApiProposal.title
+                |> SelectionSet.with ApiProposal.pitch
+                |> SelectionSet.with ApiProposal.outline
+                |> SelectionSet.with ApiProposal.feedback
+
+        availableProposalSelection : SelectionSet AvailableProposal ApiObject.Proposal
+        availableProposalSelection =
+            SelectionSet.succeed AvailableProposal
+                |> SelectionSet.with ApiProposal.id
+                |> SelectionSet.with ApiProposal.title
+
+        authorSelection : SelectionSet Author ApiObject.User
+        authorSelection =
+            SelectionSet.succeed Author
+                |> SelectionSet.with ApiUser.name
+                |> SelectionSet.with ApiUser.firstTimeSpeaker
+                |> SelectionSet.with ApiUser.speakerUnderrepresented
+    in
+    SelectionSet.succeed
+        (\author ->
+            case author of
+                Just a ->
+                    Loaded
+                        { current = newProposal
+                        , errors = []
+                        , available = []
+                        , author = a
+                        }
+
+                Nothing ->
+                    Failed
+        )
+        |> SelectionSet.with (ApiQuery.user { id = env.userId } authorSelection)
+        |> Http.queryRequest env.graphqlUrl
+        |> Http.withHeader "Authoriaztion" ("Bearer " ++ env.token)
+        |> Http.send identity
+        |> Cmd.map (Result.withDefault Failed)
+
+
+init : Proposal
+init =
+    { abstract = ""
+    , title = ""
+    , pitch = ""
+    , outline = ""
+    , feedback = ""
     }
 
 
@@ -67,13 +156,9 @@ boundedWords max amount error input =
         Ok input
 
 
-validator : Verify.Validator String Model Model
+validator : Verify.Validator String Proposal Proposal
 validator =
-    Verify.validate Model
-        |> Verify.verify .name (String.Verify.notBlank "Please enter your name. We need it to get in touch with you if your talk is selected.")
-        |> Verify.verify .email (String.Verify.notBlank "Please enter your email address. We need it to get in touch with you if your talk is selected.")
-        |> Verify.keep .firstTime
-        |> Verify.keep .underrepresentedGroup
+    Verify.validate Proposal
         |> Verify.verify .abstract
             (Verify.compose
                 (boundedWords True 200 "Please try to get your abstract below 200 words.")
@@ -90,11 +175,11 @@ validator =
                 (boundedWords True 1000 "Please try to get your outline below 1000 words.")
                 (boundedWords False 50 "Please give some more detail in your talk outline.")
             )
-        |> Verify.keep .feedbackRequest
+        |> Verify.keep .feedback
 
 
-view : Model -> String -> Html Msg
-view model topContent =
+viewEditor : Proposal -> Author -> String -> Html Msg
+viewEditor proposal author topContent =
     Html.div []
         [ Ui.markdown topContent
         , Html.div []
@@ -107,20 +192,13 @@ view model topContent =
                     [ textInput "name"
                         |> TextInput.withLabel "Your Name"
                         |> TextInput.withPlaceholder "Cool Speaker Person"
-                        |> TextInput.withValue model.name
-                        |> TextInput.onInput (\name -> Update { model | name = name })
+                        |> TextInput.withValue author.name
+                        |> TextInput.onInput (\name -> UpdateAuthor { author | name = name })
                         |> TextInput.view
-                    , textInput "email"
-                        |> TextInput.withLabel "Your Email Address"
-                        |> TextInput.withPlaceholder "you@awesomeperson.com"
-                        |> TextInput.withType TextInput.Email
-                        |> TextInput.withValue model.email
-                        |> TextInput.onInput (\email -> Update { model | email = email })
-                        |> TextInput.view
-                    , viewFirstTimeInput model.firstTime
-                        |> Html.map (\firstTime -> Update { model | firstTime = firstTime })
-                    , viewUnderrepresentedInput model.underrepresentedGroup
-                        |> Html.map (\underrepresentedGroup -> Update { model | underrepresentedGroup = underrepresentedGroup })
+                    , viewFirstTimeInput author.firstTime
+                        |> Html.map (\firstTime -> UpdateAuthor { author | firstTime = firstTime })
+                    , viewUnderrepresentedInput author.underrepresented
+                        |> Html.map (\underrepresented -> UpdateAuthor { author | underrepresented = underrepresented })
                     ]
                 }
             , viewSection
@@ -135,10 +213,10 @@ view model topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "abstract"
-                        |> TextArea.withValue model.abstract
+                        |> TextArea.withValue proposal.abstract
                         |> TextArea.withPlaceholder "Abstract"
                         |> TextArea.withMaxWords 200
-                        |> TextArea.onInput (\abstract -> Update { model | abstract = abstract })
+                        |> TextArea.onInput (\abstract -> UpdateProposal { proposal | abstract = abstract })
                         |> TextArea.view
                     ]
                 }
@@ -156,8 +234,8 @@ view model topContent =
                 , inputs =
                     [ TextInput.textInput "title"
                         |> TextInput.withPlaceholder "Super Neat Title"
-                        |> TextInput.withValue model.title
-                        |> TextInput.onInput (\title -> Update { model | title = title })
+                        |> TextInput.withValue proposal.title
+                        |> TextInput.onInput (\title -> UpdateProposal { proposal | title = title })
                         |> TextInput.view
                     ]
                 }
@@ -177,10 +255,10 @@ view model topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "pitch"
-                        |> TextArea.withValue model.pitch
+                        |> TextArea.withValue proposal.pitch
                         |> TextArea.withPlaceholder "Pitch"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\pitch -> Update { model | pitch = pitch })
+                        |> TextArea.onInput (\pitch -> UpdateProposal { proposal | pitch = pitch })
                         |> TextArea.view
                     ]
                 }
@@ -199,10 +277,10 @@ view model topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "outline"
-                        |> TextArea.withValue model.outline
+                        |> TextArea.withValue proposal.outline
                         |> TextArea.withPlaceholder "Outline"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\pitch -> Update { model | pitch = pitch })
+                        |> TextArea.onInput (\pitch -> UpdateProposal { proposal | pitch = pitch })
                         |> TextArea.view
                     ]
                 }
@@ -219,10 +297,10 @@ view model topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "feedback"
-                        |> TextArea.withValue model.feedbackRequest
+                        |> TextArea.withValue proposal.feedback
                         |> TextArea.withPlaceholder "Request Feedback"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\feedbackRequest -> Update { model | feedbackRequest = feedbackRequest })
+                        |> TextArea.onInput (\feedback -> UpdateProposal { proposal | feedback = feedback })
                         |> TextArea.view
                     ]
                 }
