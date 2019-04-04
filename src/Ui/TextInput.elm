@@ -1,29 +1,26 @@
 module Ui.TextInput exposing
     ( Input, input, view
-    , withValue
-    , withPlaceholder
-    , withLabel
+    , withValue, onInput
+    , withPlaceholder, withLabel
     , InputType(..), withType
-    , onInput
+    , withStyle
     )
 
 {-|
 
 @docs Input, input, view
 
-@docs withValue
+@docs withValue, onInput
 
-@docs withPlaceholder
-
-@docs withLabel
+@docs withPlaceholder, withLabel
 
 @docs InputType, withType
 
-@docs onInput
+@docs withStyle
 
 -}
 
-import Css
+import Css exposing (Style)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
@@ -39,6 +36,7 @@ type Input msg
         , label : Maybe String
         , type_ : InputType
         , onInput : String -> msg
+        , style : List Style
         }
 
 
@@ -51,6 +49,7 @@ input name =
         , label = Nothing
         , type_ = Text
         , onInput = identity
+        , style = []
         }
 
 
@@ -88,8 +87,16 @@ onInput onInput_ (Input config) =
         , placeholder = config.placeholder
         , label = config.label
         , type_ = config.type_
+        , style = config.style
+
+        -- the new one, of a new type...
         , onInput = onInput_
         }
+
+
+withStyle : List Style -> Input msg -> Input msg
+withStyle style (Input config) =
+    Input { config | style = style }
 
 
 view : Input msg -> Html msg
@@ -104,7 +111,9 @@ view ((Input config) as input_) =
 
 baseView : Input msg -> String -> Html msg
 baseView (Input config) value =
-    Html.div []
+    Html.styled Html.div
+        config.style
+        []
         [ case config.label of
             Just label ->
                 Html.styled Html.label
