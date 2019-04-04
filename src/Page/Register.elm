@@ -1,9 +1,11 @@
 module Page.Register exposing (Model, Msg, empty, update, view)
 
+import Css
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Lazy as Lazy
 import String.Verify
 import Ui
+import Ui.TextInput as TextInput exposing (TextInput, textInput)
 import Verify
 
 
@@ -46,47 +48,30 @@ view model topContent =
         [ Ui.markdown topContent
         , Html.form
             []
-            [ viewNameInput model.name |> Html.map UpdateName
-            , viewEmailInput model.email |> Html.map UpdateEmail
-            , viewPasswordInput model.password |> Html.map UpdatePassword
+            [ styledTextInput "name"
+                |> TextInput.withLabel "Your Name"
+                |> TextInput.withPlaceholder "Cool Speaker Person"
+                |> TextInput.withValue model.name
+                |> TextInput.onInput UpdateName
+                |> TextInput.view
+            , styledTextInput "email"
+                |> TextInput.withLabel "Your Email Address"
+                |> TextInput.withPlaceholder "you@awesomeperson.com"
+                |> TextInput.withType TextInput.Email
+                |> TextInput.withValue model.email
+                |> TextInput.onInput UpdateEmail
+                |> TextInput.view
+            , styledTextInput "password"
+                |> TextInput.withLabel "Your Password"
+                |> TextInput.withType TextInput.Password
+                |> TextInput.withValue model.password
+                |> TextInput.onInput UpdatePassword
+                |> TextInput.view
             ]
         ]
 
 
-{-| TODO: should be shared with Cfp.elm
--}
-viewNameInput : String -> Html String
-viewNameInput =
-    Lazy.lazy <|
-        Ui.textInput
-            { name = "name"
-            , label = Just "Your Name"
-            , placeholder = "Cool Speaker Person"
-            , type_ = "text"
-            }
-
-
-{-| TODO: should be shared with Cfp.elm
--}
-viewEmailInput : String -> Html String
-viewEmailInput =
-    Lazy.lazy <|
-        Ui.textInput
-            { name = "email"
-            , label = Just "Your Email Address"
-            , placeholder = "you@awesomeperson.com"
-            , type_ = "email"
-            }
-
-
-{-| TODO: should be shared with Cfp.elm
--}
-viewPasswordInput : String -> Html String
-viewPasswordInput =
-    Lazy.lazy <|
-        Ui.textInput
-            { name = "password"
-            , label = Just "Your Password"
-            , placeholder = ""
-            , type_ = "password"
-            }
+styledTextInput : String -> TextInput String
+styledTextInput =
+    textInput
+        >> TextInput.withStyle [ Css.margin2 (Css.px 30) Css.zero ]
