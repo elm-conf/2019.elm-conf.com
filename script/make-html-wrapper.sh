@@ -13,7 +13,21 @@ cat <<EOF
   <body>
     <script src="/index.min.js"></script>
     <script>
-      Elm.Main.init({ flags: { graphqlEndpoint: "${GRAPHQL_ENDPOINT:-http://localhost:5100/graphql}" }});
+      var app = Elm.Main.init({
+        flags: {
+          graphqlEndpoint: "${GRAPHQL_ENDPOINT:-https://cfp.elm-conf.com/graphql}",
+          token: localStorage.getItem('token')
+        }
+      });
+      app.ports.setToken.subscribe(function (token) {
+        localStorage.setItem('token', token)
+        setTimeout(function() { app.ports.tokenChanges.send(token); }, 0);
+      })
+      window.addEventListener('storage', function (event) {
+        if (event.storageArea === localStorage && event.key === 'token') {
+          app.ports.tokenChanges.send(event.newValue)
+        }
+      })
     </script>
   </body>
 </html>

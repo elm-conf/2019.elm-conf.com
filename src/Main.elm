@@ -1,17 +1,23 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Navigation exposing (Key)
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Http
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, Value)
 import Page.Cfp as Cfp
 import Page.Register as Register
 import Routes exposing (Route)
 import Ui
 import Url exposing (Url)
 import Url.Parser exposing (parse)
+
+
+port tokenChanges : (Maybe String -> msg) -> Sub msg
+
+
+port setToken : Maybe String -> Cmd msg
 
 
 type alias Page =
@@ -25,6 +31,9 @@ type alias Model =
     , route : Route
     , page : Maybe Page
 
+    -- JWT
+    , token : Maybe String
+
     -- graphql information
     , graphqlEndpoint : String
 
@@ -35,30 +44,37 @@ type alias Model =
 
 
 type alias Flags =
-    { graphqlEndpoint : String }
+    { graphqlEndpoint : String
+    , token : Value
+    }
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init { graphqlEndpoint } url key =
+init { graphqlEndpoint, token } url key =
     let
         route =
             url
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
     in
-    ( { key = key
-      , page = Nothing
-      , route = route
+    onUrlChange url
+        { key = key
+        , page = Nothing
+        , route = Routes.NotFound
 
-      -- graphql information
-      , graphqlEndpoint = graphqlEndpoint
+        -- JWT
+        , token =
+            token
+                |> Decode.decodeValue Decode.string
+                |> Result.toMaybe
 
-      -- application-y pages
-      , cfp = Cfp.empty
-      , register = Register.empty
-      }
-    , loadMarkdown route
-    )
+        -- graphql information
+        , graphqlEndpoint = graphqlEndpoint
+
+        -- application-y pages
+        , cfp = Cfp.empty
+        , register = Register.empty
+        }
 
 
 type Msg
@@ -67,24 +83,37 @@ type Msg
     | MarkdownRequestFinished (Result Http.Error String)
     | CfpChanged Cfp.Msg
     | RegisterChanged Register.Msg
+    | TokenChanged (Maybe String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        UrlChange url ->
-            let
-                route =
-                    url
-                        |> parse Routes.parser
-                        |> Maybe.withDefault Routes.NotFound
-            in
+onUrlChange : Url -> Model -> ( Model, Cmd Msg )
+onUrlChange url model =
+    let
+        route =
+            url
+                |> parse Routes.parser
+                |> Maybe.withDefault Routes.NotFound
+    in
+    case ( model.token, route ) of
+        ( Nothing, Routes.Cfp ) ->
+            ( model
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Register
+            )
+
+        _ ->
             ( { model
                 | route = route
                 , page = Nothing
               }
             , loadMarkdown route
             )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UrlChange url ->
+            onUrlChange url model
 
         UrlRequest (Browser.Internal url) ->
             ( model
@@ -116,11 +145,36 @@ update msg model =
 
         RegisterChanged registerMsg ->
             let
-                ( newRegister, cmds ) =
-                    Register.update registerMsg model.register
+                ( newRegister, cmds, result ) =
+                    Register.update
+                        { graphqlUrl = model.graphqlEndpoint }
+                        registerMsg
+                        model.register
             in
-            ( { model | register = newRegister }
-            , Cmd.map RegisterChanged cmds
+            case result of
+                Register.Continue ->
+                    ( { model | register = newRegister }
+                    , Cmd.map RegisterChanged cmds
+                    )
+
+                Register.Registered token ->
+                    ( { model | register = newRegister }
+                    , setToken (Just token)
+                    )
+
+        TokenChanged (Just token) ->
+            ( { model | token = Just token }
+            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp
+            )
+
+        TokenChanged Nothing ->
+            ( { model | token = Nothing }
+            , case model.route of
+                Routes.Cfp ->
+                    Navigation.pushUrl model.key <| Routes.path Routes.Register
+
+                _ ->
+                    Cmd.none
             )
 
 
@@ -176,13 +230,18 @@ view model =
     }
 
 
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    tokenChanges TokenChanged
+
+
 main : Program Flags Model Msg
 main =
     Browser.application
         { init = init
         , update = update
         , view = view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlChange = UrlChange
         , onUrlRequest = UrlRequest
         }

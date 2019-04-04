@@ -9,7 +9,7 @@ public: public/index.min.js $(IMAGES)
 	touch -m $@
 
 public/index.js: elm.json $(ELM_SRC) src/Routes.elm
-	npx elm make src/Main.elm --output $@ --optimize
+	npx elm make src/Main.elm --output $@ --debug
 
 public/index.min.js: public/index.js node_modules
 	./node_modules/.bin/uglifyjs $< --compress "pure_funcs=[F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9],pure_getters,keep_fargs=false,unsafe_comps,unsafe" | ./node_modules/.bin/uglifyjs --mangle > $@
