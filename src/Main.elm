@@ -7,6 +7,7 @@ import Html.Styled as Html
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Page.Cfp as Cfp
+import Page.Register as Register
 import Routes exposing (Route)
 import Ui
 import Url exposing (Url)
@@ -23,7 +24,10 @@ type alias Model =
     { key : Key
     , route : Route
     , page : Maybe Page
+
+    -- application-y pages
     , cfp : Cfp.Model
+    , register : Register.Model
     }
 
 
@@ -43,6 +47,7 @@ init _ url key =
       , page = Nothing
       , route = route
       , cfp = Cfp.empty
+      , register = Register.empty
       }
     , loadMarkdown route
     )
@@ -53,6 +58,7 @@ type Msg
     | UrlRequest Browser.UrlRequest
     | MarkdownRequestFinished (Result Http.Error String)
     | CfpChanged Cfp.Model
+    | RegisterChanged Register.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -97,6 +103,15 @@ update msg model =
             , Cmd.none
             )
 
+        RegisterChanged registerMsg ->
+            let
+                ( newRegister, cmds ) =
+                    Register.update registerMsg model.register
+            in
+            ( { model | register = newRegister }
+            , Cmd.map RegisterChanged cmds
+            )
+
 
 loadMarkdown : Route -> Cmd Msg
 loadMarkdown route =
@@ -126,24 +141,27 @@ view model =
             |> Maybe.map .title
             |> Maybe.withDefault ""
     , body =
-        [ case model.route of
-            Routes.Cfp ->
+        let
+            content =
                 model.page
                     |> Maybe.map .content
                     |> Maybe.withDefault ""
-                    |> Cfp.view model.cfp
-                    |> Ui.page
-                    |> Html.map CfpChanged
-                    |> Html.toUnstyled
 
-            _ ->
-                model.page
-                    |> Maybe.map .content
-                    |> Maybe.withDefault ""
-                    |> Ui.markdown
-                    |> Ui.page
-                    |> Html.toUnstyled
-        ]
+            contentView =
+                case model.route of
+                    Routes.Cfp ->
+                        Cfp.view model.cfp >> Html.map CfpChanged
+
+                    Routes.Register ->
+                        Register.view model.register >> Html.map RegisterChanged
+
+                    _ ->
+                        Ui.markdown
+        in
+        contentView content
+            |> Ui.page
+            |> Html.toUnstyled
+            |> List.singleton
     }
 
 

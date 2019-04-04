@@ -1,13 +1,13 @@
 module Ui exposing
     ( Checkbox
-    , TextInput
+    , bodyCopyStyle
+    , buttonStyle
     , checkbox
     , markdown
     , page
     , primaryColor
     , sansSerifFont
     , serifFont
-    , textInput
     )
 
 import Css
@@ -84,62 +84,38 @@ checkbox config value =
         ]
 
 
-type alias TextInput =
-    { placeholder : String
-    , name : String
-    , label : Maybe String
-    }
+bodyCopyStyle : Css.Style
+bodyCopyStyle =
+    Css.batch
+        [ Css.fontSize <| Css.px 18
+        , Css.lineHeight <| Css.px 30
+        , sansSerifFont
+        ]
 
 
-textInput : TextInput -> String -> Html String
-textInput config value =
-    Html.div []
-        [ case config.label of
-            Just label ->
-                Html.styled Html.label
-                    [ sansSerifFont
-                    , Css.color <| Css.hex "444444"
-                    , Css.fontSize <| Css.px 14
-                    , Css.display Css.block
-                    , Css.marginBottom <| Css.px 4
-                    ]
-                    [ Attributes.for config.name ]
-                    [ Html.text label ]
-
-            Nothing ->
-                Html.text ""
-        , Html.styled Html.input
-            [ Css.height <| Css.px 40
-            , Css.border3 (Css.px 1) Css.solid (Css.hex "444444")
-            , Css.borderRadius <| Css.px 5
-            , Css.lineHeight <| Css.px 38
-            , Css.paddingLeft <| Css.px 16
-            , Css.fontSize <| Css.px 18
-            , Css.width <| Css.pct 100
-            , Css.display Css.block
-            , Css.outline Css.zero
-            , sansSerifFont
-            , Css.focus
-                [ Css.borderColor primaryColor
-                , Css.property "caret-color" <| primaryColor.value
-                ]
-            ]
-            [ Attributes.type_ "text"
-            , Attributes.value value
-            , Attributes.name config.name
-            , Attributes.placeholder config.placeholder
-            , Events.onInput identity
-            ]
-            []
+buttonStyle : Css.Style
+buttonStyle =
+    Css.batch
+        [ Css.color primaryColor
+        , Css.fontSize <| Css.px 18
+        , Css.display Css.inlineBlock
+        , Css.height <| Css.px 40
+        , Css.lineHeight <| Css.px 40
+        , Css.minWidth <| Css.px 250
+        , Css.borderRadius <| Css.px 20
+        , Css.border3 (Css.px 1) Css.solid primaryColor
+        , Css.textAlign Css.center
+        , Css.backgroundColor <| Css.hex "FFF"
+        , Css.marginRight <| Css.px 25
+        , Css.hover [ Css.textDecoration Css.none ]
+        , Css.lastChild [ Css.marginRight Css.zero ]
         ]
 
 
 markdown : String -> Html msg
 markdown raw =
     Html.styled Html.div
-        [ Css.fontSize <| Css.px 18
-        , Css.lineHeight <| Css.px 30
-        , sansSerifFont
+        [ bodyCopyStyle
         , Global.descendants
             [ Global.each [ Global.h1, Global.h2 ]
                 [ Css.margin Css.zero
@@ -179,20 +155,7 @@ markdown raw =
                 [ Css.textDecoration Css.none
                 , Css.color primaryColor
                 , Css.hover [ Css.textDecoration Css.underline ]
-                , Global.withClass "button"
-                    [ Css.fontSize <| Css.px 18
-                    , Css.display Css.inlineBlock
-                    , Css.height <| Css.px 40
-                    , Css.lineHeight <| Css.px 40
-                    , Css.minWidth <| Css.px 250
-                    , Css.borderRadius <| Css.px 20
-                    , Css.border3 (Css.px 1) Css.solid primaryColor
-                    , Css.textAlign Css.center
-                    , Css.backgroundColor <| Css.hex "FFF"
-                    , Css.marginRight <| Css.px 25
-                    , Css.hover [ Css.textDecoration Css.none ]
-                    , Css.lastChild [ Css.marginRight Css.zero ]
-                    ]
+                , Global.withClass "button" [ buttonStyle ]
                 ]
             ]
         ]
