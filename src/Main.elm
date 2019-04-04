@@ -57,7 +57,7 @@ type Msg
     = UrlChange Url
     | UrlRequest Browser.UrlRequest
     | MarkdownRequestFinished (Result Http.Error String)
-    | CfpChanged Cfp.Model
+    | CfpChanged Cfp.Msg
     | RegisterChanged Register.Msg
 
 
@@ -98,10 +98,13 @@ update msg model =
             , Cmd.none
             )
 
-        CfpChanged cfp ->
+        CfpChanged (Cfp.Update cfp) ->
             ( { model | cfp = cfp }
             , Cmd.none
             )
+
+        CfpChanged Cfp.Submit ->
+            ( model, Cmd.none )
 
         RegisterChanged registerMsg ->
             let

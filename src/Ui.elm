@@ -109,6 +109,7 @@ buttonStyle =
         , Css.marginRight <| Css.px 25
         , Css.hover [ Css.textDecoration Css.none ]
         , Css.lastChild [ Css.marginRight Css.zero ]
+        , Css.cursor Css.pointer
         ]
 
 
