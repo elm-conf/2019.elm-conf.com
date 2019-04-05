@@ -484,8 +484,9 @@ viewEditor ({ author, proposal } as model) topContent =
                 , description =
                     if List.isEmpty model.errors then
                         """
-                        Congratulations, you've finished your proposal! Once you submit, you'll receive a link in your inbox
-                        to edit the talk. You can do so as many times as you like until May 15.
+                        Congratulations, you've finished your proposal!
+                        Once you submit, you can use this site to edit this proposal.
+                        You can do so as many times as you like until May 15.
 
                         If you're submitting before May 1, you should hear from us about proposal feedback within a week.
 
