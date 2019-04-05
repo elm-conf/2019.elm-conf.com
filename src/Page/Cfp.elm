@@ -10,13 +10,13 @@ import Api.Object.User as ApiUser
 import Api.Query as ApiQuery
 import Browser.Dom as Dom
 import Css
+import Extra.String as String
 import Graphql.Http as Http
 import Graphql.OptionalArgument as OptionalArg
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
-import Regex
 import String.Verify
 import Task
 import Ui
@@ -68,7 +68,8 @@ type alias AvailableProposal =
 
 
 type alias LoadedModel =
-    { current : ( Maybe Int, Proposal )
+    { proposal : Proposal
+    , current : Maybe Int
     , errors : List String
     , available : List AvailableProposal
     , author : Author
@@ -224,9 +225,10 @@ update env msg model =
         ( Loading, PageLoaded Nothing ) ->
             ( Failed, Cmd.none )
 
-        ( Loading, PageLoaded (Just ( current, author, available )) ) ->
+        ( Loading, PageLoaded (Just ( proposal, author, available )) ) ->
             ( Loaded
-                { current = ( Nothing, current )
+                { current = Nothing
+                , proposal = proposal
                 , errors = []
                 , available = available
                 , author = author
@@ -235,13 +237,7 @@ update env msg model =
             )
 
         ( Loaded m, UpdateProposal p ) ->
-            ( Loaded
-                { m
-                    | current =
-                        Tuple.mapSecond
-                            (\_ -> p)
-                            m.current
-                }
+            ( Loaded { m | proposal = p }
             , Cmd.none
             )
 
@@ -251,14 +247,21 @@ update env msg model =
             )
 
         ( Loaded m, Submit ) ->
-            ( Loaded m
-            , submitProposal
-                env
-                (Tuple.first m.current)
-                m.author
-                (Tuple.second m.current)
-                |> Cmd.map Submitted
-            )
+            case validator m.proposal of
+                Ok valid ->
+                    ( Loaded { m | errors = [] }
+                    , submitProposal
+                        env
+                        m.current
+                        m.author
+                        valid
+                        |> Cmd.map Submitted
+                    )
+
+                Err ( head, tail ) ->
+                    ( Loaded { m | errors = head :: tail }
+                    , Cmd.none
+                    )
 
         ( Loaded m, Submitted (Just a) ) ->
             ( Loaded { m | available = a :: m.available }
@@ -278,15 +281,8 @@ update env msg model =
 boundedWords : Bool -> Int -> error -> Verify.Validator error String String
 boundedWords max amount error input =
     let
-        splitRegex =
-            "\\s+"
-                |> Regex.fromStringWith { caseInsensitive = True, multiline = True }
-                |> Maybe.withDefault Regex.never
-
         wordCount =
-            input
-                |> Regex.split splitRegex
-                |> List.length
+            String.wordCount input
     in
     if max && wordCount > amount then
         Err ( error, [] )
@@ -325,16 +321,15 @@ view pageModel topContent =
     case pageModel of
         Loaded model ->
             viewEditor
-                (Tuple.second model.current)
-                model.author
+                model
                 topContent
 
         _ ->
             Html.text ""
 
 
-viewEditor : Proposal -> Author -> String -> Html Msg
-viewEditor proposal author topContent =
+viewEditor : LoadedModel -> String -> Html Msg
+viewEditor ({ author, proposal } as model) topContent =
     Html.div []
         [ Ui.markdown topContent
         , Html.div []
@@ -461,18 +456,43 @@ viewEditor proposal author topContent =
                 }
             , viewSection
                 { label = "Send it in!"
-                , heading = "You're done!"
-                , description = """
-                  Congratulations, you've finished your proposal! Once you submit, you'll receive a link in your inbox
-                  to edit the talk. You can do so as many times as you like until May 15.
+                , heading =
+                    if List.isEmpty model.errors then
+                        "You're done!"
 
-                  If you're submitting before May 1, you should hear from us about proposal feedback within a week.
+                    else
+                        "Almost there..."
+                , description =
+                    if List.isEmpty model.errors then
+                        """
+                        Congratulations, you've finished your proposal! Once you submit, you'll receive a link in your inbox
+                        to edit the talk. You can do so as many times as you like until May 15.
 
-                  Thank you so much for submitting your proposal. Talk to you soon!
-                  """
+                        If you're submitting before May 1, you should hear from us about proposal feedback within a week.
+
+                        Thank you so much for submitting your proposal. Talk to you soon!
+                        """
+
+                    else
+                        "Have a look at the errors below to learn how to complete your proposal."
                 , hasBorder = False
                 , inputs =
-                    [ Button.button
+                    [ case model.errors of
+                        [] ->
+                            Html.text ""
+
+                        errors ->
+                            errors
+                                |> List.map (Html.text >> List.singleton >> Html.li [])
+                                |> Html.styled Html.ul
+                                    [ Ui.sansSerifFont
+                                    , Css.color Ui.errorColor
+                                    , Css.paddingLeft <| Css.em 1
+                                    , Css.fontSize <| Css.px 18
+                                    , Css.lineHeight <| Css.px 30
+                                    ]
+                                    []
+                    , Button.button
                         |> Button.withLabel "Send it in!"
                         |> Button.onClick Submit
                         |> Button.view

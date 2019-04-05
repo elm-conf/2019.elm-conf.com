@@ -3,6 +3,7 @@ module Ui exposing
     , bodyCopyStyle
     , buttonStyle
     , checkbox
+    , errorColor
     , markdown
     , page
     , primaryColor
@@ -201,6 +202,11 @@ page content =
 primaryColor : Css.Color
 primaryColor =
     Css.hex "FF5F6D"
+
+
+errorColor : Css.Color
+errorColor =
+    Css.hex "D81B60"
 
 
 serifFont : Css.Style

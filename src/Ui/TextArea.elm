@@ -18,6 +18,7 @@ module Ui.TextArea exposing
 -}
 
 import Css exposing (Style)
+import Extra.String as String
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
@@ -93,33 +94,11 @@ view ((TextArea config) as input_) =
             baseView input_ ""
 
 
-wordCount : String -> Int
-wordCount =
-    let
-        regex =
-            "\\s+"
-                |> Regex.fromStringWith { caseInsensitive = True, multiline = True }
-                |> Maybe.withDefault Regex.never
-    in
-    \string ->
-        let
-            trimmed =
-                String.trim string
-        in
-        if String.isEmpty trimmed then
-            0
-
-        else
-            trimmed
-                |> Regex.split regex
-                |> List.length
-
-
 baseView : TextArea msg -> String -> Html msg
 baseView (TextArea config) value =
     let
         count =
-            wordCount value
+            String.wordCount value
     in
     Html.styled Html.div
         config.style
