@@ -37,10 +37,13 @@ parser =
      ]
 """
 
-def to_constructor(kebab_case):
+def to_constructor(path):
+    if path == '/':
+        return 'Index'
+
     parts = [
         part for part
-        in re.split(r'[-/]', kebab_case)
+        in re.split(r'[-/]', path)
         if part != ''
     ]
 
@@ -52,7 +55,7 @@ args = parser.parse_args()
 routes_to_markdown = dict(reversed(mapping.split('=')) for mapping in args.mapping)
 
 routes_to_constructors = {
-    route: to_constructor(route if route != '/' else 'index')
+    route: to_constructor(route)
     for route in routes_to_markdown.keys()
 }
 
