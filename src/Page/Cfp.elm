@@ -19,6 +19,7 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
+import ProposalString exposing (ProposalString)
 import Routes
 import String.Verify
 import Task
@@ -46,20 +47,50 @@ type alias Author =
 
 
 type alias Proposal =
-    { abstract : String
-    , title : String
-    , pitch : String
-    , outline : String
+    { abstract : ProposalString
+    , title : ProposalString
+    , pitch : ProposalString
+    , outline : ProposalString
     , feedback : String
     }
 
 
 newProposal : Proposal
 newProposal =
-    { abstract = ""
-    , title = ""
-    , pitch = ""
-    , outline = ""
+    { abstract =
+        ProposalString.init
+            (ProposalString.WithinBounds
+                { lower = 50
+                , tooShortError = "Please provide a little more info in your abstract."
+                , upper = 200
+                , tooLongError = "Please try to get your abstract below 200 words."
+                }
+            )
+            ""
+    , title =
+        ProposalString.init
+            (ProposalString.NotBlank "Please give your talk a title.")
+            ""
+    , pitch =
+        ProposalString.init
+            (ProposalString.WithinBounds
+                { lower = 50
+                , tooShortError = "Please tell us a little more in your pitch."
+                , upper = 1000
+                , tooLongError = "Please try to get your pitch below 1000 words."
+                }
+            )
+            ""
+    , outline =
+        ProposalString.init
+            (ProposalString.WithinBounds
+                { lower = 50
+                , tooShortError = "Please give some more detail in your talk outline."
+                , upper = 1000
+                , tooLongError = "Please try to get your outline below 1000 words."
+                }
+            )
+            ""
     , feedback = ""
     }
 
