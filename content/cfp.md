@@ -1,4 +1,4 @@
-{ "title": "Proposse a Talk" }
+{ "title": "Propose a Talk" }
 ---
 
 # Speak at elm-conf
