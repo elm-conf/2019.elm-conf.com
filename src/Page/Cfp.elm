@@ -140,27 +140,51 @@ loadPage env currentId =
 
 submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd Bool
 submitProposal env idToUpdate author proposal =
-    case idToUpdate of
-        Just proposalId ->
+    let
+        updateUser =
             SelectionSet.succeed ()
-                |> ApiMutation.updateProposal
+                |> ApiMutation.updateUser
                     { input =
-                        ApiInputObject.buildUpdateProposalInput
-                            { patch =
-                                ApiInputObject.buildProposalPatch
+                        ApiInputObject.buildUpdateUserInput
+                            { id = env.userId
+                            , patch =
+                                ApiInputObject.buildUserPatch
                                     (\patch ->
                                         { patch
-                                            | title = OptionalArg.Present proposal.title
-                                            , abstract = OptionalArg.Present proposal.abstract
-                                            , pitch = OptionalArg.Present proposal.pitch
-                                            , outline = OptionalArg.Present proposal.outline
-                                            , feedback = OptionalArg.Present proposal.feedback
+                                            | name = OptionalArg.Present author.name
+                                            , speakerUnderrepresented = OptionalArg.Present author.underrepresented
+                                            , firstTimeSpeaker = OptionalArg.Present author.firstTime
                                         }
                                     )
-                            , id = proposalId
                             }
                             identity
                     }
+    in
+    case idToUpdate of
+        Just proposalId ->
+            SelectionSet.succeed (Maybe.map2 (\_ _ -> ()))
+                |> SelectionSet.with
+                    (ApiMutation.updateProposal
+                        { input =
+                            ApiInputObject.buildUpdateProposalInput
+                                { patch =
+                                    ApiInputObject.buildProposalPatch
+                                        (\patch ->
+                                            { patch
+                                                | title = OptionalArg.Present proposal.title
+                                                , abstract = OptionalArg.Present proposal.abstract
+                                                , pitch = OptionalArg.Present proposal.pitch
+                                                , outline = OptionalArg.Present proposal.outline
+                                                , feedback = OptionalArg.Present proposal.feedback
+                                            }
+                                        )
+                                , id = proposalId
+                                }
+                                identity
+                        }
+                        (SelectionSet.succeed ())
+                    )
+                |> SelectionSet.with updateUser
                 |> Http.mutationRequest env.graphqlUrl
                 |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
                 |> Http.send
@@ -171,22 +195,26 @@ submitProposal env idToUpdate author proposal =
                     )
 
         Nothing ->
-            SelectionSet.succeed ()
-                |> ApiMutation.createProposal
-                    { input =
-                        ApiInputObject.buildCreateProposalInput
-                            { proposal =
-                                ApiInputObject.buildProposalInput
-                                    { authorId = env.userId
-                                    , title = proposal.title
-                                    , abstract = proposal.abstract
-                                    , pitch = proposal.pitch
-                                    , outline = proposal.outline
-                                    , feedback = proposal.feedback
-                                    }
-                            }
-                            identity
-                    }
+            SelectionSet.succeed (Maybe.map2 (\_ _ -> ()))
+                |> SelectionSet.with
+                    (ApiMutation.createProposal
+                        { input =
+                            ApiInputObject.buildCreateProposalInput
+                                { proposal =
+                                    ApiInputObject.buildProposalInput
+                                        { authorId = env.userId
+                                        , title = proposal.title
+                                        , abstract = proposal.abstract
+                                        , pitch = proposal.pitch
+                                        , outline = proposal.outline
+                                        , feedback = proposal.feedback
+                                        }
+                                }
+                                identity
+                        }
+                        (SelectionSet.succeed ())
+                    )
+                |> SelectionSet.with updateUser
                 |> Http.mutationRequest env.graphqlUrl
                 |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
                 |> Http.send
