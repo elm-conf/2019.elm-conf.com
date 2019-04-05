@@ -212,27 +212,26 @@ page content =
             ]
             []
             [ content ]
-        , Html.styled Html.div
-            [ Css.property "grid-row" "2"
-            , Css.property "grid-column" "1 / span 2"
-            , Css.property "display" "grid"
-            , Css.property "grid-auto-flow" "column"
-            , Css.property "grid-column-gap" "16px"
-            , Css.property "place-items" "center"
-            , Css.property "justify-content" "center"
-            , Css.property "grid-template-rows" "auto auto"
+        , Html.styled Html.nav
+            [ -- appearance
+              Css.width (Css.pct 100)
+            , Css.borderTop3 (Css.px 3) Css.solid primaryColor
+            , Css.backgroundColor (Css.hex "FFFFFF")
+
+            -- position
+            , Css.position Css.fixed
+            , Css.left Css.zero
+            , Css.bottom Css.zero
+
+            -- contents
+            , Css.displayFlex
+            , Css.justifyContent Css.center
+            , Css.alignItems Css.center
             , sansSerifFont
             ]
             []
             [ footerLink Routes.Index "Home"
             , footerLink Routes.SpeakAtElmConf "Speak"
-            , Html.styled Html.div
-                [ Css.color <| Css.hex "444444"
-                , Css.property "grid-row" "2"
-                , Css.property "grid-column" "1 / span 2"
-                ]
-                []
-                [ Html.text "© 2019 elm-conf" ]
             ]
         ]
 
@@ -244,7 +243,7 @@ footerLink route title =
         , Css.color <| primaryColor
         , Css.textDecoration Css.none
         , Css.hover [ Css.textDecoration Css.underline ]
-        , Css.property "grid-row" "1"
+        , Css.padding2 (Css.px 10) (Css.px 15)
         ]
         [ Attributes.href <| Routes.path route [] ]
         [ Html.text title ]
