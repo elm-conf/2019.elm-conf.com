@@ -8,13 +8,16 @@ import Api.Object.Proposal as ApiProposal
 import Api.Object.UpdateProposalPayload as ApiUpdateProposalPayload
 import Api.Object.User as ApiUser
 import Api.Query as ApiQuery
+import Browser.Dom as Dom
 import Css
 import Graphql.Http as Http
+import Graphql.OptionalArgument as OptionalArg
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Lazy as Lazy
 import Regex
 import String.Verify
+import Task
 import Ui
 import Ui.Button as Button
 import Ui.TextArea as TextArea
@@ -27,6 +30,8 @@ type Msg
     | UpdateAuthor Author
     | PageLoaded (Maybe ( Proposal, Author, List AvailableProposal ))
     | Submit
+    | Submitted (Maybe AvailableProposal)
+    | NoOp
 
 
 type alias Author =
@@ -56,13 +61,13 @@ newProposal =
 
 
 type alias AvailableProposal =
-    { id : Int
-    , title : String
+    { title : String
+    , id : Int
     }
 
 
 type alias LoadedModel =
-    { current : Proposal
+    { current : ( Maybe Int, Proposal )
     , errors : List String
     , available : List AvailableProposal
     , author : Author
@@ -102,8 +107,8 @@ loadPage env currentId =
         availableProposalSelection : SelectionSet AvailableProposal ApiObject.Proposal
         availableProposalSelection =
             SelectionSet.succeed AvailableProposal
-                |> SelectionSet.with ApiProposal.id
                 |> SelectionSet.with ApiProposal.title
+                |> SelectionSet.with ApiProposal.id
 
         authorSelection : SelectionSet Author ApiObject.User
         authorSelection =
@@ -130,7 +135,7 @@ loadPage env currentId =
         |> Http.send (Result.toMaybe >> Maybe.andThen identity)
 
 
-submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd (Maybe Int)
+submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd (Maybe AvailableProposal)
 submitProposal env idToUpdate author proposal =
     let
         proposalSelection : SelectionSet Int ApiObject.Proposal
@@ -140,16 +145,34 @@ submitProposal env idToUpdate author proposal =
     in
     case idToUpdate of
         Just proposalId ->
-            -- SelectionSet.succeed identity
-            --     |> SelectionSet.with (ApiUpdateProposalPayload.proposal proposalSelection)
-            --     |> ApiMutation.updateProposal
-            --        { input =
-            --            ApiInputObject.buildUpdateProposalInput
-            --                { proposal =
-            --                    ApiInputObject.build
-            --                }
-            --        }
-            Cmd.none
+            SelectionSet.succeed identity
+                |> SelectionSet.with (ApiUpdateProposalPayload.proposal proposalSelection)
+                |> ApiMutation.updateProposal
+                    { input =
+                        ApiInputObject.buildUpdateProposalInput
+                            { patch =
+                                ApiInputObject.buildProposalPatch
+                                    (\patch ->
+                                        { patch
+                                            | title = OptionalArg.Present proposal.title
+                                            , abstract = OptionalArg.Present proposal.abstract
+                                            , pitch = OptionalArg.Present proposal.pitch
+                                            , outline = OptionalArg.Present proposal.outline
+                                            , feedback = OptionalArg.Present proposal.feedback
+                                        }
+                                    )
+                            , id = proposalId
+                            }
+                            identity
+                    }
+                |> SelectionSet.map (Maybe.andThen identity)
+                |> Http.mutationRequest env.graphqlUrl
+                |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
+                |> Http.send
+                    (Result.toMaybe
+                        >> Maybe.andThen identity
+                        >> Maybe.map (AvailableProposal proposal.title)
+                    )
 
         Nothing ->
             SelectionSet.succeed identity
@@ -172,7 +195,11 @@ submitProposal env idToUpdate author proposal =
                 |> SelectionSet.map (Maybe.andThen identity)
                 |> Http.mutationRequest env.graphqlUrl
                 |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
-                |> Http.send (Result.toMaybe >> Maybe.andThen identity)
+                |> Http.send
+                    (Result.toMaybe
+                        >> Maybe.andThen identity
+                        >> Maybe.map (AvailableProposal proposal.title)
+                    )
 
 
 init : Env -> Maybe Int -> ( Model, Cmd Msg )
@@ -191,7 +218,7 @@ update env msg model =
 
         ( Loading, PageLoaded (Just ( current, author, available )) ) ->
             ( Loaded
-                { current = current
+                { current = ( Nothing, current )
                 , errors = []
                 , available = available
                 , author = author
@@ -200,12 +227,39 @@ update env msg model =
             )
 
         ( Loaded m, UpdateProposal p ) ->
-            ( Loaded { m | current = p }
+            ( Loaded
+                { m
+                    | current =
+                        Tuple.mapSecond
+                            (\_ -> p)
+                            m.current
+                }
             , Cmd.none
             )
 
         ( Loaded m, UpdateAuthor a ) ->
             ( Loaded { m | author = a }
+            , Cmd.none
+            )
+
+        ( Loaded m, Submit ) ->
+            ( Loaded m
+            , submitProposal
+                env
+                (Tuple.first m.current)
+                m.author
+                (Tuple.second m.current)
+                |> Cmd.map Submitted
+            )
+
+        ( Loaded m, Submitted (Just a) ) ->
+            ( Loaded { m | available = a :: m.available }
+            , Dom.setViewport 0 0
+                |> Task.perform (\_ -> NoOp)
+            )
+
+        ( Loaded m, Submitted Nothing ) ->
+            ( Loaded { m | errors = [ "Failed to submit. Please try again later." ] }
             , Cmd.none
             )
 
@@ -262,7 +316,10 @@ view : Model -> String -> Html Msg
 view pageModel topContent =
     case pageModel of
         Loaded model ->
-            viewEditor model.current model.author topContent
+            viewEditor
+                (Tuple.second model.current)
+                model.author
+                topContent
 
         _ ->
             Html.text ""
@@ -370,7 +427,7 @@ viewEditor proposal author topContent =
                         |> TextArea.withValue proposal.outline
                         |> TextArea.withPlaceholder "Outline"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\pitch -> UpdateProposal { proposal | pitch = pitch })
+                        |> TextArea.onInput (\outline -> UpdateProposal { proposal | outline = outline })
                         |> TextArea.view
                     ]
                 }
