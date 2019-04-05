@@ -257,7 +257,7 @@ update env msg model =
 
         ( Loaded m, Submitted True ) ->
             ( Loaded { m | errors = [] }
-            , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals
+            , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals []
             )
 
         ( Loaded m, Submitted False ) ->
