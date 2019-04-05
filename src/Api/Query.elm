@@ -2,8 +2,9 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Query exposing (NodeRequiredArguments, UserByNodeIdRequiredArguments, UserRequiredArguments, UsersOptionalArguments, node, nodeId, query, user, userByNodeId, users)
+module Api.Query exposing (NodeRequiredArguments, ProposalByNodeIdRequiredArguments, ProposalRequiredArguments, ProposalsOptionalArguments, UserByNodeIdRequiredArguments, UserRequiredArguments, UsersOptionalArguments, node, nodeId, proposal, proposalByNodeId, proposals, query, user, userByNodeId, users)
 
+import Api.Enum.ProposalsOrderBy
 import Api.Enum.UsersOrderBy
 import Api.InputObject
 import Api.Interface
@@ -48,39 +49,71 @@ node requiredArgs object_ =
     Object.selectionForCompositeField "node" [ Argument.required "nodeId" requiredArgs.nodeId (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
+type alias ProposalsOptionalArguments =
+    { first : OptionalArgument Int
+    , offset : OptionalArgument Int
+    , orderBy : OptionalArgument (List Api.Enum.ProposalsOrderBy.ProposalsOrderBy)
+    , condition : OptionalArgument Api.InputObject.ProposalCondition
+    }
+
+
+{-| Reads a set of `Proposal`.
+
+  - first - Only read the first `n` values of the set.
+  - offset - Skip the first `n` values.
+  - orderBy - The method to use when ordering `Proposal`.
+  - condition - A condition to be used in determining which values should be returned by the collection.
+
+-}
+proposals : (ProposalsOptionalArguments -> ProposalsOptionalArguments) -> SelectionSet decodesTo Api.Object.Proposal -> SelectionSet (Maybe (List decodesTo)) RootQuery
+proposals fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { first = Absent, offset = Absent, orderBy = Absent, condition = Absent }
+
+        optionalArgs =
+            [ Argument.optional "first" filledInOptionals.first Encode.int, Argument.optional "offset" filledInOptionals.offset Encode.int, Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.ProposalsOrderBy.toString |> Encode.list), Argument.optional "condition" filledInOptionals.condition Api.InputObject.encodeProposalCondition ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "proposals" optionalArgs object_ (identity >> Decode.list >> Decode.nullable)
+
+
 type alias UsersOptionalArguments =
     { first : OptionalArgument Int
-    , last : OptionalArgument Int
     , offset : OptionalArgument Int
-    , before : OptionalArgument Api.ScalarCodecs.Cursor
-    , after : OptionalArgument Api.ScalarCodecs.Cursor
     , orderBy : OptionalArgument (List Api.Enum.UsersOrderBy.UsersOrderBy)
     , condition : OptionalArgument Api.InputObject.UserCondition
     }
 
 
-{-| Reads and enables pagination through a set of `User`.
+{-| Reads a set of `User`.
 
   - first - Only read the first `n` values of the set.
-  - last - Only read the last `n` values of the set.
-  - offset - Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`.
-  - before - Read all values in the set before (above) this cursor.
-  - after - Read all values in the set after (below) this cursor.
+  - offset - Skip the first `n` values.
   - orderBy - The method to use when ordering `User`.
   - condition - A condition to be used in determining which values should be returned by the collection.
 
 -}
-users : (UsersOptionalArguments -> UsersOptionalArguments) -> SelectionSet decodesTo Api.Object.UsersConnection -> SelectionSet (Maybe decodesTo) RootQuery
+users : (UsersOptionalArguments -> UsersOptionalArguments) -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe (List decodesTo)) RootQuery
 users fillInOptionals object_ =
     let
         filledInOptionals =
-            fillInOptionals { first = Absent, last = Absent, offset = Absent, before = Absent, after = Absent, orderBy = Absent, condition = Absent }
+            fillInOptionals { first = Absent, offset = Absent, orderBy = Absent, condition = Absent }
 
         optionalArgs =
-            [ Argument.optional "first" filledInOptionals.first Encode.int, Argument.optional "last" filledInOptionals.last Encode.int, Argument.optional "offset" filledInOptionals.offset Encode.int, Argument.optional "before" filledInOptionals.before (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecCursor), Argument.optional "after" filledInOptionals.after (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecCursor), Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.UsersOrderBy.toString |> Encode.list), Argument.optional "condition" filledInOptionals.condition Api.InputObject.encodeUserCondition ]
+            [ Argument.optional "first" filledInOptionals.first Encode.int, Argument.optional "offset" filledInOptionals.offset Encode.int, Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.UsersOrderBy.toString |> Encode.list), Argument.optional "condition" filledInOptionals.condition Api.InputObject.encodeUserCondition ]
                 |> List.filterMap identity
     in
-    Object.selectionForCompositeField "users" optionalArgs object_ (identity >> Decode.nullable)
+    Object.selectionForCompositeField "users" optionalArgs object_ (identity >> Decode.list >> Decode.nullable)
+
+
+type alias ProposalRequiredArguments =
+    { id : Int }
+
+
+proposal : ProposalRequiredArguments -> SelectionSet decodesTo Api.Object.Proposal -> SelectionSet (Maybe decodesTo) RootQuery
+proposal requiredArgs object_ =
+    Object.selectionForCompositeField "proposal" [ Argument.required "id" requiredArgs.id Encode.int ] object_ (identity >> Decode.nullable)
 
 
 type alias UserRequiredArguments =
@@ -90,6 +123,20 @@ type alias UserRequiredArguments =
 user : UserRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
 user requiredArgs object_ =
     Object.selectionForCompositeField "user" [ Argument.required "id" requiredArgs.id Encode.int ] object_ (identity >> Decode.nullable)
+
+
+type alias ProposalByNodeIdRequiredArguments =
+    { nodeId : Api.ScalarCodecs.Id }
+
+
+{-| Reads a single `Proposal` using its globally unique `ID`.
+
+  - nodeId - The globally unique `ID` to be used in selecting a single `Proposal`.
+
+-}
+proposalByNodeId : ProposalByNodeIdRequiredArguments -> SelectionSet decodesTo Api.Object.Proposal -> SelectionSet (Maybe decodesTo) RootQuery
+proposalByNodeId requiredArgs object_ =
+    Object.selectionForCompositeField "proposalByNodeId" [ Argument.required "nodeId" requiredArgs.nodeId (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
 type alias UserByNodeIdRequiredArguments =

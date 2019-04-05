@@ -2,8 +2,9 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.CreateProposalPayload exposing (author, clientMutationId, proposal, query)
+module Api.Object.CreateProposalPayload exposing (ProposalEdgeOptionalArguments, author, clientMutationId, proposal, proposalEdge, query)
 
+import Api.Enum.ProposalsOrderBy
 import Api.InputObject
 import Api.Interface
 import Api.Object
@@ -45,3 +46,25 @@ query object_ =
 author : SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) Api.Object.CreateProposalPayload
 author object_ =
     Object.selectionForCompositeField "author" [] object_ (identity >> Decode.nullable)
+
+
+type alias ProposalEdgeOptionalArguments =
+    { orderBy : OptionalArgument (List Api.Enum.ProposalsOrderBy.ProposalsOrderBy) }
+
+
+{-| An edge for our `Proposal`. May be used by Relay 1.
+
+  - orderBy - The method to use when ordering `Proposal`.
+
+-}
+proposalEdge : (ProposalEdgeOptionalArguments -> ProposalEdgeOptionalArguments) -> SelectionSet decodesTo Api.Object.ProposalsEdge -> SelectionSet (Maybe decodesTo) Api.Object.CreateProposalPayload
+proposalEdge fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { orderBy = Absent }
+
+        optionalArgs =
+            [ Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.ProposalsOrderBy.toString |> Encode.list) ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "proposalEdge" optionalArgs object_ (identity >> Decode.nullable)

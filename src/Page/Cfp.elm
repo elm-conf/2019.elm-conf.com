@@ -1,7 +1,11 @@
 module Page.Cfp exposing (Env, Model, Msg(..), empty, init, update, view)
 
+import Api.InputObject as ApiInputObject
+import Api.Mutation as ApiMutation
 import Api.Object as ApiObject
+import Api.Object.CreateProposalPayload as ApiCreateProposalPayload
 import Api.Object.Proposal as ApiProposal
+import Api.Object.UpdateProposalPayload as ApiUpdateProposalPayload
 import Api.Object.User as ApiUser
 import Api.Query as ApiQuery
 import Css
@@ -21,7 +25,7 @@ import Verify
 type Msg
     = UpdateProposal Proposal
     | UpdateAuthor Author
-    | PageLoaded (Maybe ( Proposal, Author ))
+    | PageLoaded (Maybe ( Proposal, Author, List AvailableProposal ))
     | Submit
 
 
@@ -83,7 +87,7 @@ empty =
     Loading
 
 
-loadPage : Env -> Maybe Int -> Cmd (Maybe ( Proposal, Author ))
+loadPage : Env -> Maybe Int -> Cmd (Maybe ( Proposal, Author, List AvailableProposal ))
 loadPage env currentId =
     let
         proposalSelection : SelectionSet Proposal ApiObject.Proposal
@@ -107,12 +111,68 @@ loadPage env currentId =
                 |> SelectionSet.with ApiUser.name
                 |> SelectionSet.with ApiUser.firstTimeSpeaker
                 |> SelectionSet.with ApiUser.speakerUnderrepresented
+
+        userSelection : SelectionSet ( Proposal, Author, List AvailableProposal ) ApiObject.User
+        userSelection =
+            SelectionSet.succeed (\a b c -> ( a, b, c ))
+                |> SelectionSet.with (SelectionSet.succeed newProposal)
+                |> SelectionSet.with authorSelection
+                |> SelectionSet.with
+                    (ApiUser.authoredProposals
+                        identity
+                        availableProposalSelection
+                    )
     in
-    SelectionSet.succeed (Maybe.map (Tuple.pair newProposal))
-        |> SelectionSet.with (ApiQuery.user { id = env.userId } authorSelection)
+    SelectionSet.succeed identity
+        |> SelectionSet.with (ApiQuery.user { id = env.userId } userSelection)
         |> Http.queryRequest env.graphqlUrl
         |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
         |> Http.send (Result.toMaybe >> Maybe.andThen identity)
+
+
+submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd (Maybe Int)
+submitProposal env idToUpdate author proposal =
+    let
+        proposalSelection : SelectionSet Int ApiObject.Proposal
+        proposalSelection =
+            SelectionSet.succeed identity
+                |> SelectionSet.with ApiProposal.id
+    in
+    case idToUpdate of
+        Just proposalId ->
+            -- SelectionSet.succeed identity
+            --     |> SelectionSet.with (ApiUpdateProposalPayload.proposal proposalSelection)
+            --     |> ApiMutation.updateProposal
+            --        { input =
+            --            ApiInputObject.buildUpdateProposalInput
+            --                { proposal =
+            --                    ApiInputObject.build
+            --                }
+            --        }
+            Cmd.none
+
+        Nothing ->
+            SelectionSet.succeed identity
+                |> SelectionSet.with (ApiCreateProposalPayload.proposal proposalSelection)
+                |> ApiMutation.createProposal
+                    { input =
+                        ApiInputObject.buildCreateProposalInput
+                            { proposal =
+                                ApiInputObject.buildProposalInput
+                                    { authorId = env.userId
+                                    , title = proposal.title
+                                    , abstract = proposal.abstract
+                                    , pitch = proposal.pitch
+                                    , outline = proposal.outline
+                                    , feedback = proposal.feedback
+                                    }
+                            }
+                            identity
+                    }
+                |> SelectionSet.map (Maybe.andThen identity)
+                |> Http.mutationRequest env.graphqlUrl
+                |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
+                |> Http.send (Result.toMaybe >> Maybe.andThen identity)
 
 
 init : Env -> Maybe Int -> ( Model, Cmd Msg )
@@ -129,12 +189,12 @@ update env msg model =
         ( Loading, PageLoaded Nothing ) ->
             ( Failed, Cmd.none )
 
-        ( Loading, PageLoaded (Just ( p, a )) ) ->
+        ( Loading, PageLoaded (Just ( current, author, available )) ) ->
             ( Loaded
-                { current = p
+                { current = current
                 , errors = []
-                , available = []
-                , author = a
+                , available = available
+                , author = author
                 }
             , Cmd.none
             )

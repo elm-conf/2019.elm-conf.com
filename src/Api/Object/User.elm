@@ -2,8 +2,9 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.User exposing (createdAt, firstTimeSpeaker, id, isReviewer, name, nodeId, speakerUnderrepresented, updatedAt)
+module Api.Object.User exposing (AuthoredProposalsOptionalArguments, authoredProposals, createdAt, firstTimeSpeaker, id, isReviewer, name, nodeId, speakerUnderrepresented, updatedAt)
 
+import Api.Enum.ProposalsOrderBy
 import Api.InputObject
 import Api.Interface
 import Api.Object
@@ -59,3 +60,32 @@ createdAt =
 updatedAt : SelectionSet Api.ScalarCodecs.Datetime Api.Object.User
 updatedAt =
     Object.selectionForField "ScalarCodecs.Datetime" "updatedAt" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDatetime |> .decoder)
+
+
+type alias AuthoredProposalsOptionalArguments =
+    { first : OptionalArgument Int
+    , offset : OptionalArgument Int
+    , orderBy : OptionalArgument (List Api.Enum.ProposalsOrderBy.ProposalsOrderBy)
+    , condition : OptionalArgument Api.InputObject.ProposalCondition
+    }
+
+
+{-| Reads and enables pagination through a set of `Proposal`.
+
+  - first - Only read the first `n` values of the set.
+  - offset - Skip the first `n` values.
+  - orderBy - The method to use when ordering `Proposal`.
+  - condition - A condition to be used in determining which values should be returned by the collection.
+
+-}
+authoredProposals : (AuthoredProposalsOptionalArguments -> AuthoredProposalsOptionalArguments) -> SelectionSet decodesTo Api.Object.Proposal -> SelectionSet (List decodesTo) Api.Object.User
+authoredProposals fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { first = Absent, offset = Absent, orderBy = Absent, condition = Absent }
+
+        optionalArgs =
+            [ Argument.optional "first" filledInOptionals.first Encode.int, Argument.optional "offset" filledInOptionals.offset Encode.int, Argument.optional "orderBy" filledInOptionals.orderBy (Encode.enum Api.Enum.ProposalsOrderBy.toString |> Encode.list), Argument.optional "condition" filledInOptionals.condition Api.InputObject.encodeProposalCondition ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "authoredProposals" optionalArgs object_ (identity >> Decode.list)
