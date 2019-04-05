@@ -90,11 +90,10 @@ viewList { proposals } topContent =
                     [ Ui.bodyCopyStyle ]
                     []
                     [ Html.text "You haven't proposed any talks yet. Head on over to the "
-
-                    -- TODO: this style doesn't match, but people shouldn't see
-                    -- this until they submit so it's really a just-in-case
-                    -- thing.
-                    , Html.a [ Attributes.href (Routes.path Routes.Cfp []) ] [ Html.text "proposal page" ]
+                    , Html.styled Html.a
+                        [ Ui.linkStyle ]
+                        [ Attributes.href (Routes.path Routes.Cfp []) ]
+                        [ Html.text "proposal page" ]
                     , Html.text " to get started"
                     ]
 
@@ -107,7 +106,8 @@ viewList { proposals } topContent =
                                 , Css.marginBottom (Css.px 5)
                                 ]
                                 []
-                                [ Html.a
+                                [ Html.styled Html.a
+                                    [ Ui.linkStyle ]
                                     [ Attributes.href <| Routes.path Routes.Cfp [ Builder.int "edit" id ] ]
                                     [ Html.text title ]
                                 ]
