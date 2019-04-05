@@ -32,9 +32,9 @@ import Verify
 type Msg
     = UpdateProposal Proposal
     | UpdateAuthor Author
-    | PageLoaded (Maybe Int) (Maybe ( Proposal, Author, List AvailableProposal ))
+    | PageLoaded (Maybe Int) (Maybe ( Proposal, Author ))
     | Submit
-    | Submitted (Maybe AvailableProposal)
+    | Submitted Bool
     | NoOp
 
 
@@ -64,17 +64,10 @@ newProposal =
     }
 
 
-type alias AvailableProposal =
-    { title : String
-    , id : Int
-    }
-
-
 type alias LoadedModel =
     { proposal : Proposal
     , current : Maybe Int
     , errors : List String
-    , available : List AvailableProposal
     , author : Author
     }
 
@@ -98,7 +91,7 @@ empty =
     Loading
 
 
-loadPage : Env -> Maybe Int -> Cmd (Maybe ( Proposal, Author, List AvailableProposal ))
+loadPage : Env -> Maybe Int -> Cmd (Maybe ( Proposal, Author ))
 loadPage env currentId =
     let
         proposalSelection : SelectionSet Proposal ApiObject.Proposal
@@ -110,28 +103,12 @@ loadPage env currentId =
                 |> SelectionSet.with ApiProposal.outline
                 |> SelectionSet.with ApiProposal.feedback
 
-        availableProposalSelection : SelectionSet AvailableProposal ApiObject.Proposal
-        availableProposalSelection =
-            SelectionSet.succeed AvailableProposal
-                |> SelectionSet.with ApiProposal.title
-                |> SelectionSet.with ApiProposal.id
-
         authorSelection : SelectionSet Author ApiObject.User
         authorSelection =
             SelectionSet.succeed Author
                 |> SelectionSet.with ApiUser.name
                 |> SelectionSet.with ApiUser.firstTimeSpeaker
                 |> SelectionSet.with ApiUser.speakerUnderrepresented
-
-        userSelection : SelectionSet ( Author, List AvailableProposal ) ApiObject.User
-        userSelection =
-            SelectionSet.succeed Tuple.pair
-                |> SelectionSet.with authorSelection
-                |> SelectionSet.with
-                    (ApiUser.authoredProposals
-                        identity
-                        availableProposalSelection
-                    )
 
         proposalQuerySelection : SelectionSet (Maybe Proposal) RootQuery
         proposalQuerySelection =
@@ -144,15 +121,15 @@ loadPage env currentId =
                 Nothing ->
                     SelectionSet.succeed (Just newProposal)
 
-        userQuerySelection : SelectionSet (Maybe ( Author, List AvailableProposal )) RootQuery
+        userQuerySelection : SelectionSet (Maybe Author) RootQuery
         userQuerySelection =
             ApiQuery.user
                 { id = env.userId }
-                userSelection
+                authorSelection
 
-        query : SelectionSet (Maybe ( Proposal, Author, List AvailableProposal )) RootQuery
+        query : SelectionSet (Maybe ( Proposal, Author )) RootQuery
         query =
-            SelectionSet.map2 (Maybe.map2 (\a ( b, c ) -> ( a, b, c )))
+            SelectionSet.map2 (Maybe.map2 Tuple.pair)
                 proposalQuerySelection
                 userQuerySelection
     in
@@ -161,18 +138,11 @@ loadPage env currentId =
         |> Http.send (Result.toMaybe >> Maybe.andThen identity)
 
 
-submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd (Maybe AvailableProposal)
+submitProposal : Env -> Maybe Int -> Author -> Proposal -> Cmd Bool
 submitProposal env idToUpdate author proposal =
-    let
-        proposalSelection : SelectionSet Int ApiObject.Proposal
-        proposalSelection =
-            SelectionSet.succeed identity
-                |> SelectionSet.with ApiProposal.id
-    in
     case idToUpdate of
         Just proposalId ->
-            SelectionSet.succeed identity
-                |> SelectionSet.with (ApiUpdateProposalPayload.proposal proposalSelection)
+            SelectionSet.succeed ()
                 |> ApiMutation.updateProposal
                     { input =
                         ApiInputObject.buildUpdateProposalInput
@@ -191,18 +161,17 @@ submitProposal env idToUpdate author proposal =
                             }
                             identity
                     }
-                |> SelectionSet.map (Maybe.andThen identity)
                 |> Http.mutationRequest env.graphqlUrl
                 |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
                 |> Http.send
                     (Result.toMaybe
                         >> Maybe.andThen identity
-                        >> Maybe.map (AvailableProposal proposal.title)
+                        >> Maybe.map (\_ -> True)
+                        >> Maybe.withDefault False
                     )
 
         Nothing ->
-            SelectionSet.succeed identity
-                |> SelectionSet.with (ApiCreateProposalPayload.proposal proposalSelection)
+            SelectionSet.succeed ()
                 |> ApiMutation.createProposal
                     { input =
                         ApiInputObject.buildCreateProposalInput
@@ -218,13 +187,13 @@ submitProposal env idToUpdate author proposal =
                             }
                             identity
                     }
-                |> SelectionSet.map (Maybe.andThen identity)
                 |> Http.mutationRequest env.graphqlUrl
                 |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
                 |> Http.send
                     (Result.toMaybe
                         >> Maybe.andThen identity
-                        >> Maybe.map (AvailableProposal proposal.title)
+                        >> Maybe.map (\_ -> True)
+                        >> Maybe.withDefault False
                     )
 
 
@@ -249,12 +218,11 @@ update env msg model =
         ( Loading, PageLoaded _ Nothing ) ->
             ( Failed, Cmd.none )
 
-        ( Loading, PageLoaded current (Just ( proposal, author, available )) ) ->
+        ( Loading, PageLoaded current (Just ( proposal, author )) ) ->
             ( Loaded
                 { current = current
                 , proposal = proposal
                 , errors = []
-                , available = available
                 , author = author
                 }
             , Cmd.none
@@ -287,12 +255,12 @@ update env msg model =
                     , Cmd.none
                     )
 
-        ( Loaded m, Submitted (Just a) ) ->
-            ( Loaded { m | available = a :: m.available }
+        ( Loaded m, Submitted True ) ->
+            ( Loaded { m | errors = [] }
             , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals
             )
 
-        ( Loaded m, Submitted Nothing ) ->
+        ( Loaded m, Submitted False ) ->
             ( Loaded { m | errors = [ "Failed to submit. Please try again later." ] }
             , Cmd.none
             )
