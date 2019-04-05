@@ -17,6 +17,7 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Markdown
+import Routes
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as SvgAttributes
 
@@ -178,6 +179,7 @@ page : Html msg -> Html msg
 page content =
     Html.styled Html.div
         [ Css.padding <| Css.px 100
+        , Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/static/images/waves.svg"
         , Css.minHeight <| Css.pct 100
         , Css.backgroundRepeat Css.noRepeat
@@ -186,17 +188,60 @@ page content =
         , Css.property "display" "grid"
         , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
         , Css.property "grid-column-gap" "48px"
+        , Css.property "grid-template-rows" "1fr 100px"
         , Css.justifyContent Css.center
         ]
         []
         [ Html.styled Html.img
             [ Css.width <| Css.px 200
             , Css.height <| Css.px 200
+            , Css.property "grid-row" "1"
+            , Css.property "grid-column" "1"
             ]
             [ Attributes.src "/static/images/elm-logo.svg" ]
             []
-        , Html.div [] [ content ]
+        , Html.styled Html.div
+            [ Css.property "grid-row" "1"
+            , Css.property "grid-column" "2"
+            ]
+            []
+            [ content ]
+        , Html.styled Html.div
+            [ Css.property "grid-row" "2"
+            , Css.property "grid-column" "1 / span 2"
+            , Css.property "display" "grid"
+            , Css.property "grid-auto-flow" "column"
+            , Css.property "grid-column-gap" "16px"
+            , Css.property "place-items" "center"
+            , Css.property "justify-content" "center"
+            , Css.property "grid-template-rows" "auto auto"
+            , sansSerifFont
+            ]
+            []
+            [ footerLink Routes.Index "Home"
+            , footerLink Routes.SpeakAtElmConf "Speak"
+            , Html.styled Html.div
+                [ Css.color <| Css.hex "444444"
+                , Css.property "grid-row" "2"
+                , Css.property "grid-column" "1 / span 2"
+                ]
+                []
+                [ Html.text "© 2019 elm-conf" ]
+            ]
         ]
+
+
+footerLink : Routes.Route -> String -> Html msg
+footerLink route title =
+    Html.styled Html.a
+        [ Css.fontSize <| Css.px 18
+        , Css.color <| primaryColor
+        , Css.textDecoration Css.none
+        , Css.hover [ Css.textDecoration Css.underline ]
+        , Css.property "grid-row" "1"
+        ]
+        [ Attributes.href <| Routes.path route ]
+        [ Html.text title ]
 
 
 primaryColor : Css.Color
