@@ -14,6 +14,7 @@ import Graphql.Http as Http
 import Graphql.OptionalArgument as OptionalArg
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
 import Regex
 import String.Verify
@@ -200,6 +201,13 @@ submitProposal env idToUpdate author proposal =
                         >> Maybe.andThen identity
                         >> Maybe.map (AvailableProposal proposal.title)
                     )
+
+
+scrollToAbstract : Cmd ()
+scrollToAbstract =
+    Dom.getElement "section-Abstract"
+        |> Task.andThen (\e -> Dom.setViewport 0 e.element.y)
+        |> Task.attempt (\_ -> ())
 
 
 init : Env -> Maybe Int -> ( Model, Cmd Msg )
@@ -508,7 +516,7 @@ viewSection section =
         , Css.property "grid-template-columns" "158px minmax(auto, 650px)"
         , Css.marginLeft <| Css.px -158
         ]
-        []
+        [ Attributes.id <| "section-" ++ section.label ]
         [ Html.styled Html.div
             [ Css.property "display" "grid"
             , Css.property "grid-template-rows" "50px 1fr"
