@@ -24,12 +24,13 @@ type alias Env =
 
 
 type alias Model =
-    { inputs : Inputs
+    { registerInputs : RegisterInputs
+    , formMode : FormMode
     , errors : List String
     }
 
 
-type alias Inputs =
+type alias RegisterInputs =
     { name : String
     , email : String
     , password : String
@@ -42,6 +43,12 @@ type Msg
     | UpdatePassword String
     | Register
     | RegisterComplete (Maybe String)
+    | SwitchFormMode FormMode
+
+
+type FormMode
+    = LoginForm
+    | RegisterForm
 
 
 type ParentMsg
@@ -49,7 +56,7 @@ type ParentMsg
     | Registered String
 
 
-register : String -> Inputs -> Cmd (Maybe String)
+register : String -> RegisterInputs -> Cmd (Maybe String)
 register url inputs =
     SelectionSet.succeed identity
         |> SelectionSet.with ApiRegisterPayload.jwtToken
@@ -78,31 +85,31 @@ register url inputs =
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, ParentMsg )
-update env msg ({ inputs } as model) =
+update env msg ({ registerInputs } as model) =
     case msg of
         UpdateName name ->
-            ( { model | inputs = { inputs | name = name } }
+            ( { model | registerInputs = { registerInputs | name = name } }
             , Cmd.none
             , Continue
             )
 
         UpdateEmail email ->
-            ( { model | inputs = { inputs | email = email } }
+            ( { model | registerInputs = { registerInputs | email = email } }
             , Cmd.none
             , Continue
             )
 
         UpdatePassword password ->
-            ( { model | inputs = { inputs | password = password } }
+            ( { model | registerInputs = { registerInputs | password = password } }
             , Cmd.none
             , Continue
             )
 
         Register ->
-            case validator model.inputs of
+            case registerValidator model.registerInputs of
                 Ok valid ->
                     -- TODO: make registration request to graphql
-                    ( { model | inputs = valid, errors = [] }
+                    ( { model | registerInputs = valid, errors = [] }
                     , register env.graphqlUrl valid
                         |> Cmd.map RegisterComplete
                     , Continue
@@ -115,7 +122,7 @@ update env msg ({ inputs } as model) =
                     )
 
         RegisterComplete (Just token) ->
-            ( { model | inputs = empty.inputs }
+            ( { model | registerInputs = empty.registerInputs }
             , Cmd.none
             , Registered token
             )
@@ -129,20 +136,28 @@ update env msg ({ inputs } as model) =
             , Continue
             )
 
+        SwitchFormMode formMode ->
+            ( { model | formMode = formMode }
+            , Cmd.none
+            , Continue
+            )
 
+
+empty : Model
 empty =
-    { inputs =
+    { registerInputs =
         { name = ""
         , email = ""
         , password = ""
         }
+    , formMode = RegisterForm
     , errors = []
     }
 
 
-validator : Verify.Validator String Inputs Inputs
-validator =
-    Verify.validate Inputs
+registerValidator : Verify.Validator String RegisterInputs RegisterInputs
+registerValidator =
+    Verify.validate RegisterInputs
         |> Verify.verify .name (String.Verify.notBlank "Please enter your name. We need it to get in touch with you if your talk is selected.")
         |> Verify.verify .email (String.Verify.notBlank "Please enter your email address. We need it to get in touch with you for talk feedback and acceptance notifications.")
         |> Verify.verify .password (String.Verify.notBlank "Please set a password.")
@@ -168,33 +183,58 @@ view model topContent =
                                 [ Html.text error ]
                         )
                     |> Html.ul []
-        , Html.form
-            [ Events.onSubmit Register ]
-            [ styledTextInput "name"
-                |> TextInput.withLabel "Your Name"
-                |> TextInput.withPlaceholder "Cool Speaker Person"
-                |> TextInput.withValue model.inputs.name
-                |> TextInput.onInput UpdateName
-                |> TextInput.view
-            , styledTextInput "email"
-                |> TextInput.withLabel "Your Email Address"
-                |> TextInput.withPlaceholder "you@awesomeperson.com"
-                |> TextInput.withType TextInput.Email
-                |> TextInput.withValue model.inputs.email
-                |> TextInput.onInput UpdateEmail
-                |> TextInput.view
-            , styledTextInput "password"
-                |> TextInput.withLabel "Your Password"
-                |> TextInput.withType TextInput.Password
-                |> TextInput.withValue model.inputs.password
-                |> TextInput.onInput UpdatePassword
-                |> TextInput.view
-            , Html.styled Html.input
-                [ Ui.buttonStyle ]
-                [ Attributes.type_ "submit" ]
-                [ Html.text "Register" ]
-            ]
+        , viewRegisterForm model.registerInputs
         ]
+
+
+viewRegisterForm : RegisterInputs -> Html Msg
+viewRegisterForm inputs =
+    Html.form
+        [ Events.onSubmit Register ]
+        [ Html.styled Html.p
+            [ Ui.bodyCopyStyle ]
+            []
+            [ Html.text "Already registered? "
+            , Html.styled Html.a
+                [ Ui.linkStyle ]
+                [ Events.onClick (SwitchFormMode LoginForm) ]
+                [ Html.text "Log in" ]
+            , Html.text " instead."
+            ]
+        , styledTextInput "name"
+            |> TextInput.withLabel "Your Name"
+            |> TextInput.withPlaceholder "Cool Speaker Person"
+            |> TextInput.withValue inputs.name
+            |> TextInput.onInput UpdateName
+            |> TextInput.view
+        , emailInput
+            |> TextInput.withValue inputs.email
+            |> TextInput.view
+        , passwordInput
+            |> TextInput.withValue inputs.password
+            |> TextInput.view
+        , Html.styled Html.input
+            [ Ui.buttonStyle ]
+            [ Attributes.type_ "submit" ]
+            [ Html.text "Register" ]
+        ]
+
+
+emailInput : TextInput Msg
+emailInput =
+    styledTextInput "email"
+        |> TextInput.withLabel "Your Email Address"
+        |> TextInput.withPlaceholder "you@awesomeperson.com"
+        |> TextInput.withType TextInput.Email
+        |> TextInput.onInput UpdateEmail
+
+
+passwordInput : TextInput Msg
+passwordInput =
+    styledTextInput "password"
+        |> TextInput.withLabel "Your Password"
+        |> TextInput.withType TextInput.Password
+        |> TextInput.onInput UpdatePassword
 
 
 styledTextInput : String -> TextInput String
