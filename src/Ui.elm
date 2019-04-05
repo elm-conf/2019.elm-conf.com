@@ -4,6 +4,7 @@ module Ui exposing
     , buttonStyle
     , checkbox
     , errorColor
+    , linkStyle
     , markdown
     , page
     , primaryColor
@@ -115,6 +116,16 @@ buttonStyle =
         ]
 
 
+linkStyle : Css.Style
+linkStyle =
+    Css.batch
+        [ Css.textDecoration Css.none
+        , Css.color primaryColor
+        , Css.hover [ Css.textDecoration Css.underline ]
+        , Global.withClass "button" [ buttonStyle ]
+        ]
+
+
 markdown : String -> Html msg
 markdown raw =
     Html.styled Html.div
@@ -154,12 +165,7 @@ markdown raw =
                 [ Css.paddingLeft <| Css.em 1
                 , Css.marginBottom <| Css.px 30
                 ]
-            , Global.a
-                [ Css.textDecoration Css.none
-                , Css.color primaryColor
-                , Css.hover [ Css.textDecoration Css.underline ]
-                , Global.withClass "button" [ buttonStyle ]
-                ]
+            , Global.a [ linkStyle ]
             ]
         ]
         []

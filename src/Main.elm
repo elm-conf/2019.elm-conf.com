@@ -7,6 +7,7 @@ import Html.Styled as Html
 import Http
 import Json.Decode as Decode exposing (Decoder, Value)
 import Page.Cfp as Cfp
+import Page.Cfp.Proposals as Proposals
 import Page.Register as Register
 import Routes exposing (Route)
 import Ui
@@ -47,6 +48,7 @@ type alias Model =
     -- application-y pages
     , register : Register.Model
     , cfp : Cfp.Model
+    , proposals : Proposals.Model
     }
 
 
@@ -86,6 +88,7 @@ init { graphqlEndpoint, session } url key =
         -- application-y pages
         , register = Register.empty
         , cfp = Cfp.empty
+        , proposals = Proposals.empty
         }
 
 
@@ -96,6 +99,7 @@ type Msg
     | RegisterChanged Register.Msg
     | SessionChanged (Maybe Session)
     | CfpMsg Cfp.Msg
+    | ProposalsMsg Proposals.Msg
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -109,7 +113,7 @@ onUrlChange url model =
     case ( model.session, route ) of
         ( Nothing, Routes.Cfp ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Register
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
             )
 
         ( Just session, Routes.Cfp ) ->
@@ -142,9 +146,33 @@ onUrlChange url model =
                 ]
             )
 
+        ( Nothing, Routes.CfpProposals ) ->
+            ( model
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
+            )
+
+        ( Just session, Routes.CfpProposals ) ->
+            let
+                ( newProposals, cmd ) =
+                    Proposals.load
+                        { graphqlUrl = model.graphqlEndpoint
+                        , token = session.token
+                        }
+            in
+            ( { model
+                | page = Nothing
+                , route = route
+                , proposals = newProposals
+              }
+            , Cmd.batch
+                [ loadMarkdown route
+                , Cmd.map ProposalsMsg cmd
+                ]
+            )
+
         ( Just _, Routes.Register ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp []
             )
 
         _ ->
@@ -203,14 +231,14 @@ update msg model =
 
         SessionChanged (Just session) ->
             ( { model | session = Just session }
-            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp
+            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp []
             )
 
         SessionChanged Nothing ->
             ( { model | session = Nothing }
             , case model.route of
                 Routes.Cfp ->
-                    Navigation.pushUrl model.key <| Routes.path Routes.Register
+                    Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
                 _ ->
                     Cmd.none
@@ -232,6 +260,25 @@ update msg model =
                     in
                     ( { model | cfp = newCfp }
                     , Cmd.map CfpMsg cmd
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        ProposalsMsg proposalsMsg ->
+            case model.session of
+                Just session ->
+                    let
+                        ( newProposals, cmd ) =
+                            Proposals.update
+                                { graphqlUrl = model.graphqlEndpoint
+                                , token = session.token
+                                }
+                                proposalsMsg
+                                model.proposals
+                    in
+                    ( { model | proposals = newProposals }
+                    , Cmd.map ProposalsMsg cmd
                     )
 
                 Nothing ->
@@ -276,6 +323,9 @@ view model =
                 case model.route of
                     Routes.Cfp ->
                         Cfp.view model.cfp >> Html.map CfpMsg
+
+                    Routes.CfpProposals ->
+                        Proposals.view model.proposals >> Html.map ProposalsMsg
 
                     Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
