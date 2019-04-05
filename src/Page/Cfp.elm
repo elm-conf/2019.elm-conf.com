@@ -9,14 +9,17 @@ import Api.Object.UpdateProposalPayload as ApiUpdateProposalPayload
 import Api.Object.User as ApiUser
 import Api.Query as ApiQuery
 import Browser.Dom as Dom
+import Browser.Navigation as Navigation
 import Css
 import Extra.String as String
 import Graphql.Http as Http
+import Graphql.Operation exposing (RootQuery)
 import Graphql.OptionalArgument as OptionalArg
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
+import Routes
 import String.Verify
 import Task
 import Ui
@@ -29,7 +32,7 @@ import Verify
 type Msg
     = UpdateProposal Proposal
     | UpdateAuthor Author
-    | PageLoaded (Maybe ( Proposal, Author, List AvailableProposal ))
+    | PageLoaded (Maybe Int) (Maybe ( Proposal, Author, List AvailableProposal ))
     | Submit
     | Submitted (Maybe AvailableProposal)
     | NoOp
@@ -80,6 +83,7 @@ type alias Env =
     { graphqlUrl : String
     , userId : Int
     , token : String
+    , key : Navigation.Key
     }
 
 
@@ -119,20 +123,40 @@ loadPage env currentId =
                 |> SelectionSet.with ApiUser.firstTimeSpeaker
                 |> SelectionSet.with ApiUser.speakerUnderrepresented
 
-        userSelection : SelectionSet ( Proposal, Author, List AvailableProposal ) ApiObject.User
+        userSelection : SelectionSet ( Author, List AvailableProposal ) ApiObject.User
         userSelection =
-            SelectionSet.succeed (\a b c -> ( a, b, c ))
-                |> SelectionSet.with (SelectionSet.succeed newProposal)
+            SelectionSet.succeed Tuple.pair
                 |> SelectionSet.with authorSelection
                 |> SelectionSet.with
                     (ApiUser.authoredProposals
                         identity
                         availableProposalSelection
                     )
+
+        proposalQuerySelection : SelectionSet (Maybe Proposal) RootQuery
+        proposalQuerySelection =
+            case currentId of
+                Just id ->
+                    ApiQuery.proposal
+                        { id = id }
+                        proposalSelection
+
+                Nothing ->
+                    SelectionSet.succeed (Just newProposal)
+
+        userQuerySelection : SelectionSet (Maybe ( Author, List AvailableProposal )) RootQuery
+        userQuerySelection =
+            ApiQuery.user
+                { id = env.userId }
+                userSelection
+
+        query : SelectionSet (Maybe ( Proposal, Author, List AvailableProposal )) RootQuery
+        query =
+            SelectionSet.map2 (Maybe.map2 (\a ( b, c ) -> ( a, b, c )))
+                proposalQuerySelection
+                userQuerySelection
     in
-    SelectionSet.succeed identity
-        |> SelectionSet.with (ApiQuery.user { id = env.userId } userSelection)
-        |> Http.queryRequest env.graphqlUrl
+    Http.queryRequest env.graphqlUrl query
         |> Http.withHeader "Authorization" ("Bearer " ++ env.token)
         |> Http.send (Result.toMaybe >> Maybe.andThen identity)
 
@@ -215,19 +239,19 @@ init : Env -> Maybe Int -> ( Model, Cmd Msg )
 init env currentId =
     ( Loading
     , loadPage env currentId
-        |> Cmd.map PageLoaded
+        |> Cmd.map (PageLoaded currentId)
     )
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg )
 update env msg model =
     case ( model, msg ) of
-        ( Loading, PageLoaded Nothing ) ->
+        ( Loading, PageLoaded _ Nothing ) ->
             ( Failed, Cmd.none )
 
-        ( Loading, PageLoaded (Just ( proposal, author, available )) ) ->
+        ( Loading, PageLoaded current (Just ( proposal, author, available )) ) ->
             ( Loaded
-                { current = Nothing
+                { current = current
                 , proposal = proposal
                 , errors = []
                 , available = available
@@ -265,8 +289,7 @@ update env msg model =
 
         ( Loaded m, Submitted (Just a) ) ->
             ( Loaded { m | available = a :: m.available }
-            , Dom.setViewport 0 0
-                |> Task.perform (\_ -> NoOp)
+            , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals
             )
 
         ( Loaded m, Submitted Nothing ) ->

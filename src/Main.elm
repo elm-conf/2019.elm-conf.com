@@ -11,7 +11,8 @@ import Page.Register as Register
 import Routes exposing (Route)
 import Ui
 import Url exposing (Url)
-import Url.Parser exposing (parse)
+import Url.Parser as Parser exposing ((<?>), parse)
+import Url.Parser.Query as Query
 
 
 port tokenChanges : (Maybe Session -> msg) -> Sub msg
@@ -113,13 +114,22 @@ onUrlChange url model =
 
         ( Just session, Routes.Cfp ) ->
             let
+                id : Maybe Int
+                id =
+                    Parser.custom "SUCCEED" (\_ -> Just ())
+                        <?> Query.int "edit"
+                        |> Parser.map (\_ id_ -> id_)
+                        |> (\p -> Parser.parse p url)
+                        |> Maybe.andThen identity
+
                 ( newCfp, cmd ) =
                     Cfp.init
                         { graphqlUrl = model.graphqlEndpoint
                         , token = session.token
                         , userId = session.userId
+                        , key = model.key
                         }
-                        Nothing
+                        id
             in
             ( { model
                 | cfp = newCfp
@@ -215,6 +225,7 @@ update msg model =
                                 { graphqlUrl = model.graphqlEndpoint
                                 , token = session.token
                                 , userId = session.userId
+                                , key = model.key
                                 }
                                 cfpMsg
                                 model.cfp
