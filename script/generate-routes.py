@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function, unicode_literals
 import argparse
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('mapping', nargs='+')
@@ -37,7 +38,11 @@ parser =
 """
 
 def to_constructor(kebab_case):
-    parts = kebab_case.split('-')
+    parts = [
+        part for part
+        in re.split(r'[-/]', kebab_case)
+        if part != ''
+    ]
 
     return ''.join(part.capitalize() for part in parts)
 
@@ -47,7 +52,7 @@ args = parser.parse_args()
 routes_to_markdown = dict(reversed(mapping.split('=')) for mapping in args.mapping)
 
 routes_to_constructors = {
-    route: to_constructor(route.replace('/', '') or 'index')
+    route: to_constructor(route if route != '/' else 'index')
     for route in routes_to_markdown.keys()
 }
 
