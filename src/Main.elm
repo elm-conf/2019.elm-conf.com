@@ -224,7 +224,7 @@ update msg model =
                     , Cmd.map RegisterChanged cmds
                     )
 
-                Register.Registered token ->
+                Register.Authenticated token ->
                     ( { model | register = newRegister }
                     , setToken (Just token)
                     )

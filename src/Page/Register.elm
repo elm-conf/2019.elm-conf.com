@@ -25,6 +25,7 @@ type alias Env =
 
 type alias Model =
     { registerInputs : RegisterInputs
+    , loginInputs : LoginInputs
     , formMode : FormMode
     , errors : List String
     }
@@ -37,12 +38,20 @@ type alias RegisterInputs =
     }
 
 
+type alias LoginInputs =
+    { email : String
+    , password : String
+    }
+
+
 type Msg
     = UpdateName String
     | UpdateEmail String
     | UpdatePassword String
     | Register
+    | Login
     | RegisterComplete (Maybe String)
+    | LoginComplete (Maybe String)
     | SwitchFormMode FormMode
 
 
@@ -53,7 +62,7 @@ type FormMode
 
 type ParentMsg
     = Continue
-    | Registered String
+    | Authenticated String
 
 
 register : String -> RegisterInputs -> Cmd (Maybe String)
@@ -84,31 +93,55 @@ register url inputs =
         |> Task.attempt (Result.toMaybe >> Maybe.andThen identity)
 
 
+login : String -> LoginInputs -> Cmd (Maybe String)
+login url inputs =
+    SelectionSet.succeed identity
+        |> SelectionSet.with ApiAuthPayload.jwtToken
+        |> ApiMutation.authenticate
+            { input = ApiInputObject.buildAuthenticateInput inputs identity }
+        |> SelectionSet.map (Maybe.andThen identity)
+        |> SelectionSet.map (Maybe.map (\(ApiScalar.JwtToken s) -> s))
+        |> Http.mutationRequest url
+        |> Http.toTask
+        |> Task.attempt (Result.toMaybe >> Maybe.andThen identity)
+
+
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, ParentMsg )
-update env msg ({ registerInputs } as model) =
-    case msg of
-        UpdateName name ->
+update env msg ({ registerInputs, loginInputs } as model) =
+    case ( model.formMode, msg ) of
+        ( _, UpdateName name ) ->
             ( { model | registerInputs = { registerInputs | name = name } }
             , Cmd.none
             , Continue
             )
 
-        UpdateEmail email ->
+        ( RegisterForm, UpdateEmail email ) ->
             ( { model | registerInputs = { registerInputs | email = email } }
             , Cmd.none
             , Continue
             )
 
-        UpdatePassword password ->
+        ( LoginForm, UpdateEmail email ) ->
+            ( { model | loginInputs = { loginInputs | email = email } }
+            , Cmd.none
+            , Continue
+            )
+
+        ( RegisterForm, UpdatePassword password ) ->
             ( { model | registerInputs = { registerInputs | password = password } }
             , Cmd.none
             , Continue
             )
 
-        Register ->
+        ( LoginForm, UpdatePassword password ) ->
+            ( { model | loginInputs = { loginInputs | password = password } }
+            , Cmd.none
+            , Continue
+            )
+
+        ( _, Register ) ->
             case registerValidator model.registerInputs of
                 Ok valid ->
-                    -- TODO: make registration request to graphql
                     ( { model | registerInputs = valid, errors = [] }
                     , register env.graphqlUrl valid
                         |> Cmd.map RegisterComplete
@@ -121,13 +154,13 @@ update env msg ({ registerInputs } as model) =
                     , Continue
                     )
 
-        RegisterComplete (Just token) ->
+        ( _, RegisterComplete (Just token) ) ->
             ( { model | registerInputs = empty.registerInputs }
             , Cmd.none
-            , Registered token
+            , Authenticated token
             )
 
-        RegisterComplete Nothing ->
+        ( _, RegisterComplete Nothing ) ->
             ( { model
                 | errors =
                     [ "Something went wrong while registering your information. Please try again later." ]
@@ -136,11 +169,66 @@ update env msg ({ registerInputs } as model) =
             , Continue
             )
 
-        SwitchFormMode formMode ->
-            ( { model | formMode = formMode }
+        ( _, Login ) ->
+            case loginValidator model.loginInputs of
+                Ok valid ->
+                    ( { model | loginInputs = valid, errors = [] }
+                    , login env.graphqlUrl valid
+                        |> Cmd.map LoginComplete
+                    , Continue
+                    )
+
+                Err ( first, rest ) ->
+                    ( { model | errors = first :: rest }
+                    , Cmd.none
+                    , Continue
+                    )
+
+        ( _, LoginComplete (Just token) ) ->
+            ( { model | loginInputs = empty.loginInputs }
+            , Cmd.none
+            , Authenticated token
+            )
+
+        ( _, LoginComplete Nothing ) ->
+            ( { model
+                | errors =
+                    [ "Something went wrong while logging in. Please check your password or try again later." ]
+              }
             , Cmd.none
             , Continue
             )
+
+        ( LoginForm, SwitchFormMode RegisterForm ) ->
+            ( { model
+                | formMode = RegisterForm
+                , loginInputs = empty.loginInputs
+                , registerInputs =
+                    { registerInputs
+                        | email = loginInputs.email
+                        , password = loginInputs.password
+                    }
+              }
+            , Cmd.none
+            , Continue
+            )
+
+        ( RegisterForm, SwitchFormMode LoginForm ) ->
+            ( { model
+                | formMode = LoginForm
+                , registerInputs = empty.registerInputs
+                , loginInputs =
+                    { loginInputs
+                        | email = registerInputs.email
+                        , password = registerInputs.password
+                    }
+              }
+            , Cmd.none
+            , Continue
+            )
+
+        ( _, SwitchFormMode _ ) ->
+            ( model, Cmd.none, Continue )
 
 
 empty : Model
@@ -148,6 +236,10 @@ empty =
     { registerInputs =
         { name = ""
         , email = ""
+        , password = ""
+        }
+    , loginInputs =
+        { email = ""
         , password = ""
         }
     , formMode = RegisterForm
@@ -159,8 +251,23 @@ registerValidator : Verify.Validator String RegisterInputs RegisterInputs
 registerValidator =
     Verify.validate RegisterInputs
         |> Verify.verify .name (String.Verify.notBlank "Please enter your name. We need it to get in touch with you if your talk is selected.")
-        |> Verify.verify .email (String.Verify.notBlank "Please enter your email address. We need it to get in touch with you for talk feedback and acceptance notifications.")
-        |> Verify.verify .password (String.Verify.notBlank "Please set a password.")
+        |> verifyEmail
+        |> verifyPassword
+
+
+loginValidator : Verify.Validator String LoginInputs LoginInputs
+loginValidator =
+    Verify.validate LoginInputs
+        |> verifyEmail
+        |> verifyPassword
+
+
+verifyEmail =
+    Verify.verify .email (String.Verify.notBlank "Please enter your email address. We need it to get in touch with you for talk feedback and acceptance notifications.")
+
+
+verifyPassword =
+    Verify.verify .password (String.Verify.notBlank "Please set a password.")
 
 
 view : Model -> String -> Html Msg
@@ -183,40 +290,71 @@ view model topContent =
                                 [ Html.text error ]
                         )
                     |> Html.ul []
-        , viewRegisterForm model.registerInputs
+        , case model.formMode of
+            LoginForm ->
+                viewLoginForm model.loginInputs
+
+            RegisterForm ->
+                viewRegisterForm model.registerInputs
         ]
 
 
 viewRegisterForm : RegisterInputs -> Html Msg
 viewRegisterForm inputs =
-    Html.form
-        [ Events.onSubmit Register ]
+    Html.section []
         [ Html.styled Html.p
             [ Ui.bodyCopyStyle ]
             []
             [ Html.text "Already registered? "
-            , Html.styled Html.a
-                [ Ui.linkStyle ]
-                [ Events.onClick (SwitchFormMode LoginForm) ]
-                [ Html.text "Log in" ]
+            , switchButton "Log in" (SwitchFormMode LoginForm)
             , Html.text " instead."
             ]
-        , styledTextInput "name"
-            |> TextInput.withLabel "Your Name"
-            |> TextInput.withPlaceholder "Cool Speaker Person"
-            |> TextInput.withValue inputs.name
-            |> TextInput.onInput UpdateName
-            |> TextInput.view
-        , emailInput
-            |> TextInput.withValue inputs.email
-            |> TextInput.view
-        , passwordInput
-            |> TextInput.withValue inputs.password
-            |> TextInput.view
-        , Html.styled Html.input
-            [ Ui.buttonStyle ]
-            [ Attributes.type_ "submit" ]
-            [ Html.text "Register" ]
+        , Html.form
+            [ Events.onSubmit Register ]
+            [ styledTextInput "name"
+                |> TextInput.withLabel "Your Name"
+                |> TextInput.withPlaceholder "Cool Speaker Person"
+                |> TextInput.withValue inputs.name
+                |> TextInput.onInput UpdateName
+                |> TextInput.view
+            , emailInput
+                |> TextInput.withValue inputs.email
+                |> TextInput.view
+            , passwordInput
+                |> TextInput.withValue inputs.password
+                |> TextInput.view
+            , Html.styled Html.input
+                [ Ui.buttonStyle ]
+                [ Attributes.type_ "submit" ]
+                [ Html.text "Register" ]
+            ]
+        ]
+
+
+viewLoginForm : LoginInputs -> Html Msg
+viewLoginForm inputs =
+    Html.section
+        []
+        [ Html.styled Html.p
+            [ Ui.bodyCopyStyle ]
+            []
+            [ Html.text "Don't have a password? "
+            , switchButton "Register" (SwitchFormMode RegisterForm)
+            , Html.text " instead."
+            ]
+        , Html.form
+            [ Events.onSubmit Login ]
+            [ emailInput
+                |> TextInput.withValue inputs.email
+                |> TextInput.view
+            , passwordInput
+                |> TextInput.withValue inputs.password
+                |> TextInput.view
+            , Html.styled Html.input
+                [ Ui.buttonStyle ]
+                [ Attributes.type_ "submit" ]
+                [ Html.text "Log in" ]
+            ]
         ]
 
 
@@ -241,3 +379,18 @@ styledTextInput : String -> TextInput String
 styledTextInput =
     textInput
         >> TextInput.withStyle [ Css.margin2 (Css.px 30) Css.zero ]
+
+
+switchButton : String -> Msg -> Html Msg
+switchButton caption msg =
+    Html.styled Html.button
+        [ Css.display Css.inline
+        , Css.margin Css.zero
+        , Css.padding Css.zero
+        , Css.border Css.zero
+        , Css.backgroundColor Css.transparent
+        , Ui.bodyCopyStyle
+        , Ui.linkStyle
+        ]
+        [ Events.onClick msg ]
+        [ Html.text caption ]
