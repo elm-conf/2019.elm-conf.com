@@ -112,7 +112,7 @@ onUrlChange url model =
     case ( model.session, route ) of
         ( Nothing, Routes.Cfp ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Register
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
             )
 
         ( Just session, Routes.Cfp ) ->
@@ -138,7 +138,7 @@ onUrlChange url model =
 
         ( Nothing, Routes.CfpProposals ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Register
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
             )
 
         ( Just session, Routes.CfpProposals ) ->
@@ -162,7 +162,7 @@ onUrlChange url model =
 
         ( Just _, Routes.Register ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp
+            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp []
             )
 
         _ ->
@@ -221,14 +221,14 @@ update msg model =
 
         SessionChanged (Just session) ->
             ( { model | session = Just session }
-            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp
+            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp []
             )
 
         SessionChanged Nothing ->
             ( { model | session = Nothing }
             , case model.route of
                 Routes.Cfp ->
-                    Navigation.pushUrl model.key <| Routes.path Routes.Register
+                    Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
                 _ ->
                     Cmd.none

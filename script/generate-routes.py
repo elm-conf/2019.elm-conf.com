@@ -11,7 +11,7 @@ TEMPLATE = """\
 module {module_name} exposing (..)
 
 import Url exposing (Url)
-import Url.Builder exposing (absolute)
+import Url.Builder as Builder exposing (QueryParameter, absolute)
 import Url.Parser exposing (Parser, s, top, map, oneOf, (</>))
 
 
@@ -24,8 +24,8 @@ markdown route =
         {markdown_cases}
 
 
-path : Route -> String
-path route =
+path : Route -> List QueryParameter -> String
+path route params =
     case route of
         {path_cases}
 
@@ -77,7 +77,7 @@ markdown_cases = '\n        '.join(
 path_cases = '\n        '.join(
     '{} -> {}'.format(
         route,
-        'absolute [ {} ] []'.format(
+        'absolute [ {} ] params'.format(
             ','.join(
                 '"{}"'.format(part)
                 for part in path.split('/')
