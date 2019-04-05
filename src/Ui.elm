@@ -246,7 +246,7 @@ footerLink route title =
         , Css.hover [ Css.textDecoration Css.underline ]
         , Css.property "grid-row" "1"
         ]
-        [ Attributes.href <| Routes.path route ]
+        [ Attributes.href <| Routes.path route [] ]
         [ Html.text title ]
 
 
