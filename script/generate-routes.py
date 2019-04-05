@@ -100,8 +100,7 @@ parser_cases = '\n        , '.join(sorted(
         for (route, constructor)
         in routes_to_constructors.items()
     ),
-    key=lambda c: c.count('/'),
-    reverse=True,
+    key=lambda c: (-c.count('/'), -len(c), c),
 ))
 
 print(TEMPLATE.format(
