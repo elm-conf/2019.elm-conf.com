@@ -1,5 +1,5 @@
 CONTENT_SRC=$(wildcard content/*.md content/**/*.md)
-ELM_SRC=$(wildcard src/*.elm src/**/*.elm)
+ELM_SRC=$(shell find src -name '*.elm')
 
 IMAGES_SRC=$(shell find static/images -type f)
 IMAGES=$(IMAGES_SRC:static/%=public/static/%)
