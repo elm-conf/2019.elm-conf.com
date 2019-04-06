@@ -1,5 +1,5 @@
 module ValidatedString exposing
-    ( ValidatedString, init
+    ( ValidatedString, fromString
     , withNotBlank, withMinWords, withMaxWords
     , input, blur
     , toString, error
@@ -7,7 +7,7 @@ module ValidatedString exposing
 
 {-|
 
-@docs ValidatedString, init
+@docs ValidatedString, fromString
 
 @docs withNotBlank, withMinWords, withMaxWords
 
@@ -33,8 +33,8 @@ type ValidatedString
 -- CONFIGURATION
 
 
-init : String -> ValidatedString
-init input_ =
+fromString : String -> ValidatedString
+fromString input_ =
     ValidatedString
         { input = input_
         , validations = []
