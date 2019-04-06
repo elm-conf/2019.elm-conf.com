@@ -1,4 +1,4 @@
-module ProposalString exposing (Bounds, ProposalString, Validation(..), blur, error, init, toString, update)
+module ProposalString exposing (Bounds, ProposalString, Validation(..), blur, error, init, input, toString)
 
 import Extra.String
 
@@ -45,8 +45,8 @@ error (ProposalString existing) =
     existing.error
 
 
-update : String -> ProposalString -> ProposalString
-update input (ProposalString existing) =
+input : String -> ProposalString -> ProposalString
+input input (ProposalString existing) =
     ProposalString
         { existing
             | input = input
@@ -57,6 +57,11 @@ update input (ProposalString existing) =
                 else
                     Nothing
         }
+
+
+blur : ProposalString -> ProposalString
+blur (ProposalString existing) =
+    ProposalString { existing | everBlurred = True }
 
 
 validate : Validation -> String -> Maybe String
@@ -87,8 +92,3 @@ validateBounds bounds input =
 
     else
         Nothing
-
-
-blur : ProposalString -> ProposalString
-blur (ProposalString existing) =
-    ProposalString { existing | everBlurred = True }
