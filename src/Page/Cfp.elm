@@ -19,7 +19,6 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
-import ProposalString exposing (ProposalString)
 import Routes
 import String.Verify
 import Task
@@ -27,6 +26,7 @@ import Ui
 import Ui.Button as Button
 import Ui.TextArea as TextArea
 import Ui.TextInput as TextInput exposing (textInput)
+import ValidatedString exposing (ValidatedString)
 import Verify
 
 
@@ -47,52 +47,49 @@ type alias Author =
 
 
 type alias Proposal =
-    { abstract : ProposalString
-    , title : ProposalString
-    , pitch : ProposalString
-    , outline : ProposalString
+    { abstract : ValidatedString
+    , title : ValidatedString
+    , pitch : ValidatedString
+    , outline : ValidatedString
     , feedback : String
     }
 
 
 newProposal : Proposal
 newProposal =
-    { abstract =
-        ProposalString.init
-            (ProposalString.WithinBounds
-                { lower = 50
-                , tooShortError = "Please provide a little more info in your abstract."
-                , upper = 200
-                , tooLongError = "Please try to get your abstract below 200 words."
-                }
-            )
-            ""
-    , title =
-        ProposalString.init
-            (ProposalString.NotBlank "Please give your talk a title.")
-            ""
-    , pitch =
-        ProposalString.init
-            (ProposalString.WithinBounds
-                { lower = 50
-                , tooShortError = "Please tell us a little more in your pitch."
-                , upper = 1000
-                , tooLongError = "Please try to get your pitch below 1000 words."
-                }
-            )
-            ""
-    , outline =
-        ProposalString.init
-            (ProposalString.WithinBounds
-                { lower = 50
-                , tooShortError = "Please give some more detail in your talk outline."
-                , upper = 1000
-                , tooLongError = "Please try to get your outline below 1000 words."
-                }
-            )
-            ""
+    { abstract = validatedAbstract ""
+    , title = validatedTitle ""
+    , pitch = validatedPitch ""
+    , outline = validatedOutline ""
     , feedback = ""
     }
+
+
+validatedAbstract : String -> ValidatedString
+validatedAbstract =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 200 "Please try to get your abstract below 200 words."
+        >> ValidatedString.withMinWords 50 "Please provide a little more info in your abstract."
+
+
+validatedTitle : String -> ValidatedString
+validatedTitle =
+    ValidatedString.fromString
+        >> ValidatedString.withNotBlank "Please give your talk a title."
+
+
+validatedPitch : String -> ValidatedString
+validatedPitch =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 1000 "Please try to get your pitch below 1000 words."
+        >> ValidatedString.withMinWords 50 "Please tell us a little more in your pitch."
+
+
+validatedOutline : String -> ValidatedString
+validatedOutline =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 1000 "Please try to get your outline below 1000 words."
+        >> ValidatedString.withMinWords 50 "Please give some more detail in your outline."
 
 
 type alias LoadedModel =
@@ -128,10 +125,10 @@ loadPage env currentId =
         proposalSelection : SelectionSet Proposal ApiObject.Proposal
         proposalSelection =
             SelectionSet.succeed Proposal
-                |> SelectionSet.with ApiProposal.abstract
-                |> SelectionSet.with ApiProposal.title
-                |> SelectionSet.with ApiProposal.pitch
-                |> SelectionSet.with ApiProposal.outline
+                |> SelectionSet.with (SelectionSet.map validatedAbstract ApiProposal.abstract)
+                |> SelectionSet.with (SelectionSet.map validatedTitle ApiProposal.title)
+                |> SelectionSet.with (SelectionSet.map validatedPitch ApiProposal.pitch)
+                |> SelectionSet.with (SelectionSet.map validatedOutline ApiProposal.outline)
                 |> SelectionSet.with ApiProposal.feedback
 
         authorSelection : SelectionSet Author ApiObject.User
@@ -202,10 +199,10 @@ submitProposal env idToUpdate author proposal =
                                     ApiInputObject.buildProposalPatch
                                         (\patch ->
                                             { patch
-                                                | title = OptionalArg.Present proposal.title
-                                                , abstract = OptionalArg.Present proposal.abstract
-                                                , pitch = OptionalArg.Present proposal.pitch
-                                                , outline = OptionalArg.Present proposal.outline
+                                                | title = OptionalArg.Present (ValidatedString.toString proposal.title)
+                                                , abstract = OptionalArg.Present (ValidatedString.toString proposal.abstract)
+                                                , pitch = OptionalArg.Present (ValidatedString.toString proposal.pitch)
+                                                , outline = OptionalArg.Present (ValidatedString.toString proposal.outline)
                                                 , feedback = OptionalArg.Present proposal.feedback
                                             }
                                         )
