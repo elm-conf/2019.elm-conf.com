@@ -99,7 +99,7 @@ validatedOutline =
 type alias LoadedModel =
     { proposal : Proposal
     , current : Maybe Int
-    , errors : List String
+    , error : Maybe String
     , author : Author
     }
 
@@ -282,7 +282,7 @@ update env msg model =
             ( Loaded
                 { current = current
                 , proposal = proposal
-                , errors = []
+                , error = Nothing
                 , author = author
                 }
             , Cmd.none
@@ -326,12 +326,12 @@ update env msg model =
             )
 
         ( Loaded m, Submitted True ) ->
-            ( Loaded { m | errors = [] }
+            ( Loaded { m | error = Nothing }
             , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals []
             )
 
         ( Loaded m, Submitted False ) ->
-            ( Loaded { m | errors = [ "Failed to submit. Please try again later." ] }
+            ( Loaded { m | error = Just "Failed to submit. Please try again later." }
             , Cmd.none
             )
 
@@ -486,8 +486,13 @@ viewEditor ({ author, proposal } as model) topContent =
                     ]
                 }
             , let
+                modelErrors =
+                    model.error
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
+
                 errors =
-                    model.errors ++ proposalErrors model.proposal
+                    modelErrors ++ proposalErrors model.proposal
               in
               viewSection
                 { label = "Send it in!"
@@ -498,7 +503,7 @@ viewEditor ({ author, proposal } as model) topContent =
                     else
                         "Almost there..."
                 , description =
-                    if List.isEmpty model.errors then
+                    if List.isEmpty errors then
                         """
                         Congratulations, you've finished your proposal!
                         Once you submit, you can use this site to edit this proposal.
