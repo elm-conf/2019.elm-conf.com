@@ -68,6 +68,9 @@ withMaxWords howMany errorMessage (ValidatedString state) =
 -- UPDATES
 
 
+{-| Change the input. Does not validate immediately, unless `blur` has been
+called at least once.
+-}
 input : String -> ValidatedString -> ValidatedString
 input input_ (ValidatedString state) =
     ValidatedString
@@ -82,6 +85,8 @@ input input_ (ValidatedString state) =
         }
 
 
+{-| Mark the input as being blurred—validate immediately.
+-}
 blur : ValidatedString -> ValidatedString
 blur (ValidatedString state) =
     ValidatedString
