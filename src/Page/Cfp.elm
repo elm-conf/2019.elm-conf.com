@@ -312,13 +312,10 @@ update env msg model =
                     }
 
                 newModel =
-                    { m
-                        | proposal = validatedProposal
-                        , errors = proposalErrors validatedProposal
-                    }
+                    { m | proposal = validatedProposal }
             in
             ( Loaded newModel
-            , case newModel.errors of
+            , case proposalErrors newModel.proposal of
                 [] ->
                     newModel.proposal
                         |> submitProposal env m.current m.author
@@ -488,10 +485,14 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.view
                     ]
                 }
-            , viewSection
+            , let
+                errors =
+                    model.errors ++ proposalErrors model.proposal
+              in
+              viewSection
                 { label = "Send it in!"
                 , heading =
-                    if List.isEmpty model.errors then
+                    if List.isEmpty errors then
                         "You're done!"
 
                     else
@@ -512,11 +513,11 @@ viewEditor ({ author, proposal } as model) topContent =
                         "Have a look at the errors below to learn how to complete your proposal."
                 , hasBorder = False
                 , inputs =
-                    [ case model.errors of
+                    [ case errors of
                         [] ->
                             Html.text ""
 
-                        errors ->
+                        _ ->
                             errors
                                 |> List.map (Html.text >> List.singleton >> Html.li [])
                                 |> Html.styled Html.ul
