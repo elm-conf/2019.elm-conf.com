@@ -1,7 +1,7 @@
 module Ui.TextArea exposing
     ( TextArea, textarea, view
-    , withValue, onInput, withMaxWords
-    , withPlaceholder
+    , withValue, withPlaceholder
+    , withError, onEvents, withMaxWords
     , withStyle
     )
 
@@ -9,9 +9,9 @@ module Ui.TextArea exposing
 
 @docs TextArea, textarea, view
 
-@docs withValue, onInput, withMaxWords
+@docs withValue, withPlaceholder
 
-@docs withPlaceholder
+@docs withError, onEvents, withMaxWords
 
 @docs withStyle
 
@@ -23,6 +23,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as Lazy
+import Json.Encode exposing (null)
 import Regex
 import Ui
 
@@ -32,8 +33,12 @@ type TextArea msg
         { name : String
         , value : Maybe String
         , placeholder : String
-        , onInput : String -> msg
+        , events :
+            { input : String -> msg
+            , blur : Maybe msg
+            }
         , maxWords : Int
+        , error : Maybe String
         , style : List Style
         }
 
@@ -44,8 +49,12 @@ textarea name =
         { name = name
         , value = Nothing
         , placeholder = ""
-        , onInput = identity
+        , events =
+            { input = identity
+            , blur = Nothing
+            }
         , maxWords = 1000
+        , error = Nothing
         , style = []
         }
 
@@ -60,17 +69,28 @@ withPlaceholder placeholder (TextArea config) =
     TextArea { config | placeholder = placeholder }
 
 
-onInput : (String -> msgB) -> TextArea msgA -> TextArea msgB
-onInput onInput_ (TextArea config) =
+withError : Maybe String -> TextArea msg -> TextArea msg
+withError error (TextArea config) =
+    TextArea { config | error = error }
+
+
+onEvents :
+    { input : String -> msgB
+    , blur : Maybe msgB
+    }
+    -> TextArea msgA
+    -> TextArea msgB
+onEvents events (TextArea config) =
     TextArea
         { name = config.name
         , value = config.value
         , placeholder = config.placeholder
         , maxWords = config.maxWords
+        , error = config.error
         , style = config.style
 
         -- the new one, of a new type...
-        , onInput = onInput_
+        , events = events
         }
 
 
@@ -124,7 +144,15 @@ baseView (TextArea config) value =
             [ Attributes.value value
             , Attributes.name config.name
             , Attributes.placeholder config.placeholder
-            , Events.onInput config.onInput
+
+            -- events
+            , Events.onInput config.events.input
+            , case config.events.blur of
+                Just msg ->
+                    Events.onBlur msg
+
+                Nothing ->
+                    Attributes.property "Ui.TextArea.onBlur" null
             ]
             []
         , Html.styled Html.div
@@ -139,5 +167,16 @@ baseView (TextArea config) value =
                     ++ " / "
                     ++ String.fromInt config.maxWords
                     ++ " words"
+            , case config.error of
+                Just error ->
+                    Html.styled Html.span
+                        [ Css.color Ui.errorColor
+                        , Css.marginLeft (Css.px 5)
+                        ]
+                        []
+                        [ Html.text error ]
+
+                Nothing ->
+                    Html.text ""
             ]
         ]

@@ -20,13 +20,12 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Lazy as Lazy
 import Routes
-import String.Verify
 import Task
 import Ui
 import Ui.Button as Button
 import Ui.TextArea as TextArea
 import Ui.TextInput as TextInput exposing (textInput)
-import Verify
+import ValidatedString exposing (ValidatedString)
 
 
 type Msg
@@ -46,28 +45,61 @@ type alias Author =
 
 
 type alias Proposal =
-    { abstract : String
-    , title : String
-    , pitch : String
-    , outline : String
+    { abstract : ValidatedString
+    , title : ValidatedString
+    , pitch : ValidatedString
+    , outline : ValidatedString
     , feedback : String
     }
 
 
 newProposal : Proposal
 newProposal =
-    { abstract = ""
-    , title = ""
-    , pitch = ""
-    , outline = ""
+    { abstract = validatedAbstract ""
+    , title = validatedTitle ""
+    , pitch = validatedPitch ""
+    , outline = validatedOutline ""
     , feedback = ""
     }
+
+
+proposalErrors : Proposal -> List String
+proposalErrors { abstract, title, pitch, outline } =
+    List.filterMap ValidatedString.error
+        [ abstract, title, pitch, outline ]
+
+
+validatedAbstract : String -> ValidatedString
+validatedAbstract =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 200 "Please try to get your abstract below 200 words."
+        >> ValidatedString.withMinWords 50 "Please provide a little more info in your abstract."
+
+
+validatedTitle : String -> ValidatedString
+validatedTitle =
+    ValidatedString.fromString
+        >> ValidatedString.withNotBlank "Please give your talk a title."
+
+
+validatedPitch : String -> ValidatedString
+validatedPitch =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 1000 "Please try to get your pitch below 1000 words."
+        >> ValidatedString.withMinWords 50 "Please tell us a little more in your pitch."
+
+
+validatedOutline : String -> ValidatedString
+validatedOutline =
+    ValidatedString.fromString
+        >> ValidatedString.withMaxWords 1000 "Please try to get your outline below 1000 words."
+        >> ValidatedString.withMinWords 50 "Please give some more detail in your outline."
 
 
 type alias LoadedModel =
     { proposal : Proposal
     , current : Maybe Int
-    , errors : List String
+    , error : Maybe String
     , author : Author
     }
 
@@ -97,10 +129,10 @@ loadPage env currentId =
         proposalSelection : SelectionSet Proposal ApiObject.Proposal
         proposalSelection =
             SelectionSet.succeed Proposal
-                |> SelectionSet.with ApiProposal.abstract
-                |> SelectionSet.with ApiProposal.title
-                |> SelectionSet.with ApiProposal.pitch
-                |> SelectionSet.with ApiProposal.outline
+                |> SelectionSet.with (SelectionSet.map validatedAbstract ApiProposal.abstract)
+                |> SelectionSet.with (SelectionSet.map validatedTitle ApiProposal.title)
+                |> SelectionSet.with (SelectionSet.map validatedPitch ApiProposal.pitch)
+                |> SelectionSet.with (SelectionSet.map validatedOutline ApiProposal.outline)
                 |> SelectionSet.with ApiProposal.feedback
 
         authorSelection : SelectionSet Author ApiObject.User
@@ -171,10 +203,10 @@ submitProposal env idToUpdate author proposal =
                                     ApiInputObject.buildProposalPatch
                                         (\patch ->
                                             { patch
-                                                | title = OptionalArg.Present proposal.title
-                                                , abstract = OptionalArg.Present proposal.abstract
-                                                , pitch = OptionalArg.Present proposal.pitch
-                                                , outline = OptionalArg.Present proposal.outline
+                                                | title = OptionalArg.Present (ValidatedString.toString proposal.title)
+                                                , abstract = OptionalArg.Present (ValidatedString.toString proposal.abstract)
+                                                , pitch = OptionalArg.Present (ValidatedString.toString proposal.pitch)
+                                                , outline = OptionalArg.Present (ValidatedString.toString proposal.outline)
                                                 , feedback = OptionalArg.Present proposal.feedback
                                             }
                                         )
@@ -203,10 +235,10 @@ submitProposal env idToUpdate author proposal =
                                 { proposal =
                                     ApiInputObject.buildProposalInput
                                         { authorId = env.userId
-                                        , title = proposal.title
-                                        , abstract = proposal.abstract
-                                        , pitch = proposal.pitch
-                                        , outline = proposal.outline
+                                        , title = ValidatedString.toString proposal.title
+                                        , abstract = ValidatedString.toString proposal.abstract
+                                        , pitch = ValidatedString.toString proposal.pitch
+                                        , outline = ValidatedString.toString proposal.outline
                                         , feedback = proposal.feedback
                                         }
                                 }
@@ -250,7 +282,7 @@ update env msg model =
             ( Loaded
                 { current = current
                 , proposal = proposal
-                , errors = []
+                , error = Nothing
                 , author = author
                 }
             , Cmd.none
@@ -267,72 +299,44 @@ update env msg model =
             )
 
         ( Loaded m, Submit ) ->
-            case validator m.proposal of
-                Ok valid ->
-                    ( Loaded { m | errors = [] }
-                    , submitProposal
-                        env
-                        m.current
-                        m.author
-                        valid
-                        |> Cmd.map Submitted
-                    )
+            let
+                oldProposal =
+                    m.proposal
 
-                Err ( head, tail ) ->
-                    ( Loaded { m | errors = head :: tail }
-                    , Cmd.none
-                    )
+                validatedProposal =
+                    { oldProposal
+                        | abstract = ValidatedString.validate oldProposal.abstract
+                        , title = ValidatedString.validate oldProposal.title
+                        , pitch = ValidatedString.validate oldProposal.pitch
+                        , outline = ValidatedString.validate oldProposal.outline
+                    }
+
+                newModel =
+                    { m | proposal = validatedProposal }
+            in
+            ( Loaded newModel
+            , case proposalErrors newModel.proposal of
+                [] ->
+                    newModel.proposal
+                        |> submitProposal env m.current m.author
+                        |> Cmd.map Submitted
+
+                _ ->
+                    Cmd.none
+            )
 
         ( Loaded m, Submitted True ) ->
-            ( Loaded { m | errors = [] }
+            ( Loaded { m | error = Nothing }
             , Navigation.pushUrl env.key <| Routes.path Routes.CfpProposals []
             )
 
         ( Loaded m, Submitted False ) ->
-            ( Loaded { m | errors = [ "Failed to submit. Please try again later." ] }
+            ( Loaded { m | error = Just "Failed to submit. Please try again later." }
             , Cmd.none
             )
 
         _ ->
             ( model, Cmd.none )
-
-
-boundedWords : Bool -> Int -> error -> Verify.Validator error String String
-boundedWords max amount error input =
-    let
-        wordCount =
-            String.wordCount input
-    in
-    if max && wordCount > amount then
-        Err ( error, [] )
-
-    else if not max && wordCount < amount then
-        Err ( error, [] )
-
-    else
-        Ok input
-
-
-validator : Verify.Validator String Proposal Proposal
-validator =
-    Verify.validate Proposal
-        |> Verify.verify .abstract
-            (Verify.compose
-                (boundedWords True 200 "Please try to get your abstract below 200 words.")
-                (boundedWords False 50 "Please provide a little more info in your abstract.")
-            )
-        |> Verify.verify .title (String.Verify.notBlank "Please give your talk a title.")
-        |> Verify.verify .pitch
-            (Verify.compose
-                (boundedWords True 1000 "Please try to get your pitch below 1000 words.")
-                (boundedWords False 50 "Please tell us a little bit more in your pitch.")
-            )
-        |> Verify.verify .outline
-            (Verify.compose
-                (boundedWords True 1000 "Please try to get your outline below 1000 words.")
-                (boundedWords False 50 "Please give some more detail in your talk outline.")
-            )
-        |> Verify.keep .feedback
 
 
 view : Model -> String -> Html Msg
@@ -362,7 +366,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextInput.withLabel "Your Name"
                         |> TextInput.withPlaceholder "Cool Speaker Person"
                         |> TextInput.withValue author.name
-                        |> TextInput.onInput (\name -> UpdateAuthor { author | name = name })
+                        |> TextInput.onEvents
+                            { input = \name -> UpdateAuthor { author | name = name }
+                            , blur = Nothing
+                            }
                         |> TextInput.view
                     , viewFirstTimeInput author.firstTime
                         |> Html.map (\firstTime -> UpdateAuthor { author | firstTime = firstTime })
@@ -382,10 +389,14 @@ viewEditor ({ author, proposal } as model) topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "abstract"
-                        |> TextArea.withValue proposal.abstract
+                        |> TextArea.withValue (ValidatedString.toString proposal.abstract)
                         |> TextArea.withPlaceholder "Abstract"
                         |> TextArea.withMaxWords 200
-                        |> TextArea.onInput (\abstract -> UpdateProposal { proposal | abstract = abstract })
+                        |> TextArea.onEvents
+                            { input = \abstract -> UpdateProposal { proposal | abstract = ValidatedString.input abstract proposal.abstract }
+                            , blur = Just (UpdateProposal { proposal | abstract = ValidatedString.validate proposal.abstract })
+                            }
+                        |> TextArea.withError (ValidatedString.error proposal.abstract)
                         |> TextArea.view
                     ]
                 }
@@ -403,8 +414,12 @@ viewEditor ({ author, proposal } as model) topContent =
                 , inputs =
                     [ TextInput.textInput "title"
                         |> TextInput.withPlaceholder "Super Neat Title"
-                        |> TextInput.withValue proposal.title
-                        |> TextInput.onInput (\title -> UpdateProposal { proposal | title = title })
+                        |> TextInput.withValue (ValidatedString.toString proposal.title)
+                        |> TextInput.onEvents
+                            { input = \title -> UpdateProposal { proposal | title = ValidatedString.input title proposal.title }
+                            , blur = Just (UpdateProposal { proposal | title = ValidatedString.validate proposal.title })
+                            }
+                        |> TextInput.withError (ValidatedString.error proposal.title)
                         |> TextInput.view
                     ]
                 }
@@ -424,10 +439,14 @@ viewEditor ({ author, proposal } as model) topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "pitch"
-                        |> TextArea.withValue proposal.pitch
+                        |> TextArea.withValue (ValidatedString.toString proposal.pitch)
                         |> TextArea.withPlaceholder "Pitch"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\pitch -> UpdateProposal { proposal | pitch = pitch })
+                        |> TextArea.onEvents
+                            { input = \pitch -> UpdateProposal { proposal | pitch = ValidatedString.input pitch proposal.pitch }
+                            , blur = Just (UpdateProposal { proposal | pitch = ValidatedString.validate proposal.pitch })
+                            }
+                        |> TextArea.withError (ValidatedString.error proposal.pitch)
                         |> TextArea.view
                     ]
                 }
@@ -446,10 +465,14 @@ viewEditor ({ author, proposal } as model) topContent =
                 , hasBorder = True
                 , inputs =
                     [ TextArea.textarea "outline"
-                        |> TextArea.withValue proposal.outline
+                        |> TextArea.withValue (ValidatedString.toString proposal.outline)
                         |> TextArea.withPlaceholder "Outline"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\outline -> UpdateProposal { proposal | outline = outline })
+                        |> TextArea.onEvents
+                            { input = \outline -> UpdateProposal { proposal | outline = ValidatedString.input outline proposal.outline }
+                            , blur = Just (UpdateProposal { proposal | outline = ValidatedString.validate proposal.outline })
+                            }
+                        |> TextArea.withError (ValidatedString.error proposal.outline)
                         |> TextArea.view
                     ]
                 }
@@ -469,20 +492,32 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.withValue proposal.feedback
                         |> TextArea.withPlaceholder "Request Feedback"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\feedback -> UpdateProposal { proposal | feedback = feedback })
+                        |> TextArea.onEvents
+                            { input = \feedback -> UpdateProposal { proposal | feedback = feedback }
+                            , blur = Nothing
+                            }
                         |> TextArea.view
                     ]
                 }
-            , viewSection
+            , let
+                modelErrors =
+                    model.error
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
+
+                errors =
+                    modelErrors ++ proposalErrors model.proposal
+              in
+              viewSection
                 { label = "Send it in!"
                 , heading =
-                    if List.isEmpty model.errors then
+                    if List.isEmpty errors then
                         "You're done!"
 
                     else
                         "Almost there..."
                 , description =
-                    if List.isEmpty model.errors then
+                    if List.isEmpty errors then
                         """
                         Congratulations, you've finished your proposal!
                         Once you submit, you can use this site to edit this proposal.
@@ -497,11 +532,11 @@ viewEditor ({ author, proposal } as model) topContent =
                         "Have a look at the errors below to learn how to complete your proposal."
                 , hasBorder = False
                 , inputs =
-                    [ case model.errors of
+                    [ case errors of
                         [] ->
                             Html.text ""
 
-                        errors ->
+                        _ ->
                             errors
                                 |> List.map (Html.text >> List.singleton >> Html.li [])
                                 |> Html.styled Html.ul

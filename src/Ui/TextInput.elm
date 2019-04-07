@@ -1,8 +1,9 @@
 module Ui.TextInput exposing
     ( TextInput, textInput, view
-    , withValue, onInput
+    , withValue, onEvents
     , withPlaceholder, withLabel
     , InputType(..), withType
+    , withError
     , withStyle
     )
 
@@ -10,11 +11,13 @@ module Ui.TextInput exposing
 
 @docs TextInput, textInput, view
 
-@docs withValue, onInput
+@docs withValue, onEvents
 
 @docs withPlaceholder, withLabel
 
 @docs InputType, withType
+
+@docs withError
 
 @docs withStyle
 
@@ -25,6 +28,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as Lazy
+import Json.Encode exposing (null)
 import Ui
 
 
@@ -35,7 +39,11 @@ type TextInput msg
         , placeholder : String
         , label : Maybe String
         , type_ : InputType
-        , onInput : String -> msg
+        , events :
+            { input : String -> msg
+            , blur : Maybe msg
+            }
+        , error : Maybe String
         , style : List Style
         }
 
@@ -48,7 +56,11 @@ textInput name =
         , placeholder = ""
         , label = Nothing
         , type_ = Text
-        , onInput = identity
+        , error = Nothing
+        , events =
+            { input = identity
+            , blur = Nothing
+            }
         , style = []
         }
 
@@ -68,6 +80,11 @@ withLabel label (TextInput config) =
     TextInput { config | label = Just label }
 
 
+withError : Maybe String -> TextInput msg -> TextInput msg
+withError error (TextInput config) =
+    TextInput { config | error = error }
+
+
 type InputType
     = Text
     | Email
@@ -79,8 +96,13 @@ withType type_ (TextInput config) =
     TextInput { config | type_ = type_ }
 
 
-onInput : (String -> msgB) -> TextInput msgA -> TextInput msgB
-onInput onInput_ (TextInput config) =
+onEvents :
+    { input : String -> msgB
+    , blur : Maybe msgB
+    }
+    -> TextInput msgA
+    -> TextInput msgB
+onEvents events (TextInput config) =
     TextInput
         { name = config.name
         , value = config.value
@@ -88,9 +110,10 @@ onInput onInput_ (TextInput config) =
         , label = config.label
         , type_ = config.type_
         , style = config.style
+        , error = config.error
 
         -- the new one, of a new type...
-        , onInput = onInput_
+        , events = events
         }
 
 
@@ -148,9 +171,30 @@ baseView (TextInput config) value =
             , Attributes.value value
             , Attributes.name config.name
             , Attributes.placeholder config.placeholder
-            , Events.onInput config.onInput
+
+            -- events
+            , Events.onInput config.events.input
+            , case config.events.blur of
+                Just msg ->
+                    Events.onBlur msg
+
+                Nothing ->
+                    Attributes.property "Ui.TextInput.onBlur" null
             ]
             []
+        , case config.error of
+            Just error ->
+                Html.styled Html.div
+                    [ Ui.sansSerifFont
+                    , Css.fontSize <| Css.px 14
+                    , Css.color Ui.errorColor
+                    , Css.marginTop <| Css.px 5
+                    ]
+                    []
+                    [ Html.text error ]
+
+            Nothing ->
+                Html.text ""
         ]
 
 
