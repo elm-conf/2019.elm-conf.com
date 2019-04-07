@@ -1,6 +1,6 @@
 module Ui.TextInput exposing
     ( TextInput, textInput, view
-    , withValue, onInput
+    , withValue, onEvents
     , withPlaceholder, withLabel
     , InputType(..), withType
     , withStyle
@@ -10,7 +10,7 @@ module Ui.TextInput exposing
 
 @docs TextInput, textInput, view
 
-@docs withValue, onInput
+@docs withValue, onEvents
 
 @docs withPlaceholder, withLabel
 
@@ -25,6 +25,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as Lazy
+import Json.Encode exposing (null)
 import Ui
 
 
@@ -35,7 +36,10 @@ type TextInput msg
         , placeholder : String
         , label : Maybe String
         , type_ : InputType
-        , onInput : String -> msg
+        , events :
+            { input : String -> msg
+            , blur : Maybe msg
+            }
         , style : List Style
         }
 
@@ -48,7 +52,10 @@ textInput name =
         , placeholder = ""
         , label = Nothing
         , type_ = Text
-        , onInput = identity
+        , events =
+            { input = identity
+            , blur = Nothing
+            }
         , style = []
         }
 
@@ -79,8 +86,13 @@ withType type_ (TextInput config) =
     TextInput { config | type_ = type_ }
 
 
-onInput : (String -> msgB) -> TextInput msgA -> TextInput msgB
-onInput onInput_ (TextInput config) =
+onEvents :
+    { input : String -> msgB
+    , blur : Maybe msgB
+    }
+    -> TextInput msgA
+    -> TextInput msgB
+onEvents events (TextInput config) =
     TextInput
         { name = config.name
         , value = config.value
@@ -90,7 +102,7 @@ onInput onInput_ (TextInput config) =
         , style = config.style
 
         -- the new one, of a new type...
-        , onInput = onInput_
+        , events = events
         }
 
 
@@ -148,7 +160,15 @@ baseView (TextInput config) value =
             , Attributes.value value
             , Attributes.name config.name
             , Attributes.placeholder config.placeholder
-            , Events.onInput config.onInput
+
+            -- events
+            , Events.onInput config.events.input
+            , case config.events.blur of
+                Just msg ->
+                    Events.onBlur msg
+
+                Nothing ->
+                    Attributes.property "Ui.TextInput.onBlur" null
             ]
             []
         ]

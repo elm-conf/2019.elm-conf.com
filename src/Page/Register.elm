@@ -315,7 +315,10 @@ viewRegisterForm inputs =
                 |> TextInput.withLabel "Your Name"
                 |> TextInput.withPlaceholder "Cool Speaker Person"
                 |> TextInput.withValue inputs.name
-                |> TextInput.onInput UpdateName
+                |> TextInput.onEvents
+                    { input = UpdateName
+                    , blur = Nothing
+                    }
                 |> TextInput.view
             , emailInput
                 |> TextInput.withValue inputs.email
@@ -364,7 +367,10 @@ emailInput =
         |> TextInput.withLabel "Your Email Address"
         |> TextInput.withPlaceholder "you@awesomeperson.com"
         |> TextInput.withType TextInput.Email
-        |> TextInput.onInput UpdateEmail
+        |> TextInput.onEvents
+            { input = UpdateEmail
+            , blur = Nothing
+            }
 
 
 passwordInput : TextInput Msg
@@ -372,7 +378,10 @@ passwordInput =
     styledTextInput "password"
         |> TextInput.withLabel "Your Password"
         |> TextInput.withType TextInput.Password
-        |> TextInput.onInput UpdatePassword
+        |> TextInput.onEvents
+            { input = UpdatePassword
+            , blur = Nothing
+            }
 
 
 styledTextInput : String -> TextInput String

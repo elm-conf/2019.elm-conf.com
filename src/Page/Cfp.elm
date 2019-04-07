@@ -366,7 +366,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextInput.withLabel "Your Name"
                         |> TextInput.withPlaceholder "Cool Speaker Person"
                         |> TextInput.withValue author.name
-                        |> TextInput.onInput (\name -> UpdateAuthor { author | name = name })
+                        |> TextInput.onEvents
+                            { input = \name -> UpdateAuthor { author | name = name }
+                            , blur = Nothing
+                            }
                         |> TextInput.view
                     , viewFirstTimeInput author.firstTime
                         |> Html.map (\firstTime -> UpdateAuthor { author | firstTime = firstTime })
@@ -389,7 +392,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.withValue (ValidatedString.toString proposal.abstract)
                         |> TextArea.withPlaceholder "Abstract"
                         |> TextArea.withMaxWords 200
-                        |> TextArea.onInput (\abstract -> UpdateProposal { proposal | abstract = ValidatedString.input abstract proposal.abstract })
+                        |> TextArea.onEvents
+                            { input = \abstract -> UpdateProposal { proposal | abstract = ValidatedString.input abstract proposal.abstract }
+                            , blur = Just (UpdateProposal { proposal | abstract = ValidatedString.validate proposal.abstract })
+                            }
                         -- TODO: onBlur
                         -- TODO: withError
                         |> TextArea.view
@@ -410,7 +416,10 @@ viewEditor ({ author, proposal } as model) topContent =
                     [ TextInput.textInput "title"
                         |> TextInput.withPlaceholder "Super Neat Title"
                         |> TextInput.withValue (ValidatedString.toString proposal.title)
-                        |> TextInput.onInput (\title -> UpdateProposal { proposal | title = ValidatedString.input title proposal.title })
+                        |> TextInput.onEvents
+                            { input = \title -> UpdateProposal { proposal | title = ValidatedString.input title proposal.title }
+                            , blur = Just (UpdateProposal { proposal | title = ValidatedString.validate proposal.title })
+                            }
                         -- TODO: onBlur
                         -- TODO: withError
                         |> TextInput.view
@@ -435,7 +444,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.withValue (ValidatedString.toString proposal.pitch)
                         |> TextArea.withPlaceholder "Pitch"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\pitch -> UpdateProposal { proposal | pitch = ValidatedString.input pitch proposal.pitch })
+                        |> TextArea.onEvents
+                            { input = \pitch -> UpdateProposal { proposal | pitch = ValidatedString.input pitch proposal.pitch }
+                            , blur = Just (UpdateProposal { proposal | pitch = ValidatedString.validate proposal.pitch })
+                            }
                         -- TODO: onBlur
                         -- TODO: withError
                         |> TextArea.view
@@ -459,7 +471,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.withValue (ValidatedString.toString proposal.outline)
                         |> TextArea.withPlaceholder "Outline"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\outline -> UpdateProposal { proposal | outline = ValidatedString.input outline proposal.outline })
+                        |> TextArea.onEvents
+                            { input = \outline -> UpdateProposal { proposal | outline = ValidatedString.input outline proposal.outline }
+                            , blur = Just (UpdateProposal { proposal | outline = ValidatedString.validate proposal.outline })
+                            }
                         -- TODO: onBlur
                         -- TODO: withError
                         |> TextArea.view
@@ -481,7 +496,10 @@ viewEditor ({ author, proposal } as model) topContent =
                         |> TextArea.withValue proposal.feedback
                         |> TextArea.withPlaceholder "Request Feedback"
                         |> TextArea.withMaxWords 1000
-                        |> TextArea.onInput (\feedback -> UpdateProposal { proposal | feedback = feedback })
+                        |> TextArea.onEvents
+                            { input = \feedback -> UpdateProposal { proposal | feedback = feedback }
+                            , blur = Nothing
+                            }
                         |> TextArea.view
                     ]
                 }

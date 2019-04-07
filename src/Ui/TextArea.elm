@@ -1,6 +1,6 @@
 module Ui.TextArea exposing
     ( TextArea, textarea, view
-    , withValue, onInput, withMaxWords
+    , withValue, onEvents, withMaxWords
     , withPlaceholder
     , withStyle
     )
@@ -9,7 +9,7 @@ module Ui.TextArea exposing
 
 @docs TextArea, textarea, view
 
-@docs withValue, onInput, withMaxWords
+@docs withValue, onEvents, withMaxWords
 
 @docs withPlaceholder
 
@@ -23,6 +23,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as Lazy
+import Json.Encode exposing (null)
 import Regex
 import Ui
 
@@ -32,7 +33,10 @@ type TextArea msg
         { name : String
         , value : Maybe String
         , placeholder : String
-        , onInput : String -> msg
+        , events :
+            { input : String -> msg
+            , blur : Maybe msg
+            }
         , maxWords : Int
         , style : List Style
         }
@@ -44,7 +48,10 @@ textarea name =
         { name = name
         , value = Nothing
         , placeholder = ""
-        , onInput = identity
+        , events =
+            { input = identity
+            , blur = Nothing
+            }
         , maxWords = 1000
         , style = []
         }
@@ -60,8 +67,13 @@ withPlaceholder placeholder (TextArea config) =
     TextArea { config | placeholder = placeholder }
 
 
-onInput : (String -> msgB) -> TextArea msgA -> TextArea msgB
-onInput onInput_ (TextArea config) =
+onEvents :
+    { input : String -> msgB
+    , blur : Maybe msgB
+    }
+    -> TextArea msgA
+    -> TextArea msgB
+onEvents events (TextArea config) =
     TextArea
         { name = config.name
         , value = config.value
@@ -70,7 +82,7 @@ onInput onInput_ (TextArea config) =
         , style = config.style
 
         -- the new one, of a new type...
-        , onInput = onInput_
+        , events = events
         }
 
 
@@ -124,7 +136,15 @@ baseView (TextArea config) value =
             [ Attributes.value value
             , Attributes.name config.name
             , Attributes.placeholder config.placeholder
-            , Events.onInput config.onInput
+
+            -- events
+            , Events.onInput config.events.input
+            , case config.events.blur of
+                Just msg ->
+                    Events.onBlur msg
+
+                Nothing ->
+                    Attributes.property "Ui.TextArea.onBlur" null
             ]
             []
         , Html.styled Html.div
