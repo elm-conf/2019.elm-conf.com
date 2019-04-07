@@ -396,8 +396,7 @@ viewEditor ({ author, proposal } as model) topContent =
                             { input = \abstract -> UpdateProposal { proposal | abstract = ValidatedString.input abstract proposal.abstract }
                             , blur = Just (UpdateProposal { proposal | abstract = ValidatedString.validate proposal.abstract })
                             }
-                        -- TODO: onBlur
-                        -- TODO: withError
+                        |> TextArea.withError (ValidatedString.error proposal.abstract)
                         |> TextArea.view
                     ]
                 }
@@ -420,8 +419,7 @@ viewEditor ({ author, proposal } as model) topContent =
                             { input = \title -> UpdateProposal { proposal | title = ValidatedString.input title proposal.title }
                             , blur = Just (UpdateProposal { proposal | title = ValidatedString.validate proposal.title })
                             }
-                        -- TODO: onBlur
-                        -- TODO: withError
+                        |> TextInput.withError (ValidatedString.error proposal.title)
                         |> TextInput.view
                     ]
                 }
@@ -448,8 +446,7 @@ viewEditor ({ author, proposal } as model) topContent =
                             { input = \pitch -> UpdateProposal { proposal | pitch = ValidatedString.input pitch proposal.pitch }
                             , blur = Just (UpdateProposal { proposal | pitch = ValidatedString.validate proposal.pitch })
                             }
-                        -- TODO: onBlur
-                        -- TODO: withError
+                        |> TextArea.withError (ValidatedString.error proposal.pitch)
                         |> TextArea.view
                     ]
                 }
@@ -475,8 +472,7 @@ viewEditor ({ author, proposal } as model) topContent =
                             { input = \outline -> UpdateProposal { proposal | outline = ValidatedString.input outline proposal.outline }
                             , blur = Just (UpdateProposal { proposal | outline = ValidatedString.validate proposal.outline })
                             }
-                        -- TODO: onBlur
-                        -- TODO: withError
+                        |> TextArea.withError (ValidatedString.error proposal.outline)
                         |> TextArea.view
                     ]
                 }
