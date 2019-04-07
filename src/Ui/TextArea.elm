@@ -1,7 +1,7 @@
 module Ui.TextArea exposing
     ( TextArea, textarea, view
-    , withValue, onEvents, withMaxWords
-    , withPlaceholder
+    , withValue, withPlaceholder
+    , withError, onEvents, withMaxWords
     , withStyle
     )
 
@@ -9,9 +9,9 @@ module Ui.TextArea exposing
 
 @docs TextArea, textarea, view
 
-@docs withValue, onEvents, withMaxWords
+@docs withValue, withPlaceholder
 
-@docs withPlaceholder
+@docs withError, onEvents, withMaxWords
 
 @docs withStyle
 
@@ -38,6 +38,7 @@ type TextArea msg
             , blur : Maybe msg
             }
         , maxWords : Int
+        , error : Maybe String
         , style : List Style
         }
 
@@ -53,6 +54,7 @@ textarea name =
             , blur = Nothing
             }
         , maxWords = 1000
+        , error = Nothing
         , style = []
         }
 
@@ -67,6 +69,11 @@ withPlaceholder placeholder (TextArea config) =
     TextArea { config | placeholder = placeholder }
 
 
+withError : Maybe String -> TextArea msg -> TextArea msg
+withError error (TextArea config) =
+    TextArea { config | error = error }
+
+
 onEvents :
     { input : String -> msgB
     , blur : Maybe msgB
@@ -79,6 +86,7 @@ onEvents events (TextArea config) =
         , value = config.value
         , placeholder = config.placeholder
         , maxWords = config.maxWords
+        , error = config.error
         , style = config.style
 
         -- the new one, of a new type...
@@ -159,5 +167,14 @@ baseView (TextArea config) value =
                     ++ " / "
                     ++ String.fromInt config.maxWords
                     ++ " words"
+            , case config.error of
+                Just error ->
+                    Html.styled Html.span
+                        [ Css.color Ui.errorColor ]
+                        []
+                        [ Html.text error ]
+
+                Nothing ->
+                    Html.text ""
             ]
         ]

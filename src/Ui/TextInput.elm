@@ -3,6 +3,7 @@ module Ui.TextInput exposing
     , withValue, onEvents
     , withPlaceholder, withLabel
     , InputType(..), withType
+    , withError
     , withStyle
     )
 
@@ -15,6 +16,8 @@ module Ui.TextInput exposing
 @docs withPlaceholder, withLabel
 
 @docs InputType, withType
+
+@docs withError
 
 @docs withStyle
 
@@ -40,6 +43,7 @@ type TextInput msg
             { input : String -> msg
             , blur : Maybe msg
             }
+        , error : Maybe String
         , style : List Style
         }
 
@@ -52,6 +56,7 @@ textInput name =
         , placeholder = ""
         , label = Nothing
         , type_ = Text
+        , error = Nothing
         , events =
             { input = identity
             , blur = Nothing
@@ -73,6 +78,11 @@ withPlaceholder placeholder (TextInput config) =
 withLabel : String -> TextInput msg -> TextInput msg
 withLabel label (TextInput config) =
     TextInput { config | label = Just label }
+
+
+withError : Maybe String -> TextInput msg -> TextInput msg
+withError error (TextInput config) =
+    TextInput { config | error = error }
 
 
 type InputType
@@ -100,6 +110,7 @@ onEvents events (TextInput config) =
         , label = config.label
         , type_ = config.type_
         , style = config.style
+        , error = config.error
 
         -- the new one, of a new type...
         , events = events
@@ -171,6 +182,19 @@ baseView (TextInput config) value =
                     Attributes.property "Ui.TextInput.onBlur" null
             ]
             []
+        , case config.error of
+            Just error ->
+                Html.styled Html.div
+                    [ Ui.sansSerifFont
+                    , Css.fontSize <| Css.px 14
+                    , Css.color Ui.errorColor
+                    , Css.marginTop <| Css.px 5
+                    ]
+                    []
+                    [ Html.text error ]
+
+            Nothing ->
+                Html.text ""
         ]
 
 
