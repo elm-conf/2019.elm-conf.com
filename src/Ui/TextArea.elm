@@ -170,7 +170,9 @@ baseView (TextArea config) value =
             , case config.error of
                 Just error ->
                     Html.styled Html.span
-                        [ Css.color Ui.errorColor ]
+                        [ Css.color Ui.errorColor
+                        , Css.marginLeft (Css.px 5)
+                        ]
                         []
                         [ Html.text error ]
 
