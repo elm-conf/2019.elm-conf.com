@@ -454,13 +454,13 @@ viewEditor ({ author, proposal } as model) topContent =
                 { label = "Outline"
                 , heading = "How will you use your time on stage?"
                 , description = """
-                  All elm-conf talks will be 30 minutes. How do you plan to use that time? An outline would be most
-                  useful here, but feel free to let us know however makes sense to you!
+                  All elm-conf talks will be 30 minutes.
+                  How do you plan to use that time?
+                  An outline would be most useful here, but feel free to let us know however makes sense to you!
 
-                  Note that you will not need to leave time for questions. We default to taking questions in the hall
-                  after talks; it's a better experience for both the speakers and the attendees. Nobody's in the best
-                  mindset to answer live questions after a talk, and it avoids wasting everyone's time with "well,
-                  actually…"s.
+                  Note that you will not need to leave time for questions.
+                  We will make time to take questions in the hall after talks; it's a better experience for both the speakers and the attendees.
+                  Nobody's in the best mindset to answer live questions after a talk, and it avoids wasting everyone's time with "well, actually…"s.
                   """
                 , hasBorder = True
                 , inputs =
@@ -482,7 +482,7 @@ viewEditor ({ author, proposal } as model) topContent =
                 , description = """
                   Writing proposals like this is difficult, especially if you haven't done many before! We want to make
                   that easier by working with you to improve your talk, as long as you make the initial submission before
-                  May 1. So: what did you struggle with? Is there any part you think is weak?
+                  May 5. So: what did you struggle with? Is there any part you think is weak?
 
                   Alternatively, if you would like us not to help, please say so here.
                   """
@@ -521,9 +521,9 @@ viewEditor ({ author, proposal } as model) topContent =
                         """
                         Congratulations, you've finished your proposal!
                         Once you submit, you can use this site to edit this proposal.
-                        You can do so as many times as you like until May 15.
+                        You can do so as many times as you like until May 10.
 
-                        If you're submitting before May 1, you should hear from us about proposal feedback within a week.
+                        If you're submitting before May 5, you should hear from us about proposal feedback within a week.
 
                         Thank you so much for submitting your proposal. Talk to you soon!
                         """
