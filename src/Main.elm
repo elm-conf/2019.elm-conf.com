@@ -79,7 +79,6 @@ init { graphqlEndpoint, session } url key =
                         (Decode.field "userId" Decode.int)
                         (Decode.field "token" Decode.string)
                     )
-                |> Debug.log "session"
                 |> Result.toMaybe
 
         -- graphql information
