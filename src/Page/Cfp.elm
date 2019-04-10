@@ -562,7 +562,7 @@ viewFirstTimeInput =
     Lazy.lazy <|
         Ui.checkbox
             { name = "first_time"
-            , label = "I am a first-time speaker"
+            , label = "I am a first-time conference speaker"
             }
 
 
