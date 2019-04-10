@@ -230,14 +230,16 @@ page content =
             , sansSerifFont
             ]
             []
-            [ footerLink Routes.Index "Home"
-            , footerLink Routes.SpeakAtElmConf "Speak"
+            [ footerLink "Home" <| Routes.path Routes.Index []
+            , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
+            , footerLink "Twitter" "https://twitter.com/elmconf"
+            , footerLink "Instagram" "https://instagram.com/elmconf"
             ]
         ]
 
 
-footerLink : Routes.Route -> String -> Html msg
-footerLink route title =
+footerLink : String -> String -> Html msg
+footerLink title url =
     Html.styled Html.a
         [ Css.fontSize <| Css.px 18
         , Css.color <| primaryColor
@@ -245,7 +247,7 @@ footerLink route title =
         , Css.hover [ Css.textDecoration Css.underline ]
         , Css.padding2 (Css.px 10) (Css.px 15)
         ]
-        [ Attributes.href <| Routes.path route [] ]
+        [ Attributes.href url ]
         [ Html.text title ]
 
 
