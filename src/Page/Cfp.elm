@@ -428,7 +428,7 @@ viewEditor ({ author, proposal } as model) topContent =
                 , heading = "Pitch your talk to the organizers"
                 , description = """
                   Explain why this particular talk will be valuable to the Elm community, and why you are the right
-                  person to give it. You can do so without revealing you identity with phrases like "I am the author of
+                  person to give it. You can do so without revealing your identity with phrases like "I am the author of
                   a library that does this", or "I have successfully applied this technique at a large company in the
                   automotive industry."
 
