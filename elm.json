@@ -17,7 +17,7 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "elm-explorations/markdown": "1.0.0",
-            "rtfeldman/elm-css": "16.0.0",
+            "rtfeldman/elm-css": "16.0.1",
             "stoeffel/elm-verify": "5.0.0"
         },
         "indirect": {
