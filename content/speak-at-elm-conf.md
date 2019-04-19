@@ -42,7 +42,7 @@ A conference can't happen without speakers, so we want to do right by you.
 If we accept your proposal, we will:
 
 - Give you a ticket to elm-conf and [Strange Loop](https://thestrangeloop.com/)
-- Fly you to St. Louis (direct booking for speakers in the continental US, and a stipend for international travel)
+- Fly you to St. Louis
 - Book you a hotel room close to the venue for the duration of the conference
 - Work with you to make a great talk with optional practice sessions and feedback from prior years' speakers
 - Invite you to a dinner prior to the conference
