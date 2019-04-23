@@ -6,7 +6,7 @@ cat <<EOF
   <head>
     <title>elm-conf</title>
     <meta charset="utf-8" />
-    <link rel="icon" href="/static/images/favicon.ico" />
+    <link rel="icon" href="/images/favicon.ico" />
     <link href="https://fonts.googleapis.com/css?family=Vollkorn|Work+Sans" rel="stylesheet">
     <style>html, body { margin: 0; width: 100%; height: 100%; } * { box-sizing: border-box; }</style>
   </head>
@@ -15,7 +15,7 @@ cat <<EOF
     <script>
       var app = Elm.Main.init({
         flags: {
-          graphqlEndpoint: "${GRAPHQL_ENDPOINT:-https://cfp.elm-conf.com/graphql}",
+          graphqlEndpoint: "${GRAPHQL_ENDPOINT:-/graphql}",
           session: parseToken(localStorage.getItem('token'))
         }
       });
