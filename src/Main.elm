@@ -2,24 +2,30 @@ port module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Navigation exposing (Key)
+import CfpJwt exposing (Token)
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Http
 import Json.Decode as Decode exposing (Decoder, Value)
+import Jwt exposing (JwtError)
 import Page.Cfp as Cfp
 import Page.Cfp.Proposals as Proposals
 import Page.Register as Register
 import Routes exposing (Route)
+import Task
 import Ui
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((<?>), parse)
 import Url.Parser.Query as Query
 
 
-port tokenChanges : (Maybe Session -> msg) -> Sub msg
+port tokenChanges : (Maybe String -> msg) -> Sub msg
 
 
 port setToken : Maybe String -> Cmd msg
+
+
+port removeToken : () -> Cmd msg
 
 
 type alias Page =
@@ -29,9 +35,7 @@ type alias Page =
 
 
 type alias Session =
-    { userId : Int
-    , token : String
-    }
+    ( String, CfpJwt.Token )
 
 
 type alias Model =
@@ -54,41 +58,57 @@ type alias Model =
 
 type alias Flags =
     { graphqlEndpoint : String
-    , session : Value
+    , token : Maybe String
     }
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init { graphqlEndpoint, session } url key =
+init { graphqlEndpoint, token } url key =
     let
         route =
             url
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
+
+        ( model, cmd ) =
+            onUrlChange url
+                { key = key
+                , page = Nothing
+                , route = Routes.NotFound
+
+                -- JWT
+                , session = CfpJwt.fromFlags token
+
+                -- graphql information
+                , graphqlEndpoint = graphqlEndpoint
+
+                -- application-y pages
+                , register = Register.empty
+                , cfp = Cfp.empty
+                , proposals = Proposals.empty
+                }
+
+        checkToken =
+            case token of
+                Just material ->
+                    material
+                        |> Jwt.checkTokenExpiry
+                        |> Task.attempt
+                            (\validated ->
+                                case validated of
+                                    Ok True ->
+                                        TokenChanged (Just material)
+
+                                    _ ->
+                                        TokenChanged Nothing
+                            )
+
+                Nothing ->
+                    Cmd.none
     in
-    onUrlChange url
-        { key = key
-        , page = Nothing
-        , route = Routes.NotFound
-
-        -- JWT
-        , session =
-            session
-                |> Decode.decodeValue
-                    (Decode.map2 Session
-                        (Decode.field "userId" Decode.int)
-                        (Decode.field "token" Decode.string)
-                    )
-                |> Result.toMaybe
-
-        -- graphql information
-        , graphqlEndpoint = graphqlEndpoint
-
-        -- application-y pages
-        , register = Register.empty
-        , cfp = Cfp.empty
-        , proposals = Proposals.empty
-        }
+    ( model
+    , Cmd.batch [ cmd, checkToken ]
+    )
 
 
 type Msg
@@ -96,7 +116,7 @@ type Msg
     | UrlRequest Browser.UrlRequest
     | MarkdownRequestFinished (Result Http.Error String)
     | RegisterChanged Register.Msg
-    | SessionChanged (Maybe Session)
+    | TokenChanged (Maybe String)
     | CfpMsg Cfp.Msg
     | ProposalsMsg Proposals.Msg
 
@@ -115,7 +135,7 @@ onUrlChange url model =
             , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
             )
 
-        ( Just session, Routes.Cfp ) ->
+        ( Just ( tokenMaterial, token ), Routes.Cfp ) ->
             let
                 id : Maybe Int
                 id =
@@ -128,8 +148,8 @@ onUrlChange url model =
                 ( newCfp, cmd ) =
                     Cfp.init
                         { graphqlUrl = model.graphqlEndpoint
-                        , token = session.token
-                        , userId = session.userId
+                        , token = tokenMaterial
+                        , userId = token.userId
                         , key = model.key
                         }
                         id
@@ -150,12 +170,12 @@ onUrlChange url model =
             , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
             )
 
-        ( Just session, Routes.CfpProposals ) ->
+        ( Just ( tokenMaterial, _ ), Routes.CfpProposals ) ->
             let
                 ( newProposals, cmd ) =
                     Proposals.load
                         { graphqlUrl = model.graphqlEndpoint
-                        , token = session.token
+                        , token = tokenMaterial
                         }
             in
             ( { model
@@ -228,30 +248,34 @@ update msg model =
                     , setToken (Just token)
                     )
 
-        SessionChanged (Just session) ->
-            ( { model | session = Just session }
+        TokenChanged (Just token) ->
+            ( { model | session = CfpJwt.fromFlags (Just token) }
             , Navigation.pushUrl model.key <| Routes.path Routes.Cfp []
             )
 
-        SessionChanged Nothing ->
-            ( { model | session = Nothing }
-            , case model.route of
-                Routes.Cfp ->
-                    Navigation.pushUrl model.key <| Routes.path Routes.Register []
+        TokenChanged Nothing ->
+            let
+                routeCmd =
+                    case model.route of
+                        Routes.Cfp ->
+                            Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
-                _ ->
-                    Cmd.none
+                        _ ->
+                            Cmd.none
+            in
+            ( { model | session = Nothing }
+            , Cmd.batch [ routeCmd, removeToken () ]
             )
 
         CfpMsg cfpMsg ->
             case model.session of
-                Just session ->
+                Just ( tokenMaterial, token ) ->
                     let
                         ( newCfp, cmd ) =
                             Cfp.update
                                 { graphqlUrl = model.graphqlEndpoint
-                                , token = session.token
-                                , userId = session.userId
+                                , token = tokenMaterial
+                                , userId = token.userId
                                 , key = model.key
                                 }
                                 cfpMsg
@@ -266,12 +290,12 @@ update msg model =
 
         ProposalsMsg proposalsMsg ->
             case model.session of
-                Just session ->
+                Just ( tokenMaterial, _ ) ->
                     let
                         ( newProposals, cmd ) =
                             Proposals.update
                                 { graphqlUrl = model.graphqlEndpoint
-                                , token = session.token
+                                , token = tokenMaterial
                                 }
                                 proposalsMsg
                                 model.proposals
@@ -341,7 +365,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    tokenChanges SessionChanged
+    tokenChanges TokenChanged
 
 
 main : Program Flags Model Msg
