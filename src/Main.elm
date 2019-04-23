@@ -12,6 +12,7 @@ import Page.Cfp as Cfp
 import Page.Cfp.Proposals as Proposals
 import Page.Register as Register
 import Routes exposing (Route)
+import Task
 import Ui
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((<?>), parse)
@@ -65,23 +66,46 @@ init { graphqlEndpoint, token } url key =
             url
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
+
+        ( model, cmd ) =
+            onUrlChange url
+                { key = key
+                , page = Nothing
+                , route = Routes.NotFound
+
+                -- JWT
+                , session = CfpJwt.fromFlags token
+
+                -- graphql information
+                , graphqlEndpoint = graphqlEndpoint
+
+                -- application-y pages
+                , register = Register.empty
+                , cfp = Cfp.empty
+                , proposals = Proposals.empty
+                }
+
+        checkToken =
+            case token of
+                Just material ->
+                    material
+                        |> Jwt.checkTokenExpiry
+                        |> Task.attempt
+                            (\validated ->
+                                case validated of
+                                    Ok True ->
+                                        TokenChanged (Just material)
+
+                                    _ ->
+                                        TokenChanged Nothing
+                            )
+
+                Nothing ->
+                    Cmd.none
     in
-    onUrlChange url
-        { key = key
-        , page = Nothing
-        , route = Routes.NotFound
-
-        -- JWT
-        , session = CfpJwt.fromFlags token
-
-        -- graphql information
-        , graphqlEndpoint = graphqlEndpoint
-
-        -- application-y pages
-        , register = Register.empty
-        , cfp = Cfp.empty
-        , proposals = Proposals.empty
-        }
+    ( model
+    , Cmd.batch [ cmd, checkToken ]
+    )
 
 
 type Msg
