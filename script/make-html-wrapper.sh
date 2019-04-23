@@ -15,7 +15,7 @@ cat <<EOF
     <script>
       var app = Elm.Main.init({
         flags: {
-          graphqlEndpoint: "${GRAPHQL_ENDPOINT:-https://cfp.elm-conf.com/graphql}",
+          graphqlEndpoint: "${GRAPHQL_ENDPOINT:-/graphql}",
           session: parseToken(localStorage.getItem('token'))
         }
       });
