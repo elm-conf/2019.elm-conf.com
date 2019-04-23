@@ -22,12 +22,15 @@ cat <<EOF
       app.ports.setToken.subscribe(function (token) {
         localStorage.setItem('token', token)
         setTimeout(function() { app.ports.tokenChanges.send(token); }, 0);
-      })
+      });
+      app.ports.removeToken.subscribe(function () {
+        localStorage.removeItem('token');
+      });
       window.addEventListener('storage', function (event) {
         if (event.storageArea === localStorage && event.key === 'token') {
           app.ports.tokenChanges.send(event.newValue)
         }
-      })
+      });
     </script>
   </body>
 </html>

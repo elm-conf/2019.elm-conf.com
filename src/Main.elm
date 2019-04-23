@@ -25,6 +25,9 @@ port tokenChanges : (Maybe String -> msg) -> Sub msg
 port setToken : Maybe String -> Cmd msg
 
 
+port removeToken : () -> Cmd msg
+
+
 type alias Page =
     { content : String
     , title : String
@@ -251,13 +254,17 @@ update msg model =
             )
 
         TokenChanged Nothing ->
-            ( { model | session = Nothing }
-            , case model.route of
-                Routes.Cfp ->
-                    Navigation.pushUrl model.key <| Routes.path Routes.Register []
+            let
+                routeCmd =
+                    case model.route of
+                        Routes.Cfp ->
+                            Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
-                _ ->
-                    Cmd.none
+                        _ ->
+                            Cmd.none
+            in
+            ( { model | session = Nothing }
+            , Cmd.batch [ routeCmd, removeToken () ]
             )
 
         CfpMsg cfpMsg ->
