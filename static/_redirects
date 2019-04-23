@@ -1,0 +1,2 @@
+# Proxy the GraphQL endpoint to get around CORS wackiness
+/graphql https://cfp.elm-conf.com/graphql 200
