@@ -186,7 +186,7 @@ page content =
     Html.styled Html.div
         [ Css.padding <| Css.px 100
         , Css.paddingBottom Css.zero
-        , Css.backgroundImage <| Css.url "/static/images/waves.svg"
+        , Css.backgroundImage <| Css.url "/images/waves.svg"
         , Css.minHeight <| Css.pct 100
         , Css.backgroundRepeat Css.noRepeat
         , Css.backgroundSize Css.contain
@@ -204,7 +204,7 @@ page content =
             , Css.property "grid-row" "1"
             , Css.property "grid-column" "1"
             ]
-            [ Attributes.src "/static/images/elm-logo.svg" ]
+            [ Attributes.src "/images/elm-logo.svg" ]
             []
         , Html.styled Html.div
             [ Css.property "grid-row" "1"
