@@ -13,6 +13,7 @@ import Page.Cfp.Proposals as Proposals
 import Page.Register as Register
 import Routes exposing (Route)
 import Task
+import Time
 import Ui
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((<?>), parse)
@@ -70,6 +71,9 @@ init { graphqlEndpoint, token } url key =
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
 
+        session =
+            CfpJwt.fromFlags token
+
         ( model, cmd ) =
             onUrlChange url
                 { key = key
@@ -77,7 +81,7 @@ init { graphqlEndpoint, token } url key =
                 , route = Routes.NotFound
 
                 -- JWT
-                , session = CfpJwt.fromFlags token
+                , session = session
 
                 -- graphql information
                 , graphqlEndpoint = graphqlEndpoint
@@ -89,25 +93,23 @@ init { graphqlEndpoint, token } url key =
                 }
 
         checkToken =
-            case token of
-                Just material ->
-                    material
-                        |> Jwt.checkTokenExpiry
-                        |> Task.attempt
-                            (\validated ->
-                                case validated of
-                                    Ok True ->
-                                        TokenChanged (Just material)
+            case session of
+                Just ( material, { expires } ) ->
+                    Task.perform
+                        (\now ->
+                            if Time.posixToMillis now >= Time.posixToMillis expires then
+                                TokenChanged Nothing
 
-                                    _ ->
-                                        TokenChanged Nothing
-                            )
+                            else
+                                TokenWasFine
+                        )
+                        Time.now
 
                 Nothing ->
                     Cmd.none
     in
     ( model
-    , Cmd.batch [ cmd, checkToken ]
+    , Cmd.batch [ checkToken, cmd ]
     )
 
 
@@ -119,6 +121,7 @@ type Msg
     | TokenChanged (Maybe String)
     | CfpMsg Cfp.Msg
     | ProposalsMsg Proposals.Msg
+    | TokenWasFine
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -306,6 +309,9 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
+
+        TokenWasFine ->
+            ( model, Cmd.none )
 
 
 loadMarkdown : Route -> Cmd Msg
