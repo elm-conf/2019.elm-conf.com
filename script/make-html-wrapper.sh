@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cat <<EOF
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <title>elm-conf</title>
