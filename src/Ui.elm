@@ -204,7 +204,9 @@ page content =
             , Css.property "grid-row" "1"
             , Css.property "grid-column" "1"
             ]
-            [ Attributes.src "/images/elm-logo.svg" ]
+            [ Attributes.src "/images/elm-logo.svg"
+            , Attributes.alt ""
+            ]
             []
         , Html.styled Html.div
             [ Css.property "grid-row" "1"
