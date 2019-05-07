@@ -482,7 +482,7 @@ viewEditor ({ author, proposal } as model) topContent =
                 , description = """
                   Writing proposals like this is difficult, especially if you haven't done many before! We want to make
                   that easier by working with you to improve your talk, as long as you make the initial submission before
-                  May 5. So: what did you struggle with? Is there any part you think is weak?
+                  May 12. So: what did you struggle with? Is there any part you think is weak?
 
                   Alternatively, if you would like us not to help, please say so here.
                   """
@@ -521,9 +521,9 @@ viewEditor ({ author, proposal } as model) topContent =
                         """
                         Congratulations, you've finished your proposal!
                         Once you submit, you can use this site to edit this proposal.
-                        You can do so as many times as you like until May 10.
+                        You can do so as many times as you like until May 17.
 
-                        If you're submitting before May 5, you should hear from us about proposal feedback within a week.
+                        If you're submitting before May 12, you should hear from us about proposal feedback within a week.
 
                         Thank you so much for submitting your proposal. Talk to you soon!
                         """

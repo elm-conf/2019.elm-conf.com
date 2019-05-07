@@ -3,12 +3,12 @@
 
 # Speak at elm-conf
 
-elm-conf's call for speakers is open! We are accepting proposals now through May 10. Whether you've been giving talks for years or this will be your first (and *especially* then), we want to hear from you!
+elm-conf's call for speakers is open! We are accepting proposals now through May 17. Whether you've been giving talks for years or this will be your first (and *especially* then), we want to hear from you!
 
 ## Just the facts, please
 
-- We invite speakers of all levels to submit 30-minute talk proposals from April 9 to May 10.
-- We will give direct feedback on all proposals submitted by May 5.
+- We invite speakers of all levels to submit 30-minute talk proposals from April 9 to May 17.
+- We will give direct feedback on all proposals submitted by May 12.
 - All proposals will be evaluated anonymously, and we intend to notify selected speakers no later than May 24.
 - You can submit as many talks as you like.
 
