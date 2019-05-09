@@ -3,11 +3,13 @@ module Ui exposing
     , bodyCopyStyle
     , buttonStyle
     , checkbox
+    , desktopOnly
     , errorColor
     , linkStyle
     , markdown
     , page
     , primaryColor
+    , responsive
     , sansSerifFont
     , serifFont
     )

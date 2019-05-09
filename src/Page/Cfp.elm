@@ -587,14 +587,18 @@ type alias Section msg =
 viewSection : Section msg -> Html msg
 viewSection section =
     Html.styled Html.div
-        [ Css.property "display" "grid"
-        , Css.property "grid-template-columns" "158px minmax(auto, 650px)"
-        , Css.marginLeft <| Css.px -158
+        [ Ui.desktopOnly
+            [ Css.property "display" "grid"
+            , Css.property "grid-template-columns" "158px minmax(auto, 650px)"
+            , Css.marginLeft <| Css.px -158
+            ]
         ]
         [ Attributes.id <| "section-" ++ section.label ]
         [ Html.styled Html.div
-            [ Css.property "display" "grid"
-            , Css.property "grid-template-rows" "50px 1fr"
+            [ Ui.desktopOnly
+                [ Css.property "display" "grid"
+                , Css.property "grid-template-rows" "50px 1fr"
+                ]
             ]
             []
             [ Html.styled Html.div
@@ -623,11 +627,16 @@ viewSection section =
                 ]
             , if section.hasBorder then
                 Html.styled Html.div
-                    [ Css.width <| Css.px 3
-                    , Css.height <| Css.pct 100
-                    , Css.borderRadius <| Css.px 1.5
-                    , Css.backgroundColor <| Css.hex "D8D8D8"
-                    , Css.marginLeft <| Css.px 8
+                    [ Ui.responsive
+                        { desktop =
+                            [ Css.width <| Css.px 3
+                            , Css.height <| Css.pct 100
+                            , Css.borderRadius <| Css.px 1.5
+                            , Css.backgroundColor <| Css.hex "D8D8D8"
+                            , Css.marginLeft <| Css.px 8
+                            ]
+                        , mobile = [ Css.display Css.none ]
+                        }
                     ]
                     []
                     []
