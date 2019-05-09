@@ -12,8 +12,9 @@ module Ui exposing
     , serifFont
     )
 
-import Css
+import Css exposing (Style)
 import Css.Global as Global
+import Css.Media exposing (maxWidth, minWidth, only, screen, withMedia)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
@@ -184,33 +185,46 @@ markdown raw =
 page : Html msg -> Html msg
 page content =
     Html.styled Html.div
-        [ Css.padding <| Css.px 100
-        , Css.paddingBottom Css.zero
+        [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
         , Css.minHeight <| Css.pct 100
         , Css.backgroundRepeat Css.noRepeat
         , Css.backgroundSize Css.contain
         , Css.borderTop3 (Css.px 5) Css.solid primaryColor
-        , Css.property "display" "grid"
-        , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
-        , Css.property "grid-column-gap" "48px"
-        , Css.property "grid-template-rows" "1fr 100px"
         , Css.justifyContent Css.center
+        , Css.property "display" "grid"
+        , responsive
+            { desktop =
+                [ Css.padding <| Css.px 100
+                , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
+                , Css.property "grid-template-rows" "1fr 100px"
+                , Css.property "grid-column-gap" "48px"
+                ]
+            , mobile =
+                [ Css.padding <| Css.px 50
+                , Css.property "grid-template-columns" "1fr"
+                ]
+            }
         ]
         []
         [ Html.styled Html.img
             [ Css.width <| Css.px 200
             , Css.height <| Css.px 200
-            , Css.property "grid-row" "1"
-            , Css.property "grid-column" "1"
+            , desktopOnly
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "1"
+                ]
             ]
             [ Attributes.src "/images/elm-logo.svg"
             , Attributes.alt ""
             ]
             []
         , Html.styled Html.div
-            [ Css.property "grid-row" "1"
-            , Css.property "grid-column" "2"
+            [ desktopOnly
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "2"
+                ]
+            , Css.marginBottom (Css.px 50)
             ]
             []
             [ content ]
@@ -271,3 +285,19 @@ serifFont =
 sansSerifFont : Css.Style
 sansSerifFont =
     Css.fontFamilies [ "Work Sans" ]
+
+
+responsive : { desktop : List Style, mobile : List Style } -> Style
+responsive { desktop, mobile } =
+    Css.batch
+        [ withMedia [ only screen [ minWidth (Css.px 801) ] ] desktop
+        , withMedia [ only screen [ maxWidth (Css.px 800) ] ] mobile
+        ]
+
+
+desktopOnly : List Style -> Style
+desktopOnly styles =
+    responsive
+        { desktop = styles
+        , mobile = []
+        }
