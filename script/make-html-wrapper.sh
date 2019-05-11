@@ -11,7 +11,7 @@ META_DESCRIPTION_CONTENT="$(cat "$SOURCE" | python script/meta.py | jq -r '.desc
 if test -z "$META_DESCRIPTION_CONTENT"; then
     META_DESCRIPTION=""
 else
-    META_DESCRIPTION="<meta_description name=\"description\" content=\"$META_DESCRIPTION_CONTENT\">"
+    META_DESCRIPTION="<meta name=\"description\" content=\"$META_DESCRIPTION_CONTENT\" />"
 fi
 
 cat <<EOF
@@ -19,8 +19,8 @@ cat <<EOF
 <html lang="en">
   <head>
     <title>elm-conf</title>
-    <meta_description charset="utf-8" />
-    <meta_description name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     $META_DESCRIPTION
 
     <link rel="icon" href="/images/favicon.ico" />
