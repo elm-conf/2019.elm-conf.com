@@ -1,13 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SOURCE="${1:-}"
+if test -z "$SOURCE"; then
+    echo "USAGE: $0 source.md"
+    exit 1
+fi
+
+META_DESCRIPTION_CONTENT="$(cat "$SOURCE" | python script/meta.py | jq -r '.description // ""')"
+if test -z "$META_DESCRIPTION_CONTENT"; then
+    META_DESCRIPTION=""
+else
+    META_DESCRIPTION="<meta_description name=\"description\" content=\"$META_DESCRIPTION_CONTENT\">"
+fi
+
 cat <<EOF
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <title>elm-conf</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta_description charset="utf-8" />
+    <meta_description name="viewport" content="width=device-width, initial-scale=1">
+    $META_DESCRIPTION
 
     <link rel="icon" href="/images/favicon.ico" />
     <link href="https://fonts.googleapis.com/css?family=Vollkorn|Work+Sans" rel="stylesheet">
