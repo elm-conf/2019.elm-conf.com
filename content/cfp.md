@@ -1,4 +1,7 @@
-{ "title": "Propose a Talk" }
+{
+    "title": "Propose a Talk",
+    "description": "elm-conf's call for submissions is open through May 17, 2019. We want your talk!"
+}
 ---
 
 # Speak at elm-conf

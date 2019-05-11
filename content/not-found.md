@@ -1,4 +1,7 @@
-{ "title": "Page Not Found" }
+{
+    "title": "Page Not Found",
+    "description": "elm-conf is a one-day conference for the Elm programming language, returning September 12 2019 to St. Louis, MO."
+}
 ---
 
 # Page Not Found!
