@@ -521,7 +521,7 @@ viewEditor ({ author, proposal } as model) topContent =
                         """
                         Congratulations, you've finished your proposal!
                         Once you submit, you can use this site to edit this proposal.
-                        You can do so as many times as you like until May 17.
+                        You can do so as many times as you like until May 19.
 
                         If you're submitting before May 12, you should hear from us about proposal feedback within a week.
 
