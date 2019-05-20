@@ -133,68 +133,19 @@ onUrlChange url model =
                 |> Maybe.withDefault Routes.NotFound
     in
     case ( model.session, route ) of
-        ( Nothing, Routes.Cfp ) ->
+        ( _, Routes.Cfp ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
+            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
             )
 
-        ( Just ( tokenMaterial, token ), Routes.Cfp ) ->
-            let
-                id : Maybe Int
-                id =
-                    Parser.custom "SUCCEED" (\_ -> Just ())
-                        <?> Query.int "edit"
-                        |> Parser.map (\_ id_ -> id_)
-                        |> (\p -> Parser.parse p url)
-                        |> Maybe.andThen identity
-
-                ( newCfp, cmd ) =
-                    Cfp.init
-                        { graphqlUrl = model.graphqlEndpoint
-                        , token = tokenMaterial
-                        , userId = token.userId
-                        , key = model.key
-                        }
-                        id
-            in
-            ( { model
-                | cfp = newCfp
-                , page = Nothing
-                , route = route
-              }
-            , Cmd.batch
-                [ loadMarkdown route
-                , Cmd.map CfpMsg cmd
-                ]
-            )
-
-        ( Nothing, Routes.CfpProposals ) ->
+        ( _, Routes.CfpProposals ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Register []
+            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
             )
 
-        ( Just ( tokenMaterial, _ ), Routes.CfpProposals ) ->
-            let
-                ( newProposals, cmd ) =
-                    Proposals.load
-                        { graphqlUrl = model.graphqlEndpoint
-                        , token = tokenMaterial
-                        }
-            in
-            ( { model
-                | page = Nothing
-                , route = route
-                , proposals = newProposals
-              }
-            , Cmd.batch
-                [ loadMarkdown route
-                , Cmd.map ProposalsMsg cmd
-                ]
-            )
-
-        ( Just _, Routes.Register ) ->
+        ( _, Routes.Register ) ->
             ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.Cfp []
+            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
             )
 
         _ ->
