@@ -1,12 +1,12 @@
 {
     "title": "Speak at elm-conf",
-    "description": "elm-conf's call for submissions is open through May 19, 2019. We want your talk!"
+    "description": "elm-conf's call for submissions was open through May 19, 2019. We want your talk!"
 }
 ---
 
 # Speak at elm-conf
 
-elm-conf's call for speakers is open! We are accepting proposals now through May 19. Whether you've been giving talks for years or this will be your first (and *especially* then), we want to hear from you!
+elm-conf's call for speakers is now closed. We accepted proposals from April 9 through May 19, 2019.
 
 ## Just the facts, please
 
@@ -16,8 +16,6 @@ elm-conf's call for speakers is open! We are accepting proposals now through May
 - You can submit as many talks as you like.
 
 If you would like feedback on a talk idea before you submit it, please email us at [elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com).
-
-<a class="button" href="/cfp">Start your submission</a>
 
 ## What's in an elm-conf talk?
 
@@ -79,5 +77,3 @@ That said, we recognize that any process involving humans will be imperfect.
 The Elm community is small and sometimes it's impossible to avoid putting identifying information like a project name or description in a proposal.
 If you find yourself in that situation, focus on making a high-quality proposal over an anonymized one.
 We lean on the committee members outside the Elm community here; they can give these proposals a fair review.
-
-<a class="button" href="/cfp">Start your submission</a>
