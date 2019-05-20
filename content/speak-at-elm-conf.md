@@ -6,7 +6,7 @@
 
 # Speak at elm-conf
 
-elm-conf's call for speakers is now closed. We accepted proposals from April 9 through May 19, 2019.
+elm-conf's call for speakers is now closed. We accepted proposals from April 9 through May 19, 2019. Stay tuned for announcements about the lineup!
 
 ## Just the facts, please
 
