@@ -1,0 +1,5 @@
+{
+    "title": "Abadi Kurniawan"
+}
+---
+Animation is fun, and if done properly can help improve user experience and increase accessibility. Writing a good and performant animation in a pure functional language like Elm can be a challenge. In this talk, I will explore 2 ideas on how to build a good API for doing animation in Elm that perform well using browser’s optimized animation engine and ports. We’ll compare each the pros and cons of each techniques. After this talk, you'll be equipped with both the tools, the confidence, and the inspiration, to build fun and cool animations in Elm. As an added bonus, you get to see some cool animations along the way :)
