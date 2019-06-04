@@ -14,5 +14,6 @@ stdenv.mkDerivation {
     nodePackages.npm
     nodejs-8_x
     python3
+    imagemagick
   ];
 }

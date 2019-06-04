@@ -4,8 +4,11 @@ ELM_SRC=$(shell find src -name '*.elm')
 STATIC_SRC=$(shell find static/ -type f)
 STATIC=$(STATIC_SRC:static/%=public/%)
 
+PHOTOS_SRC=$(shell find speaker-photos/ -type f)
+PHOTOS=$(PHOTOS_SRC:speaker-photos/%=public/images/speakers/%)
+
 # content dependencies are generated!
-public: public/index.min.js $(STATIC)
+public: public/index.min.js $(STATIC) $(PHOTOS)
 	touch -m $@
 
 public/index.js: elm.json src/Api $(ELM_SRC) src/Routes.elm public/404.html
@@ -28,6 +31,12 @@ include Makefile.public
 
 Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
 	$< $(CONTENT_SRC) > $@
+
+# photos
+
+public/images/speakers/%: speaker-photos/%
+	@mkdir -p $(@D)
+	convert $< -resize 200x200^ -gravity center -extent 200x200 $@
 
 # package management
 
