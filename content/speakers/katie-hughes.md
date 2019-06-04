@@ -5,7 +5,7 @@
 
 # Katie Hughes
 
-Katie Hughes is your friendly neighborhood software engineer who works at NoRedInk. She relates to both Dick Greyson and Selina Kyle since she attends circus school and adores her black cat.
+Katie Hughes is your friendly neighborhood software engineer who works at NoRedInk. She relates to both Dick Grayson and Selina Kyle since she attends circus school and adores her black cat.
 
 ## Katie's Talk: *GraphQSquirrel*
 
