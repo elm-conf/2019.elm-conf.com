@@ -36,7 +36,7 @@ Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
 
 public/images/speakers/%: speaker-photos/%
 	@mkdir -p $(@D)
-	convert $< -resize 200x200^ -gravity center -extent 200x200 $@
+	convert $< -resize 400x484^ -gravity center -extent 400x484 $@
 
 # package management
 
