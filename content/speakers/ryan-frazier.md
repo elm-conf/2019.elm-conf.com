@@ -2,6 +2,9 @@
     "title": "Ryan Frazier"
 }
 ---
+
+# Ryan Frazier
+
 Music teachers need great music theory teaching tools. In this talk you will see that Elm's type system is a great way to model music theory concepts. Music theory is full of nuance and exceptions to rules. Using types and leveraging the Elm compiler we can reduce the number of tests needed to validate a correct solution.
 
 I am building an app that drills students on theory concepts such as notes, intervals, and chords. The brain of the exercises is the music theory API built in Elm.

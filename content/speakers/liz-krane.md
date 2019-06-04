@@ -2,6 +2,9 @@
     "title": "Liz Krane"
 }
 ---
+
+# Liz Krane
+
 Through a series of animated demos and funny failed experiments, join me on my journey towards building a musical game where the controller is a digital piano!
 
 Highlights include:
