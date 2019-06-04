@@ -32,6 +32,7 @@ port removeToken : () -> Cmd msg
 type alias Page =
     { content : String
     , title : String
+    , photo : Maybe String
     }
 
 
@@ -275,12 +276,17 @@ loadMarkdown route =
 
 parsePage : String -> Maybe Page
 parsePage raw =
+    let
+        decoder contentHolder =
+            Decode.map2 contentHolder
+                (Decode.field "title" Decode.string)
+                (Decode.maybe (Decode.field "photo" Decode.string))
+    in
     case String.split "---" raw of
         frontMatter :: rest ->
             frontMatter
-                |> Decode.decodeString (Decode.field "title" Decode.string)
+                |> Decode.decodeString (decoder (Page (String.join "---" rest)))
                 |> Result.toMaybe
-                |> Maybe.map (Page (String.join "---" rest))
 
         _ ->
             Nothing
@@ -314,7 +320,7 @@ view model =
                         Ui.markdown
         in
         contentView content
-            |> Ui.page
+            |> Ui.page (Maybe.andThen .photo model.page)
             |> Html.toUnstyled
             |> List.singleton
     }
