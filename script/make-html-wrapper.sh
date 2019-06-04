@@ -24,7 +24,7 @@ cat <<EOF
     $META_DESCRIPTION
 
     <link rel="icon" href="/images/favicon.ico" />
-    <link href="https://fonts.googleapis.com/css?family=Vollkorn|Work+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Vollkorn:400,400i|Work+Sans" rel="stylesheet">
     <style>html, body { margin: 0; width: 100%; height: 100%; } * { box-sizing: border-box; }</style>
 
     <!-- bugsnag JS needs to be included in the head, according to their docs -->
