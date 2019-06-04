@@ -1,5 +1,6 @@
 {
-    "title": "Abadi Kurniawan"
+    "title": "Abadi Kurniawan",
+    "photo": "/images/speakers/abadi-kurniawan.jpg"
 }
 ---
 
