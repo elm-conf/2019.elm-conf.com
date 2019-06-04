@@ -184,8 +184,8 @@ markdown raw =
         ]
 
 
-page : Html msg -> Html msg
-page content =
+page : Maybe String -> Html msg -> Html msg
+page photo content =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
@@ -211,13 +211,27 @@ page content =
         []
         [ Html.styled Html.img
             [ Css.width <| Css.px 200
-            , Css.height <| Css.px 200
             , desktopOnly
                 [ Css.property "grid-row" "1"
                 , Css.property "grid-column" "1"
                 ]
+            , case photo of
+                Nothing ->
+                    Css.height (Css.px 200)
+
+                Just _ ->
+                    Css.batch
+                        [ Css.height (Css.px 242)
+                        , Css.borderRadius (Css.px 30)
+                        , responsive
+                            { desktop = [ Css.marginTop (Css.px -21) ]
+                            , mobile = [ Css.margin2 Css.zero Css.auto ]
+                            }
+                        ]
             ]
-            [ Attributes.src "/images/elm-logo.svg"
+            [ photo
+                |> Maybe.withDefault "/images/elm-logo.svg"
+                |> Attributes.src
             , Attributes.alt ""
             ]
             []
