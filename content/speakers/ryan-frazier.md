@@ -1,5 +1,6 @@
 {
-    "title": "Ryan Frazier"
+    "title": "Ryan Frazier",
+    "photo": "/images/speakers/ryan-frazier.jpg"
 }
 ---
 

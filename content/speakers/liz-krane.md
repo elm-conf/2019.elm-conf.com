@@ -1,5 +1,6 @@
 {
-    "title": "Liz Krane"
+    "title": "Liz Krane",
+    "photo": "/images/speakers/liz-krane.jpg"
 }
 ---
 

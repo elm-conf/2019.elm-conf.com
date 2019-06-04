@@ -1,5 +1,6 @@
 {
-    "title": "Tessa Kelly"
+    "title": "Tessa Kelly",
+    "photo": "/images/speakers/tessa-kelly.png"
 }
 ---
 

@@ -1,5 +1,6 @@
 {
-    "title": "Ian Mackenzie"
+    "title": "Ian Mackenzie",
+    "photo": "/images/speakers/ian-mackenzie.jpeg"
 }
 ---
 

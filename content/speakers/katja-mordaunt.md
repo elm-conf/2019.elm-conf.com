@@ -1,5 +1,6 @@
 {
-    "title": "Katja Mordaunt"
+    "title": "Katja Mordaunt",
+    "photo": "/images/speakers/katja-mordaunt.jpg"
 }
 ---
 
