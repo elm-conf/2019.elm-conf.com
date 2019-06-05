@@ -1,5 +1,6 @@
 {
-    "title": "James Gary"
+    "title": "James Gary",
+    "photo": "/images/speakers/james-gary.jpg"
 }
 ---
 
