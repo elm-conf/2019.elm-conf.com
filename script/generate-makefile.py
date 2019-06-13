@@ -18,7 +18,7 @@ SOURCE_RULE = """\
 public: {target}
 {target}: {source}
 	@mkdir -p $(@D)
-	cp $< $@
+	grep -v 'directive:more' $< > $@
 """
 
 def copy_source(source):
