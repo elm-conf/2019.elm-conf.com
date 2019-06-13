@@ -24,6 +24,11 @@ public/%: static/%
 	@mkdir -p $(@D)
 	cp $< $@
 
+public/speakers_list.md: $(shell find content/speakers -name '*.md')
+	@mkdir -p $(@D)
+	if test -f $@; then rm $@; fi
+	for speaker in $^; do python script/split-file-after.py 'directive:more' < $$speaker >> $@; echo '===' >> $@; done
+
 src/Api: node_modules
 	npx elm-graphql https://cfp.elm-conf.com/graphql --base Api
 
