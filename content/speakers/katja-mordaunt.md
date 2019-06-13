@@ -8,6 +8,8 @@
 
 Katja is a developer with neontribe.co.uk where she mostly makes web apps that aim to improve the reach of small charities. She works iteratively with clients and users to get as close as possible to what people need. Her choice of tools (apart from vim and linux) depends on the project, but she often writes APIs in php and frontends in React (when she has to) and Elm (when she can). She values community, open source, transparency, itegrity, generally sharing stuff and giving everyone a voice. She hopes every day to contribute towards sucking a little bit of despair out of the world and adding a lot of empowerment. In a past life she produced independent films and is a believer that sharing stories makes the world a better place.
 
+(Katja's Talk: *Growing an Elm project with the whole team*)[directive:more]
+
 ## Katja's Talk: *Growing an Elm project with the whole team*
 
 We all know writing code isn't the hard part. The most important decision we make is what to build - not how to build it. Once we start building, we should continuously reflect on our users, and concentrate on laying good foundations for our future selves. We can better do that as a team of equals.

@@ -8,6 +8,8 @@
 
 Ian is the author of the elm-geometry and elm-units packages and is passionate about using Elm as a platform for design, engineering and manufacturing.
 
+(Ian's Talk: *A 3D Rendering Engine for Elm*)[directive:more]
+
 ## Ian's Talk: *A 3D Rendering Engine for Elm*
 
 Elm has some of the safest, friendliest WebGL support around, but has been missing a high-level 3D rendering engine - until now! This talk will introduce elm-3d-scene, a designed-for-Elm 3D rendering package for making dynamic, interactive, high-performance 3D applications such as games, scientific visualizations and computer-aided design tools.

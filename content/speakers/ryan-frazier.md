@@ -8,6 +8,8 @@
 
 Before switching careers to programming web applications, Ryan Frazier was an aspiring concert pianist. Recently, he discovered the power of Elm and SVG to do music stuff in the browser.
 
+(Ryan's Talk: *Building a Music Theory API with Types*)[directive:more]
+
 ## Ryan's Talk: *Building a Music Theory API with Types*
 
 Music teachers need great music theory teaching tools. In this talk you will see that Elm's type system is a great way to model music theory concepts. Music theory is full of nuance and exceptions to rules. Using types and leveraging the Elm compiler we can reduce the number of tests needed to validate a correct solution.

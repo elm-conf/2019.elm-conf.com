@@ -8,6 +8,8 @@
 
 Tessa helps teachers teach grammar and writing as an engineer at NoRedInk. She's excited about accessibility, colors, and testing. Ask her about New Mexico if you are interested in being talked at.
 
+(Tessa's Talk: *Writing Testable Elm*)[directive:more]
+
 ## Tessa's Talk: *Writing Testable Elm*
 
 Writing Elm applications is a joy, but do you feel the same way when you go to write or modify your test code? In this talk, we'll explore techniques for writing easily testable Elm code. We'll cover testing decoders and initialization logic, testing complex user flows, testing modules (inlcuding those taking advantage of the benefits of opaque types), and adding property testing.

@@ -8,6 +8,8 @@
 
 Katie Hughes is your friendly neighborhood software engineer who works at NoRedInk. She relates to both Dick Grayson and Selina Kyle since she attends circus school and adores her black cat.
 
+(Katie's Talk: *GraphQSquirrel*)[directive:more]
+
 ## Katie's Talk: *GraphQSquirrel*
 
 Squirrel Girl, Squirrel Girl! She’s a human and also squirrel! Does she have lots of pals? Well let’s ask GraphQL! 6 degrees of the Squirrel Girl.
