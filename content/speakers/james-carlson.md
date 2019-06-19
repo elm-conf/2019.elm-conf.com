@@ -1,8 +1,13 @@
 {
-    "title": "James Carlson"
+    "title": "James Carlson",
+    "photo": "/images/speakers/james-carlson.jpg"
 }
 ---
 
 # James Carlson
+
+James Carlson worked for many years as a math professor.  Since he retired an undisclosed number of years ago, he has been dabbling in functional programing, mostly Elm, but also (lately) some Futhark, a functional language that compiles to optimized GPU code.  He is trying to learn type theory, which combines philosophy, logic, mathematics, and functional programming.  What more could one ask for?  His main contributions to Elm are the jxxcarlson/elm-tar and minilatex packages. The function of the latter is to parse a subset of LaTeX and render it to HTML.
+
+## James' Talk: *Making Elm talk to your personal Supercomputer*
 
 What do you do when Elm is too slow?  This can easily happen when running simulations of physical processes, agent-based models in the social sciences, statistical computations, or just a very large and complex version of the Game of Life.  Fear not!  There is a solution: Futhark, a statically typed, pure functional language that compiles to optimized GPU code. And that means FAST! In this talk, we'll give a quick overview of Futhark, describe how to rig up a Futhark compute server, and how to wire it to an Elm front end.
