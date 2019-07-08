@@ -8,6 +8,8 @@
 
 elm-conf returns to St. Louis on September 12, 2019 for a day of talks, learning, and growing as a community. The conference will be held in beautiful downtown St. Louis as a [Strange Loop](https://thestrangeloop.com) preconference event.
 
+<a class="button" target="_blank" href="https://ti.to/strange-loop/2019/with/6vcn1w2pvic">Get your Ticket!</a>
+
 ## So, what's elm-conf?
 
 elm-conf is a single-day, one-track conference for the Elm programming language community, currently in our fourth year.
