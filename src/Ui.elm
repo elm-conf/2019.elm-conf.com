@@ -233,6 +233,7 @@ page photo content =
                 |> Maybe.withDefault "/images/elm-logo.svg"
                 |> Attributes.src
             , Attributes.alt ""
+            , Attributes.attribute "role" "banner"
             ]
             []
         , Html.styled Html.div
@@ -242,7 +243,7 @@ page photo content =
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            []
+            [ Attributes.attribute "role" "main" ]
             [ content ]
         , Html.styled Html.nav
             [ -- appearance
@@ -261,7 +262,7 @@ page photo content =
             , Css.alignItems Css.center
             , sansSerifFont
             ]
-            []
+            [ Attributes.attribute "role" "navigation" ]
             [ footerLink "Home" <| Routes.path Routes.Index []
             , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
             , footerLink "Twitter" "https://twitter.com/elmconf"
