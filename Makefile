@@ -46,3 +46,12 @@ node_modules: package.json package-lock.json
 
 clean:
 	rm -rf public Makefile.public src/Routes.elm
+
+# testing
+
+cypress/integration/a11y_spec.js: cypress/integration/a11y_runner.js public
+	@mkdir -p $(@D)
+	echo 'const URLS = `\\' > $@
+	find public -name 'index.html' -type f | sed -E 's/^public//' | xargs dirname >> $@
+	echo '`;' >> $@
+	cat $< >> $@

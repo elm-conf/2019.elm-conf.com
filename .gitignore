@@ -1,4 +1,7 @@
 /Makefile.public
+/cypress/integration/a11y_spec.js
+/cypress/screenshots
+/cypress/videos
 /elm-stuff
 /node_modules
 /public
