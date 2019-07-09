@@ -2,8 +2,9 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.Proposal exposing (abstract, author, authorId, createdAt, feedback, id, nodeId, outline, pitch, title, updatedAt)
+module Api.Object.Proposal exposing (abstract, author, authorId, createdAt, feedback, id, nodeId, outline, pitch, status, title, updatedAt)
 
+import Api.Enum.ProposalStatus
 import Api.InputObject
 import Api.Interface
 import Api.Object
@@ -69,6 +70,11 @@ createdAt =
 updatedAt : SelectionSet Api.ScalarCodecs.Datetime Api.Object.Proposal
 updatedAt =
     Object.selectionForField "ScalarCodecs.Datetime" "updatedAt" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDatetime |> .decoder)
+
+
+status : SelectionSet (Maybe Api.Enum.ProposalStatus.ProposalStatus) Api.Object.Proposal
+status =
+    Object.selectionForField "(Maybe Enum.ProposalStatus.ProposalStatus)" "status" [] (Api.Enum.ProposalStatus.decoder |> Decode.nullable)
 
 
 {-| Reads a single `User` that is related to this `Proposal`.
