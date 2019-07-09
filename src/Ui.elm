@@ -209,33 +209,34 @@ page photo content =
             }
         ]
         []
-        [ Html.styled Html.img
-            [ Css.width <| Css.px 200
-            , desktopOnly
-                [ Css.property "grid-row" "1"
-                , Css.property "grid-column" "1"
-                ]
-            , case photo of
-                Nothing ->
-                    Css.height (Css.px 200)
+        [ Html.header []
+            [ Html.styled Html.img
+                [ Css.width <| Css.px 200
+                , desktopOnly
+                    [ Css.property "grid-row" "1"
+                    , Css.property "grid-column" "1"
+                    ]
+                , case photo of
+                    Nothing ->
+                        Css.height (Css.px 200)
 
-                Just _ ->
-                    Css.batch
-                        [ Css.height (Css.px 242)
-                        , Css.borderRadius (Css.px 30)
-                        , responsive
-                            { desktop = [ Css.marginTop (Css.px -21) ]
-                            , mobile = [ Css.margin2 Css.zero Css.auto ]
-                            }
-                        ]
+                    Just _ ->
+                        Css.batch
+                            [ Css.height (Css.px 242)
+                            , Css.borderRadius (Css.px 30)
+                            , responsive
+                                { desktop = [ Css.marginTop (Css.px -21) ]
+                                , mobile = [ Css.margin2 Css.zero Css.auto ]
+                                }
+                            ]
+                ]
+                [ photo
+                    |> Maybe.withDefault "/images/elm-logo.svg"
+                    |> Attributes.src
+                , Attributes.alt ""
+                ]
+                []
             ]
-            [ photo
-                |> Maybe.withDefault "/images/elm-logo.svg"
-                |> Attributes.src
-            , Attributes.alt ""
-            , Attributes.attribute "role" "banner"
-            ]
-            []
         , Html.styled Html.div
             [ desktopOnly
                 [ Css.property "grid-row" "1"
