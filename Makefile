@@ -41,7 +41,7 @@ public/images/speakers/%: speaker-photos/%
 # package management
 
 node_modules: package.json package-lock.json
-	npm install
+	npm install --verbose
 	@touch -m $@
 
 clean:
