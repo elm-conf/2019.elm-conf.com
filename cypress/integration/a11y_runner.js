@@ -10,15 +10,6 @@ describe('Accessibility', function() {
 
         // do accessibility test
         cy.injectAxe();
-        cy.configureAxe({
-          rules: [
-            {
-              // TODO: I would love to only turn it off for our primary brand color?
-              id: "color-contrast",
-              enabled: false,
-            }
-          ]
-        });
         cy.checkA11y();
       });
     });
