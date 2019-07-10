@@ -3,9 +3,10 @@ set -euo pipefail
 
 make public
 
-(cd public; python -m http.server 8001) &
+cd public
+python -m http.server 8001 &
 SERVER=$!
-echo "serving /public on PID $SERVER"
+cd -
 
 cleanup() {
     kill "$SERVER"
