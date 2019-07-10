@@ -49,6 +49,9 @@ clean:
 
 # testing
 
+test: cypress/integration/a11y_spec.js
+	./script/cypress-test.sh
+
 cypress/integration/a11y_spec.js: cypress/integration/a11y_runner.js public
 	@mkdir -p $(@D)
 	echo 'const URLS = `\\' > $@
