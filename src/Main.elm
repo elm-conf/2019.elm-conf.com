@@ -11,6 +11,7 @@ import Jwt exposing (JwtError)
 import Page.Cfp as Cfp
 import Page.Cfp.Proposals as Proposals
 import Page.Register as Register
+import Page.Schedule as Schedule
 import Routes exposing (Route)
 import Task
 import Time
@@ -315,6 +316,9 @@ view model =
 
                     Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
+
+                    Routes.Schedule ->
+                        Schedule.view
 
                     _ ->
                         Ui.markdown
