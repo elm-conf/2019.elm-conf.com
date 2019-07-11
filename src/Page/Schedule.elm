@@ -8,8 +8,7 @@ import Ui
 
 events : List ( String, String )
 events =
-    [ ( "8:00 a.m.", "Doors and registration open. Light breakfast provided." )
-    , ( "9:00 a.m.", "Opening Address: Welcome to elm-conf 2019!" )
+    [ ( "8:00 AM", "Doors and registration open." )
     , ( "9:00 AM", "Tessa Kelly" )
     , ( "9:30 AM", "Short Break" )
     , ( "9:35 AM", "Abadi Kurniawan" )
