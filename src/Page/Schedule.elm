@@ -104,7 +104,12 @@ viewEvent ( startTime, event ) =
                 []
                 [ Html.styled Html.div
                     [ Css.borderRadius <| Css.pct 50
-                    , Css.border3 (Css.px 5) Css.solid (Css.hex "D8D8D8")
+                    , case event of
+                        Break _ ->
+                            Css.border3 (Css.px 5) Css.solid (Css.hex "D8D8D8")
+
+                        Talk _ ->
+                            Css.border3 (Css.px 5) Css.solid Ui.primaryColor
                     , Css.backgroundColor <| Css.hex "FFF"
                     , Css.width <| Css.px 20
                     , Css.height <| Css.px 20
