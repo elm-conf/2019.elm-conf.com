@@ -32,7 +32,7 @@ events =
     [ ( Time.millisToPosix 1568293200000
       , Break
             { description = "Doors and registration open."
-            , additionalInfo = Nothing
+            , additionalInfo = Just "test test test badges on first floor outside doors etc"
             }
       )
     , ( Time.millisToPosix 1568296800000
@@ -161,20 +161,15 @@ viewDescription event =
                 )
             ]
 
-        Break _ ->
-            "HEEYEYYYY TEST CONTENT"
-                |> String.split "\n\n"
-                |> List.map
-                    (Html.text
-                        >> List.singleton
-                        >> Html.styled Html.p
-                            [ Css.margin Css.zero
-                            , Css.fontSize <| Css.px 18
-                            , Ui.sansSerifFont
-                            , Css.lineHeight <| Css.px 30
-                            ]
-                            []
-                    )
+        Break { description, additionalInfo } ->
+            [ Ui.markdown
+                (description
+                    ++ (additionalInfo
+                            |> Maybe.map ((++) "\n\n")
+                            |> Maybe.withDefault ""
+                       )
+                )
+            ]
 
 
 viewTime : Posix -> Html msg
