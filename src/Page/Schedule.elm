@@ -140,21 +140,25 @@ viewEvent ( startTime, event ) =
             , Css.height <| Css.px 30
             ]
             []
-            ("HEEYEYYYY TEST CONTENT"
-                |> String.split "\n\n"
-                |> List.map
-                    (Html.text
-                        >> List.singleton
-                        >> Html.styled Html.p
-                            [ Css.margin Css.zero
-                            , Css.fontSize <| Css.px 18
-                            , Ui.sansSerifFont
-                            , Css.lineHeight <| Css.px 30
-                            ]
-                            []
-                    )
-            )
+            (viewDescription event)
         ]
+
+
+viewDescription : Event -> List (Html msg)
+viewDescription event =
+    "HEEYEYYYY TEST CONTENT"
+        |> String.split "\n\n"
+        |> List.map
+            (Html.text
+                >> List.singleton
+                >> Html.styled Html.p
+                    [ Css.margin Css.zero
+                    , Css.fontSize <| Css.px 18
+                    , Ui.sansSerifFont
+                    , Css.lineHeight <| Css.px 30
+                    ]
+                    []
+            )
 
 
 viewTime : Posix -> Html msg
