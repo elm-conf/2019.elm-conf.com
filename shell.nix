@@ -11,9 +11,10 @@ stdenv.mkDerivation {
   buildInputs = [
     git
     gnumake
+    imagemagick
+    jq
     nodePackages.npm
     nodejs-8_x
     python3
-    imagemagick
   ];
 }
