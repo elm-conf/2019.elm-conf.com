@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-nix-shell --pure --run 'make test'
+nix-shell --run 'make test'
