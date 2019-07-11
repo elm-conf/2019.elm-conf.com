@@ -146,19 +146,35 @@ viewEvent ( startTime, event ) =
 
 viewDescription : Event -> List (Html msg)
 viewDescription event =
-    "HEEYEYYYY TEST CONTENT"
-        |> String.split "\n\n"
-        |> List.map
-            (Html.text
-                >> List.singleton
-                >> Html.styled Html.p
-                    [ Css.margin Css.zero
-                    , Css.fontSize <| Css.px 18
-                    , Ui.sansSerifFont
-                    , Css.lineHeight <| Css.px 30
-                    ]
-                    []
-            )
+    case event of
+        Talk { speakerName, speakerBio, moreText, moreLink } ->
+            [ Ui.markdown
+                ("## "
+                    ++ speakerName
+                    ++ "\n\n"
+                    ++ speakerBio
+                    ++ "\n\n["
+                    ++ moreText
+                    ++ " »]("
+                    ++ moreLink
+                    ++ ")"
+                )
+            ]
+
+        Break _ ->
+            "HEEYEYYYY TEST CONTENT"
+                |> String.split "\n\n"
+                |> List.map
+                    (Html.text
+                        >> List.singleton
+                        >> Html.styled Html.p
+                            [ Css.margin Css.zero
+                            , Css.fontSize <| Css.px 18
+                            , Ui.sansSerifFont
+                            , Css.lineHeight <| Css.px 30
+                            ]
+                            []
+                    )
 
 
 viewTime : Posix -> Html msg
