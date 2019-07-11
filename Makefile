@@ -41,8 +41,20 @@ public/images/speakers/%: speaker-photos/%
 # package management
 
 node_modules: package.json package-lock.json
-	npm install
+	npm install --verbose
 	@touch -m $@
 
 clean:
 	rm -rf public Makefile.public src/Routes.elm
+
+# testing
+
+test: cypress/integration/a11y_spec.js
+	./script/cypress-test.sh
+
+cypress/integration/a11y_spec.js: cypress/a11y_runner.js public
+	@mkdir -p $(@D)
+	echo 'const URLS = `\\' > $@
+	find public -name 'index.html' -type f | sed -E 's/^public//' | xargs dirname >> $@
+	echo '`;' >> $@
+	cat $< >> $@

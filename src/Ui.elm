@@ -102,14 +102,14 @@ bodyCopyStyle =
 buttonStyle : Css.Style
 buttonStyle =
     Css.batch
-        [ Css.color primaryColor
+        [ Css.color primaryHighContrastColor
         , Css.fontSize <| Css.px 18
         , Css.display Css.inlineBlock
         , Css.height <| Css.px 40
         , Css.lineHeight <| Css.px 40
         , Css.minWidth <| Css.px 250
         , Css.borderRadius <| Css.px 20
-        , Css.border3 (Css.px 1) Css.solid primaryColor
+        , Css.border3 (Css.px 1) Css.solid primaryHighContrastColor
         , Css.textAlign Css.center
         , Css.backgroundColor <| Css.hex "FFF"
         , Css.marginRight <| Css.px 25
@@ -123,7 +123,7 @@ linkStyle : Css.Style
 linkStyle =
     Css.batch
         [ Css.textDecoration Css.none
-        , Css.color primaryColor
+        , Css.color primaryHighContrastColor
         , Css.hover [ Css.textDecoration Css.underline ]
         , Global.withClass "button" [ buttonStyle ]
         ]
@@ -209,32 +209,34 @@ page photo content =
             }
         ]
         []
-        [ Html.styled Html.img
-            [ Css.width <| Css.px 200
-            , desktopOnly
-                [ Css.property "grid-row" "1"
-                , Css.property "grid-column" "1"
-                ]
-            , case photo of
-                Nothing ->
-                    Css.height (Css.px 200)
+        [ Html.header []
+            [ Html.styled Html.img
+                [ Css.width <| Css.px 200
+                , desktopOnly
+                    [ Css.property "grid-row" "1"
+                    , Css.property "grid-column" "1"
+                    ]
+                , case photo of
+                    Nothing ->
+                        Css.height (Css.px 200)
 
-                Just _ ->
-                    Css.batch
-                        [ Css.height (Css.px 242)
-                        , Css.borderRadius (Css.px 30)
-                        , responsive
-                            { desktop = [ Css.marginTop (Css.px -21) ]
-                            , mobile = [ Css.margin2 Css.zero Css.auto ]
-                            }
-                        ]
+                    Just _ ->
+                        Css.batch
+                            [ Css.height (Css.px 242)
+                            , Css.borderRadius (Css.px 30)
+                            , responsive
+                                { desktop = [ Css.marginTop (Css.px -21) ]
+                                , mobile = [ Css.margin2 Css.zero Css.auto ]
+                                }
+                            ]
+                ]
+                [ photo
+                    |> Maybe.withDefault "/images/elm-logo.svg"
+                    |> Attributes.src
+                , Attributes.alt ""
+                ]
+                []
             ]
-            [ photo
-                |> Maybe.withDefault "/images/elm-logo.svg"
-                |> Attributes.src
-            , Attributes.alt ""
-            ]
-            []
         , Html.styled Html.div
             [ desktopOnly
                 [ Css.property "grid-row" "1"
@@ -242,12 +244,12 @@ page photo content =
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            []
+            [ Attributes.attribute "role" "main" ]
             [ content ]
         , Html.styled Html.nav
             [ -- appearance
               Css.width (Css.pct 100)
-            , Css.borderTop3 (Css.px 3) Css.solid primaryColor
+            , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
             , Css.backgroundColor (Css.hex "FFFFFF")
 
             -- position
@@ -261,7 +263,7 @@ page photo content =
             , Css.alignItems Css.center
             , sansSerifFont
             ]
-            []
+            [ Attributes.attribute "role" "navigation" ]
             [ footerLink "Home" <| Routes.path Routes.Index []
             , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
             , footerLink "Twitter" "https://twitter.com/elmconf"
@@ -274,7 +276,7 @@ footerLink : String -> String -> Html msg
 footerLink title url =
     Html.styled Html.a
         [ Css.fontSize <| Css.px 18
-        , Css.color <| primaryColor
+        , Css.color primaryHighContrastColor
         , Css.textDecoration Css.none
         , Css.hover [ Css.textDecoration Css.underline ]
         , Css.padding2 (Css.px 10) (Css.px 15)
@@ -286,6 +288,11 @@ footerLink title url =
 primaryColor : Css.Color
 primaryColor =
     Css.hex "FF5F6D"
+
+
+primaryHighContrastColor : Css.Color
+primaryHighContrastColor =
+    Css.hex "EE0015"
 
 
 errorColor : Css.Color
