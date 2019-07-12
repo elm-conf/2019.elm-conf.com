@@ -184,6 +184,11 @@ markdown raw =
         ]
 
 
+mainContentId : String
+mainContentId =
+    "main"
+
+
 page : Maybe String -> Html msg -> Html msg
 page photo content =
     Html.styled Html.div
@@ -209,7 +214,8 @@ page photo content =
             }
         ]
         []
-        [ header photo
+        [ skipToContent
+        , header photo
         , Html.styled Html.main_
             [ desktopOnly
                 [ Css.property "grid-row" "1"
@@ -217,10 +223,17 @@ page photo content =
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            [ Attributes.id "main" ]
+            [ Attributes.id mainContentId ]
             [ content ]
         , navigation
         ]
+
+
+skipToContent : Html msg
+skipToContent =
+    Html.a
+        [ Attributes.href ("#" ++ mainContentId) ]
+        [ Html.text "Skip to Content" ]
 
 
 header : Maybe String -> Html msg
