@@ -124,7 +124,7 @@ type Msg
     | CfpMsg Cfp.Msg
     | ProposalsMsg Proposals.Msg
     | TokenWasFine
-    | ChangeFocus String String
+    | SetFocus String
     | NoOp
 
 
@@ -272,13 +272,11 @@ update msg model =
         TokenWasFine ->
             ( model, Cmd.none )
 
-        ChangeFocus toBlur toFocus ->
+        SetFocus toFocus ->
             ( model
-            , Task.sequence
-                [ Dom.blur toBlur
-                , Dom.focus toFocus
-                ]
-                |> Task.attempt (\_ -> NoOp)
+            , Task.attempt
+                (\_ -> NoOp)
+                (Dom.focus toFocus)
             )
 
         NoOp ->
@@ -339,7 +337,7 @@ view model =
                         Ui.markdown
         in
         Ui.page
-            { changeFocus = ChangeFocus
+            { setFocus = SetFocus
             , photo = Maybe.andThen .photo model.page
             , content = contentView content
             }
