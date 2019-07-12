@@ -321,7 +321,7 @@ view model =
                         Schedule.view
 
                     _ ->
-                        Ui.markdown
+                        Ui.markdown False
         in
         contentView content
             |> Ui.page (Maybe.andThen .photo model.page)

@@ -224,7 +224,7 @@ events =
 view : String -> Html msg
 view topContent =
     Html.div []
-        [ Ui.markdown topContent
+        [ Ui.markdown False topContent
         , events
             |> List.map viewEvent
             |> Html.div []
@@ -299,7 +299,7 @@ viewDescription : Event -> List (Html msg)
 viewDescription event =
     case event of
         Talk { speakerName, speakerBio, moreText, moreLink } ->
-            [ Ui.markdown
+            [ Ui.markdown True
                 ("## "
                     ++ speakerName
                     ++ "\n\n"
@@ -313,7 +313,7 @@ viewDescription event =
             ]
 
         Break { description, additionalInfo } ->
-            [ Ui.markdown
+            [ Ui.markdown False
                 (description
                     ++ (additionalInfo
                             |> Maybe.map ((++) "\n\n")
