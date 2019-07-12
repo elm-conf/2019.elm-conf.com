@@ -26,11 +26,8 @@ describe('Accessibility', function() {
         cy.focused().click({ force: true });
 
         // assert
-        cy.get('main').then(function(mainQuery) {
-          var main = mainQuery[0];
-          cy.hash().should('eq', '#' + main.id);
-          cy.focused().should('eq', main);
-        });
+        cy.get('main').then(function(mainQuery) { cy.hash().should('eq', '#' + mainQuery[0].id); });
+        cy.get('main').should('be.focused');
       });
     });
   });
