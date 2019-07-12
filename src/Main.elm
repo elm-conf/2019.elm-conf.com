@@ -133,29 +133,33 @@ onUrlChange url model =
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
     in
-    case ( model.session, route ) of
-        ( _, Routes.Cfp ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+    if model.route == route then
+        ( model, Cmd.none )
 
-        ( _, Routes.CfpProposals ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+    else
+        case ( model.session, route ) of
+            ( _, Routes.Cfp ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
 
-        ( _, Routes.Register ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+            ( _, Routes.CfpProposals ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
 
-        _ ->
-            ( { model
-                | route = route
-                , page = Nothing
-              }
-            , loadMarkdown route
-            )
+            ( _, Routes.Register ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
+
+            _ ->
+                ( { model
+                    | route = route
+                    , page = Nothing
+                  }
+                , loadMarkdown route
+                )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -165,9 +169,10 @@ update msg model =
             onUrlChange url model
 
         UrlRequest (Browser.Internal url) ->
-            ( model
-            , Navigation.pushUrl model.key (Url.toString url)
-            )
+            Debug.log "internal url change"
+                ( model
+                , Navigation.pushUrl model.key (Url.toString url)
+                )
 
         UrlRequest (Browser.External url) ->
             ( model
