@@ -246,29 +246,34 @@ page photo content =
             ]
             [ Attributes.id "main" ]
             [ content ]
-        , Html.styled Html.nav
-            [ -- appearance
-              Css.width (Css.pct 100)
-            , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
-            , Css.backgroundColor (Css.hex "FFFFFF")
+        , navigation
+        ]
 
-            -- position
-            , Css.position Css.fixed
-            , Css.left Css.zero
-            , Css.bottom Css.zero
 
-            -- contents
-            , Css.displayFlex
-            , Css.justifyContent Css.center
-            , Css.alignItems Css.center
-            , sansSerifFont
-            ]
-            [ Attributes.attribute "role" "navigation" ]
-            [ footerLink "Home" <| Routes.path Routes.Index []
-            , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
-            , footerLink "Twitter" "https://twitter.com/elmconf"
-            , footerLink "Instagram" "https://instagram.com/elmconf"
-            ]
+navigation : Html msg
+navigation =
+    Html.styled Html.nav
+        [ -- appearance
+          Css.width (Css.pct 100)
+        , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
+        , Css.backgroundColor (Css.hex "FFFFFF")
+
+        -- position
+        , Css.position Css.fixed
+        , Css.left Css.zero
+        , Css.bottom Css.zero
+
+        -- contents
+        , Css.displayFlex
+        , Css.justifyContent Css.center
+        , Css.alignItems Css.center
+        , sansSerifFont
+        ]
+        [ Attributes.attribute "role" "navigation" ]
+        [ footerLink "Home" <| Routes.path Routes.Index []
+        , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
+        , footerLink "Twitter" "https://twitter.com/elmconf"
+        , footerLink "Instagram" "https://instagram.com/elmconf"
         ]
 
 
