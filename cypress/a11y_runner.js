@@ -20,10 +20,9 @@ describe('Accessibility', function() {
         cy.visit(url);
         cy.get('h1');
 
-        // do tab navigation on the keyboard. The click has to be forced because
-        // of some quirk in Cypress' runner.
+        // do tab navigation on the keyboard.
         cy.tab();
-        cy.focused().click({ force: true });
+        cy.focused().click();
 
         // assert
         cy.get('main').then(function(mainQuery) { cy.hash().should('eq', '#' + mainQuery[0].id); });
