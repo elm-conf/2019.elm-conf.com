@@ -237,14 +237,14 @@ page photo content =
                 ]
                 []
             ]
-        , Html.styled Html.div
+        , Html.styled Html.main_
             [ desktopOnly
                 [ Css.property "grid-row" "1"
                 , Css.property "grid-column" "2"
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            [ Attributes.attribute "role" "main" ]
+            [ Attributes.id "main" ]
             [ content ]
         , Html.styled Html.nav
             [ -- appearance
