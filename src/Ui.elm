@@ -231,9 +231,35 @@ page photo content =
 
 skipToContent : Html msg
 skipToContent =
-    Html.a
+    Html.styled Html.a
+        [ Css.position Css.absolute
+        , Css.color primaryHighContrastColor
+        , Css.textDecoration Css.none
+
+        -- hidden by default
+        , Css.left (Css.px -1000)
+        , Css.top (Css.px -1000)
+        , Css.height (Css.px 1)
+        , Css.width (Css.px 1)
+        , Css.overflow Css.hidden
+
+        -- shown when the link is active, focused, and hovering
+        , [ Css.focus, Css.active, Css.hover ]
+            |> List.map
+                (\pseudoSelector ->
+                    pseudoSelector
+                        [ Css.left Css.zero
+                        , Css.top (Css.px 5)
+                        , Css.width Css.auto
+                        , Css.height Css.auto
+                        , Css.overflow Css.visible
+                        , Css.padding (Css.px 25)
+                        ]
+                )
+            |> Css.batch
+        ]
         [ Attributes.href ("#" ++ mainContentId) ]
-        [ Html.text "Skip to Content" ]
+        [ Html.text "Skip to content" ]
 
 
 header : Maybe String -> Html msg
