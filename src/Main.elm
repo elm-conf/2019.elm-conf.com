@@ -43,7 +43,7 @@ type alias Session =
 
 type alias Model =
     { key : Key
-    , route : Route
+    , route : Maybe Route
     , page : Maybe Page
 
     -- JWT
@@ -80,7 +80,7 @@ init { graphqlEndpoint, token } url key =
             onUrlChange url
                 { key = key
                 , page = Nothing
-                , route = Routes.NotFound
+                , route = Nothing
 
                 -- JWT
                 , session = session
@@ -136,7 +136,7 @@ onUrlChange url model =
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
     in
-    if model.route == route then
+    if model.route == Just route then
         ( model, Cmd.none )
 
     else
@@ -158,7 +158,7 @@ onUrlChange url model =
 
             _ ->
                 ( { model
-                    | route = route
+                    | route = Just route
                     , page = Nothing
                   }
                 , loadMarkdown route
@@ -219,7 +219,7 @@ update msg model =
             let
                 routeCmd =
                     case model.route of
-                        Routes.Cfp ->
+                        Just Routes.Cfp ->
                             Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
                         _ ->
@@ -326,13 +326,13 @@ view model =
 
             contentView =
                 case model.route of
-                    Routes.Cfp ->
+                    Just Routes.Cfp ->
                         Cfp.view model.cfp >> Html.map CfpMsg
 
-                    Routes.CfpProposals ->
+                    Just Routes.CfpProposals ->
                         Proposals.view model.proposals >> Html.map ProposalsMsg
 
-                    Routes.Register ->
+                    Just Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
 
                     _ ->
