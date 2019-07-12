@@ -27,6 +27,11 @@ stLouis =
     Time.customZone (-5 * 60) []
 
 
+finalEventTime : Int
+finalEventTime =
+    1568332800000
+
+
 events : List ( Posix, Event )
 events =
     [ ( Time.millisToPosix 1568293200000
@@ -191,7 +196,7 @@ events =
             , additionalInfo = Nothing
             }
       )
-    , ( Time.millisToPosix 1568332800000
+    , ( Time.millisToPosix finalEventTime
       , Break
             { description = "Strange Loop Party"
             , additionalInfo = Nothing
@@ -233,6 +238,14 @@ view topContent =
 
 viewEvent : ( Posix, Event ) -> Html msg
 viewEvent ( startTime, event ) =
+    let
+        timeHeight =
+            if startTime == Time.millisToPosix finalEventTime then
+                0
+
+            else
+                100
+    in
     Html.styled Html.div
         [ Ui.desktopOnly
             [ Css.property "display" "grid"
@@ -275,7 +288,7 @@ viewEvent ( startTime, event ) =
                 [ Ui.responsive
                     { desktop =
                         [ Css.width <| Css.px 3
-                        , Css.height <| Css.pct 100
+                        , Css.height <| Css.pct timeHeight
                         , Css.borderRadius <| Css.px 1.5
                         , Css.backgroundColor <| Css.hex "D8D8D8"
                         , Css.marginLeft <| Css.px 8
