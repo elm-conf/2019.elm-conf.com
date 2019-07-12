@@ -209,34 +209,7 @@ page photo content =
             }
         ]
         []
-        [ Html.header []
-            [ Html.styled Html.img
-                [ Css.width <| Css.px 200
-                , desktopOnly
-                    [ Css.property "grid-row" "1"
-                    , Css.property "grid-column" "1"
-                    ]
-                , case photo of
-                    Nothing ->
-                        Css.height (Css.px 200)
-
-                    Just _ ->
-                        Css.batch
-                            [ Css.height (Css.px 242)
-                            , Css.borderRadius (Css.px 30)
-                            , responsive
-                                { desktop = [ Css.marginTop (Css.px -21) ]
-                                , mobile = [ Css.margin2 Css.zero Css.auto ]
-                                }
-                            ]
-                ]
-                [ photo
-                    |> Maybe.withDefault "/images/elm-logo.svg"
-                    |> Attributes.src
-                , Attributes.alt ""
-                ]
-                []
-            ]
+        [ header photo
         , Html.styled Html.main_
             [ desktopOnly
                 [ Css.property "grid-row" "1"
@@ -247,6 +220,38 @@ page photo content =
             [ Attributes.id "main" ]
             [ content ]
         , navigation
+        ]
+
+
+header : Maybe String -> Html msg
+header photo =
+    Html.header []
+        [ Html.styled Html.img
+            [ Css.width <| Css.px 200
+            , desktopOnly
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "1"
+                ]
+            , case photo of
+                Nothing ->
+                    Css.height (Css.px 200)
+
+                Just _ ->
+                    Css.batch
+                        [ Css.height (Css.px 242)
+                        , Css.borderRadius (Css.px 30)
+                        , responsive
+                            { desktop = [ Css.marginTop (Css.px -21) ]
+                            , mobile = [ Css.margin2 Css.zero Css.auto ]
+                            }
+                        ]
+            ]
+            [ photo
+                |> Maybe.withDefault "/images/elm-logo.svg"
+                |> Attributes.src
+            , Attributes.alt ""
+            ]
+            []
         ]
 
 
