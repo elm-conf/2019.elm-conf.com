@@ -189,8 +189,13 @@ mainContentId =
     "main"
 
 
-page : Maybe String -> Html msg -> Html msg
-page photo content =
+skipToContentId : String
+skipToContentId =
+    "skip-to-content"
+
+
+page : { changeFocus : String -> String -> msg, photo : Maybe String, content : Html msg } -> Html msg
+page { changeFocus, photo, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
@@ -214,7 +219,7 @@ page photo content =
             }
         ]
         []
-        [ skipToContent
+        [ skipToContent (changeFocus skipToContentId mainContentId)
         , header photo
         , Html.styled Html.main_
             [ desktopOnly
@@ -223,14 +228,16 @@ page photo content =
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            [ Attributes.id mainContentId ]
+            [ Attributes.id mainContentId
+            , Attributes.tabindex -1
+            ]
             [ content ]
         , navigation
         ]
 
 
-skipToContent : Html msg
-skipToContent =
+skipToContent : msg -> Html msg
+skipToContent focusOnContent =
     Html.styled Html.a
         [ Css.position Css.absolute
         , Css.color primaryHighContrastColor
@@ -258,7 +265,10 @@ skipToContent =
                 )
             |> Css.batch
         ]
-        [ Attributes.href ("#" ++ mainContentId) ]
+        [ Attributes.href ("#" ++ mainContentId)
+        , Attributes.id skipToContentId
+        , Events.onClick focusOnContent
+        ]
         [ Html.text "Skip to content" ]
 
 

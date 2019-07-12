@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import Browser exposing (Document)
+import Browser.Dom as Dom
 import Browser.Navigation as Navigation exposing (Key)
 import CfpJwt exposing (Token)
 import Html as RootHtml exposing (Html)
@@ -123,6 +124,8 @@ type Msg
     | CfpMsg Cfp.Msg
     | ProposalsMsg Proposals.Msg
     | TokenWasFine
+    | ChangeFocus String String
+    | NoOp
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -169,10 +172,9 @@ update msg model =
             onUrlChange url model
 
         UrlRequest (Browser.Internal url) ->
-            Debug.log "internal url change"
-                ( model
-                , Navigation.pushUrl model.key (Url.toString url)
-                )
+            ( model
+            , Navigation.pushUrl model.key (Url.toString url)
+            )
 
         UrlRequest (Browser.External url) ->
             ( model
@@ -270,6 +272,18 @@ update msg model =
         TokenWasFine ->
             ( model, Cmd.none )
 
+        ChangeFocus toBlur toFocus ->
+            ( model
+            , Task.sequence
+                [ Dom.blur toBlur
+                , Dom.focus toFocus
+                ]
+                |> Task.attempt (\_ -> NoOp)
+            )
+
+        NoOp ->
+            ( model, Cmd.none )
+
 
 loadMarkdown : Route -> Cmd Msg
 loadMarkdown route =
@@ -324,8 +338,11 @@ view model =
                     _ ->
                         Ui.markdown
         in
-        contentView content
-            |> Ui.page (Maybe.andThen .photo model.page)
+        Ui.page
+            { changeFocus = ChangeFocus
+            , photo = Maybe.andThen .photo model.page
+            , content = contentView content
+            }
             |> Html.toUnstyled
             |> List.singleton
     }
