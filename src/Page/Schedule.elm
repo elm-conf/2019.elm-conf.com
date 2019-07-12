@@ -287,9 +287,7 @@ viewEvent ( startTime, event ) =
                 []
             ]
         , Html.styled Html.div
-            [ Css.displayFlex
-            , Css.alignItems Css.center
-            ]
+            []
             []
             (viewDescription event)
         ]
