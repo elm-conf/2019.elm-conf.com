@@ -333,7 +333,10 @@ viewTime time =
             Time.toMinute stLouis time
 
         ( hour12, period ) =
-            if hour24 > 12 then
+            if hour24 == 12 then
+                ( hour24, "pm" )
+
+            else if hour24 > 12 then
                 ( hour24 - 12, "pm" )
 
             else
