@@ -232,6 +232,7 @@ page { setFocus, photo, content } =
             , Attributes.tabindex -1
             ]
             [ content ]
+        , footer
         ]
 
 
@@ -338,6 +339,32 @@ navLink title url =
         ]
         [ Attributes.href url ]
         [ Html.text title ]
+
+
+footer : Html msg
+footer =
+    Html.styled Html.footer
+        [ desktopOnly
+            [ Css.property "grid-row" "3"
+            , Css.property "grid-column" "2"
+            , Css.property "display" "grid"
+            , Css.property "grid-template-columns" "2fr 2fr 1fr"
+            , Css.property "grid-column-gap" "10px"
+            ]
+        ]
+        []
+        [ markdown "### Code of Conduct\n\nParticipation in elm-conf is governed by the [Strange Loop Code of Conduct](https://thestrangeloop.com/policies.html)."
+        , markdown "### Sponsorships\n\nelm-conf sponsorships are available at a variety of levels. Please [email elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com) for more information."
+        , markdown "### Contact\n\n- [Email](mailto:elm-conf@thestrangeloop.com)\n- [Twitter](https://twitter.com/elmconf)\n- [Instagram](https://instagram.com/elmconf)"
+        ]
+
+
+footerSection : Html msg -> List (Html msg) -> Html msg
+footerSection title body =
+    Html.styled Html.p
+        []
+        []
+        (Html.h3 [] [ title ] :: body)
 
 
 primaryColor : Css.Color
