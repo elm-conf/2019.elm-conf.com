@@ -322,6 +322,7 @@ navigation =
         ]
         []
         [ navLink "Home" <| Routes.path Routes.Index []
+        , navLink "About" <| Routes.path Routes.About []
         , navLink "Buy Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
