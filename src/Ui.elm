@@ -222,6 +222,11 @@ page { setFocus, photo, content } =
                 , Css.property "grid-column" "2"
                 ]
             , Css.marginBottom (Css.px 50)
+
+            -- we remote the outline of this div. It's not a input element, but
+            -- we need to be able to change the focus so that we can properly
+            -- skip to content for keyboard and screen reader nav.
+            , Css.focus [ Css.outline Css.none ]
             ]
             [ Attributes.id mainContentId
             , Attributes.tabindex -1
