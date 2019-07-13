@@ -323,8 +323,7 @@ navigation =
         []
         [ navLink "Home" <| Routes.path Routes.Index []
         , navLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
-        , navLink "Twitter" "https://twitter.com/elmconf"
-        , navLink "Instagram" "https://instagram.com/elmconf"
+        , navLink "Buy Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
 
