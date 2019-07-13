@@ -143,7 +143,6 @@ markdown raw =
             , Global.h1
                 [ Css.fontSize <| Css.px 72
                 , Css.lineHeight <| Css.px 90
-                , Css.marginTop <| Css.px 50
                 , Css.marginBottom <| Css.px 25
                 , Global.adjacentSiblings
                     [ Global.p
@@ -204,7 +203,7 @@ page { setFocus, photo, content } =
             { desktop =
                 [ Css.padding <| Css.px 100
                 , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
-                , Css.property "grid-template-rows" "1fr 100px"
+                , Css.property "grid-template-rows" "50px 1fr 100px"
                 , Css.property "grid-column-gap" "48px"
                 ]
             , mobile =
@@ -215,10 +214,11 @@ page { setFocus, photo, content } =
         ]
         []
         [ skipToContent (setFocus mainContentId)
+        , navigation
         , header photo
         , Html.styled Html.main_
             [ desktopOnly
-                [ Css.property "grid-row" "1"
+                [ Css.property "grid-row" "2"
                 , Css.property "grid-column" "2"
                 ]
             , Css.marginBottom (Css.px 50)
@@ -227,7 +227,6 @@ page { setFocus, photo, content } =
             , Attributes.tabindex -1
             ]
             [ content ]
-        , navigation
         ]
 
 
@@ -268,13 +267,15 @@ skipToContent focusOnContent =
 
 header : Maybe String -> Html msg
 header photo =
-    Html.header []
+    Html.styled Html.header
+        [ desktopOnly
+            [ Css.property "grid-row" "1 / 2"
+            , Css.property "grid-column" "1"
+            ]
+        ]
+        []
         [ Html.styled Html.img
             [ Css.width <| Css.px 200
-            , desktopOnly
-                [ Css.property "grid-row" "1"
-                , Css.property "grid-column" "1"
-                ]
             , case photo of
                 Nothing ->
                     Css.height (Css.px 200)
@@ -301,32 +302,28 @@ header photo =
 navigation : Html msg
 navigation =
     Html.styled Html.nav
-        [ -- appearance
-          Css.width (Css.pct 100)
-        , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
-        , Css.backgroundColor (Css.hex "FFFFFF")
-
-        -- position
-        , Css.position Css.fixed
-        , Css.left Css.zero
-        , Css.bottom Css.zero
-
-        -- contents
-        , Css.displayFlex
-        , Css.justifyContent Css.center
+        [ Css.displayFlex
+        , Css.justifyContent Css.flexStart
         , Css.alignItems Css.center
         , sansSerifFont
+        , desktopOnly
+            [ Css.property "grid-row" "1"
+            , Css.property "grid-column" "2"
+
+            -- compensate for the first link target having a left margin
+            , Css.marginLeft (Css.px -10)
+            ]
         ]
-        [ Attributes.attribute "role" "navigation" ]
-        [ footerLink "Home" <| Routes.path Routes.Index []
-        , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
-        , footerLink "Twitter" "https://twitter.com/elmconf"
-        , footerLink "Instagram" "https://instagram.com/elmconf"
+        []
+        [ navLink "Home" <| Routes.path Routes.Index []
+        , navLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
+        , navLink "Twitter" "https://twitter.com/elmconf"
+        , navLink "Instagram" "https://instagram.com/elmconf"
         ]
 
 
-footerLink : String -> String -> Html msg
-footerLink title url =
+navLink : String -> String -> Html msg
+navLink title url =
     Html.styled Html.a
         [ Css.fontSize <| Css.px 18
         , Css.color primaryHighContrastColor
