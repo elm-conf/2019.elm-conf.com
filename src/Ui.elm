@@ -184,8 +184,13 @@ markdown raw =
         ]
 
 
-page : Maybe String -> Html msg -> Html msg
-page photo content =
+mainContentId : String
+mainContentId =
+    "main"
+
+
+page : { setFocus : String -> msg, photo : Maybe String, content : Html msg } -> Html msg
+page { setFocus, photo, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
@@ -209,66 +214,114 @@ page photo content =
             }
         ]
         []
-        [ Html.header []
-            [ Html.styled Html.img
-                [ Css.width <| Css.px 200
-                , desktopOnly
-                    [ Css.property "grid-row" "1"
-                    , Css.property "grid-column" "1"
-                    ]
-                , case photo of
-                    Nothing ->
-                        Css.height (Css.px 200)
-
-                    Just _ ->
-                        Css.batch
-                            [ Css.height (Css.px 242)
-                            , Css.borderRadius (Css.px 30)
-                            , responsive
-                                { desktop = [ Css.marginTop (Css.px -21) ]
-                                , mobile = [ Css.margin2 Css.zero Css.auto ]
-                                }
-                            ]
-                ]
-                [ photo
-                    |> Maybe.withDefault "/images/elm-logo.svg"
-                    |> Attributes.src
-                , Attributes.alt ""
-                ]
-                []
-            ]
-        , Html.styled Html.div
+        [ skipToContent (setFocus mainContentId)
+        , header photo
+        , Html.styled Html.main_
             [ desktopOnly
                 [ Css.property "grid-row" "1"
                 , Css.property "grid-column" "2"
                 ]
             , Css.marginBottom (Css.px 50)
             ]
-            [ Attributes.attribute "role" "main" ]
+            [ Attributes.id mainContentId
+            , Attributes.tabindex -1
+            ]
             [ content ]
-        , Html.styled Html.nav
-            [ -- appearance
-              Css.width (Css.pct 100)
-            , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
-            , Css.backgroundColor (Css.hex "FFFFFF")
+        , navigation
+        ]
 
-            -- position
-            , Css.position Css.fixed
-            , Css.left Css.zero
-            , Css.bottom Css.zero
 
-            -- contents
-            , Css.displayFlex
-            , Css.justifyContent Css.center
-            , Css.alignItems Css.center
-            , sansSerifFont
+skipToContent : msg -> Html msg
+skipToContent focusOnContent =
+    Html.styled Html.a
+        [ Css.position Css.absolute
+        , Css.color primaryHighContrastColor
+        , Css.textDecoration Css.none
+
+        -- hidden by default
+        , Css.left (Css.px -1000)
+        , Css.top (Css.px -1000)
+        , Css.height (Css.px 1)
+        , Css.width (Css.px 1)
+        , Css.overflow Css.hidden
+
+        -- shown when the link is active, focused, and hovering
+        , [ Css.focus, Css.active, Css.hover ]
+            |> List.map
+                (\pseudoSelector ->
+                    pseudoSelector
+                        [ Css.left Css.zero
+                        , Css.top (Css.px 5)
+                        , Css.width Css.auto
+                        , Css.height Css.auto
+                        , Css.overflow Css.visible
+                        , Css.padding (Css.px 25)
+                        ]
+                )
+            |> Css.batch
+        ]
+        [ Attributes.href ("#" ++ mainContentId)
+        , Events.onClick focusOnContent
+        ]
+        [ Html.text "Skip to content" ]
+
+
+header : Maybe String -> Html msg
+header photo =
+    Html.header []
+        [ Html.styled Html.img
+            [ Css.width <| Css.px 200
+            , desktopOnly
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "1"
+                ]
+            , case photo of
+                Nothing ->
+                    Css.height (Css.px 200)
+
+                Just _ ->
+                    Css.batch
+                        [ Css.height (Css.px 242)
+                        , Css.borderRadius (Css.px 30)
+                        , responsive
+                            { desktop = [ Css.marginTop (Css.px -21) ]
+                            , mobile = [ Css.margin2 Css.zero Css.auto ]
+                            }
+                        ]
             ]
-            [ Attributes.attribute "role" "navigation" ]
-            [ footerLink "Home" <| Routes.path Routes.Index []
-            , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
-            , footerLink "Twitter" "https://twitter.com/elmconf"
-            , footerLink "Instagram" "https://instagram.com/elmconf"
+            [ photo
+                |> Maybe.withDefault "/images/elm-logo.svg"
+                |> Attributes.src
+            , Attributes.alt ""
             ]
+            []
+        ]
+
+
+navigation : Html msg
+navigation =
+    Html.styled Html.nav
+        [ -- appearance
+          Css.width (Css.pct 100)
+        , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
+        , Css.backgroundColor (Css.hex "FFFFFF")
+
+        -- position
+        , Css.position Css.fixed
+        , Css.left Css.zero
+        , Css.bottom Css.zero
+
+        -- contents
+        , Css.displayFlex
+        , Css.justifyContent Css.center
+        , Css.alignItems Css.center
+        , sansSerifFont
+        ]
+        [ Attributes.attribute "role" "navigation" ]
+        [ footerLink "Home" <| Routes.path Routes.Index []
+        , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
+        , footerLink "Twitter" "https://twitter.com/elmconf"
+        , footerLink "Instagram" "https://instagram.com/elmconf"
         ]
 
 
