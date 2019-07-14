@@ -90,14 +90,6 @@ Try using "widget" or "doodad" instead.
 
 It's a small group of people who work together to advance Elm, and who are taking personal responsibility for the future of the language.
 
-### Who are these people referred to by first name in talks?
-
-- **"Evan"** is probably Evan Czaplicki, creator of Elm.
-- **"Richard"** is probably Richard Feldman, author of *Elm in Action*. [Here's his talk](speakers/richard-feldman.md).
-- **"Tereza"** is probably Tereza Sokol, creator of `elm-plot`. [Here's her talk](speakers/tereza-sokol.md).
-- **"Aaron"** is probably Aaron VonderHaar, creator of `elm-format`.
-- **"Luke"** is probably Luke Westby, creator of [Ellie](https://ellie-app.com).
-
 ### What's "make impossible states impossible"?
 
 "Make impossible states impossible" is a variation on "make illegal states unrepresentable" introduced by [Richard Feldman in his 2016 elm-conf talk](https://www.youtube.com/watch?v=IcgmSRJHu_8).
