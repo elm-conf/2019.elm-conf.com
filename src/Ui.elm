@@ -129,44 +129,70 @@ linkStyle =
         ]
 
 
+bigHeaderStyle : Css.Style
+bigHeaderStyle =
+    Css.batch
+        [ Css.margin Css.zero
+        , serifFont
+        , Css.fontWeight <| Css.int 500
+        , Css.color primaryColor
+        ]
+
+
+h1Style : Css.Style
+h1Style =
+    Css.batch
+        [ bigHeaderStyle
+        , Css.fontSize <| Css.px 72
+        , Css.lineHeight <| Css.px 90
+        , Css.marginBottom <| Css.px 25
+        , Global.adjacentSiblings
+            [ Global.p
+                [ Css.lineHeight <| Css.px 40
+                , Css.fontSize <| Css.px 24
+                , Css.letterSpacing <| Css.px -0.8
+                , Css.color <| Css.hex "444444"
+                ]
+            ]
+        ]
+
+
+h2Style : Css.Style
+h2Style =
+    Css.batch
+        [ bigHeaderStyle
+        , Css.fontSize <| Css.px 36
+        , Css.lineHeight <| Css.px 50
+        , Css.marginTop <| Css.px 90
+        , Css.marginBottom <| Css.px 10
+        ]
+
+
+pStyle : Css.Style
+pStyle =
+    Css.batch
+        [ Css.margin Css.zero
+        , Css.marginBottom <| Css.px 30
+        ]
+
+
+ulStyle : Css.Style
+ulStyle =
+    Css.batch
+        [ Css.paddingLeft <| Css.em 1
+        , Css.marginBottom <| Css.px 30
+        ]
+
+
 markdown : String -> Html msg
 markdown raw =
     Html.styled Html.div
         [ bodyCopyStyle
         , Global.descendants
-            [ Global.each [ Global.h1, Global.h2 ]
-                [ Css.margin Css.zero
-                , serifFont
-                , Css.fontWeight <| Css.int 500
-                , Css.color primaryColor
-                ]
-            , Global.h1
-                [ Css.fontSize <| Css.px 72
-                , Css.lineHeight <| Css.px 90
-                , Css.marginBottom <| Css.px 25
-                , Global.adjacentSiblings
-                    [ Global.p
-                        [ Css.lineHeight <| Css.px 40
-                        , Css.fontSize <| Css.px 24
-                        , Css.letterSpacing <| Css.px -0.8
-                        , Css.color <| Css.hex "444444"
-                        ]
-                    ]
-                ]
-            , Global.h2
-                [ Css.fontSize <| Css.px 36
-                , Css.lineHeight <| Css.px 50
-                , Css.marginTop <| Css.px 90
-                , Css.marginBottom <| Css.px 10
-                ]
-            , Global.p
-                [ Css.margin Css.zero
-                , Css.marginBottom <| Css.px 30
-                ]
-            , Global.ul
-                [ Css.paddingLeft <| Css.em 1
-                , Css.marginBottom <| Css.px 30
-                ]
+            [ Global.h1 [ h1Style ]
+            , Global.h2 [ h2Style ]
+            , Global.p [ pStyle ]
+            , Global.ul [ ulStyle ]
             , Global.a [ linkStyle ]
             ]
         ]
