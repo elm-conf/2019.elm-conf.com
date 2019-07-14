@@ -172,9 +172,13 @@ update msg model =
             onUrlChange url model
 
         UrlRequest (Browser.Internal url) ->
-            ( model
-            , Navigation.pushUrl model.key (Url.toString url)
-            )
+            if String.endsWith "pdf" url.path then
+                ( model, Navigation.load (Url.toString url) )
+
+            else
+                ( model
+                , Navigation.pushUrl model.key (Url.toString url)
+                )
 
         UrlRequest (Browser.External url) ->
             ( model

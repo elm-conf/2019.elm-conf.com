@@ -404,7 +404,12 @@ footer =
             , Html.styled Html.p
                 [ bodyCopyStyle ]
                 []
-                [ Html.text "elm-conf sponsorships are available at a variety of levels. Please "
+                [ Html.text "elm-conf sponsorships are available at a variety of levels. See the "
+                , Html.styled Html.a
+                    [ linkStyle ]
+                    [ Attributes.href "/elm-conf_2019_Sponsorship_Prospectus.pdf" ]
+                    [ Html.text "sponsorship prospectus" ]
+                , Html.text " or "
                 , Html.styled Html.a
                     [ linkStyle ]
                     [ Attributes.href "mailto:elm-conf@thestrangeloop.com" ]
