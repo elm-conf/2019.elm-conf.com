@@ -168,6 +168,15 @@ h2Style =
         ]
 
 
+h3Style : Css.Style
+h3Style =
+    Css.batch
+        [ Css.fontSize <| Css.px 18
+        , Css.fontWeight <| Css.int 500
+        , sansSerifFont
+        ]
+
+
 pStyle : Css.Style
 pStyle =
     Css.batch
@@ -191,6 +200,7 @@ markdown raw =
         , Global.descendants
             [ Global.h1 [ h1Style ]
             , Global.h2 [ h2Style ]
+            , Global.h3 [ h3Style ]
             , Global.p [ pStyle ]
             , Global.ul [ ulStyle ]
             , Global.a [ linkStyle ]
@@ -379,18 +389,59 @@ footer =
             ]
         ]
         []
-        [ markdown "### Code of Conduct\n\nParticipation in elm-conf is governed by the [Strange Loop Code of Conduct](https://thestrangeloop.com/policies.html)."
-        , markdown "### Sponsorships\n\nelm-conf sponsorships are available at a variety of levels. Please [email elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com) for more information."
-        , markdown "### Contact\n\n- [Email](mailto:elm-conf@thestrangeloop.com)\n- [Twitter](https://twitter.com/elmconf)\n- [Instagram](https://instagram.com/elmconf)"
+        [ Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Code of Conduct" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.text "Participation in elm-conf is governed by the "
+                , Html.styled Html.a [ linkStyle ] [ Attributes.href "https://thestrangeloop.com/policies.html" ] [ Html.text "Strange Loop Code of Conduct" ]
+                , Html.text "."
+                ]
+            ]
+        , Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Sponsorships" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.text "elm-conf sponsorships are available at a variety of levels. Please "
+                , Html.styled Html.a
+                    [ linkStyle ]
+                    [ Attributes.href "mailto:elm-conf@thestrangeloop.com" ]
+                    [ Html.text "email elm-conf@thestrangeloop.com" ]
+                , Html.text " for more information."
+                ]
+            ]
+        , Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Contact" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.styled Html.ul
+                    [ ulStyle ]
+                    []
+                    [ Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "mailto:elm-conf@thestrangeloop.com" ]
+                            [ Html.text "Email" ]
+                        ]
+                    , Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "https://twitter.com/elmconf" ]
+                            [ Html.text "Twitter" ]
+                        ]
+                    , Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "https://instagram.com/elmconf" ]
+                            [ Html.text "Instagram" ]
+                        ]
+                    ]
+                ]
+            ]
         ]
-
-
-footerSection : Html msg -> List (Html msg) -> Html msg
-footerSection title body =
-    Html.styled Html.p
-        []
-        []
-        (Html.h3 [] [ title ] :: body)
 
 
 primaryColor : Css.Color
