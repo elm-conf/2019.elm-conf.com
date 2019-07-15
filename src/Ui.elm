@@ -313,6 +313,7 @@ image src =
                 Css.batch
                     [ Css.height (Css.px 242)
                     , Css.borderRadius (Css.px 30)
+                    , Css.border3 (Css.px 5) Css.solid (Css.hex "FFF")
                     ]
         ]
         [ src

@@ -207,11 +207,33 @@ events =
 
 view : String -> Html msg
 view topContent =
-    Html.div []
+    let
+        viewLine =
+            Html.styled Html.div
+                [ Ui.responsive
+                    { desktop =
+                        [ Css.width <| Css.px 3
+                        , Css.height <| Css.calc (Css.pct 100) Css.minus (Css.px 20)
+                        , Css.borderRadius <| Css.px 1.5
+                        , Css.backgroundColor <| Css.hex "D8D8D8"
+                        , Css.position Css.absolute
+                        , Css.top <| Css.px 5
+                        , Css.left <| Css.px -132
+                        , Css.zIndex <| Css.int -1
+                        ]
+                    , mobile = [ Css.display Css.none ]
+                    }
+                ]
+                []
+                []
+    in
+    Html.div
+        []
         [ Ui.markdown topContent
-        , events
-            |> List.map viewEvent
-            |> Html.div []
+        , Html.styled Html.div
+            [ Ui.desktopOnly [ Css.position Css.relative ] ]
+            []
+            ([ viewLine ] ++ List.map viewEvent events)
         ]
 
 
@@ -242,37 +264,27 @@ viewEvent ( startTime, event ) =
                 []
                 [ Html.styled Html.div
                     [ Css.borderRadius <| Css.pct 50
-                    , case event of
-                        Break _ ->
-                            Css.border3 (Css.px 5) Css.solid (Css.hex "D8D8D8")
-
-                        Talk _ ->
-                            Css.border3 (Css.px 5) Css.solid Ui.primaryColor
+                    , Css.padding2 (Css.px 5) Css.zero
                     , Css.backgroundColor <| Css.hex "FFF"
-                    , Css.width <| Css.px 20
-                    , Css.height <| Css.px 20
-                    , Css.marginRight <| Css.px 4
-                    , Css.position Css.relative
                     ]
                     []
-                    [ viewTime startTime ]
-                ]
+                    [ Html.styled Html.div
+                        [ Css.borderRadius <| Css.pct 50
+                        , case event of
+                            Break _ ->
+                                Css.border3 (Css.px 5) Css.solid (Css.hex "D8D8D8")
 
-        viewLine =
-            Html.styled Html.div
-                [ Ui.responsive
-                    { desktop =
-                        [ Css.width <| Css.px 3
-                        , Css.height <| Css.pct timeHeight
-                        , Css.borderRadius <| Css.px 1.5
-                        , Css.backgroundColor <| Css.hex "D8D8D8"
-                        , Css.marginLeft <| Css.px 8
+                            Talk _ ->
+                                Css.border3 (Css.px 5) Css.solid Ui.primaryColor
+                        , Css.backgroundColor <| Css.hex "FFF"
+                        , Css.width <| Css.px 20
+                        , Css.height <| Css.px 20
+                        , Css.position Css.relative
                         ]
-                    , mobile = [ Css.display Css.none ]
-                    }
+                        []
+                        [ viewTime startTime ]
+                    ]
                 ]
-                []
-                []
 
         viewEventTitle =
             case event of
