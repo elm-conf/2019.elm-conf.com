@@ -316,7 +316,14 @@ viewEvent ( startTime, event ) =
                             ]
                         ]
                         []
-                        [ Ui.image (Just speakerPhoto) ]
+                        [ Html.styled Html.div
+                            [ Css.borderTop3 (Css.px 5) Css.solid (Css.hex "FFF")
+                            , Css.borderBottom3 (Css.px 5) Css.solid (Css.hex "FFF")
+                            , Css.height <| Css.px 252
+                            ]
+                            []
+                            [ Ui.image (Just speakerPhoto) ]
+                        ]
 
                 Break _ ->
                     Html.text ""
