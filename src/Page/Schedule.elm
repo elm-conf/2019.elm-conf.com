@@ -36,8 +36,8 @@ events : List ( Posix, Event )
 events =
     [ ( Time.millisToPosix 1568293200000
       , Break
-            { description = "Doors and registration open."
-            , additionalInfo = Just "test test test badges on first floor outside doors etc"
+            { description = "Doors and registration open"
+            , additionalInfo = Nothing
             }
       )
     , ( Time.millisToPosix 1568296800000
@@ -51,7 +51,7 @@ events =
       )
     , ( Time.millisToPosix 1568298600000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -66,7 +66,7 @@ events =
       )
     , ( Time.millisToPosix 1568300700000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -81,7 +81,7 @@ events =
       )
     , ( Time.millisToPosix 1568302800000
       , Break
-            { description = "Long Break"
+            { description = "Long break"
             , additionalInfo = Nothing
             }
       )
@@ -96,7 +96,7 @@ events =
       )
     , ( Time.millisToPosix 1568306400000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -117,7 +117,7 @@ events =
       )
     , ( Time.millisToPosix 1568313900000
       , Break
-            { description = "elm-conf resumes after lunch"
+            { description = "Conference resumes after lunch"
             , additionalInfo = Nothing
             }
       )
@@ -132,7 +132,7 @@ events =
       )
     , ( Time.millisToPosix 1568316000000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -147,7 +147,7 @@ events =
       )
     , ( Time.millisToPosix 1568318100000
       , Break
-            { description = "Long Break"
+            { description = "Long break"
             , additionalInfo = Nothing
             }
       )
@@ -162,7 +162,7 @@ events =
       )
     , ( Time.millisToPosix 1568321700000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -177,7 +177,7 @@ events =
       )
     , ( Time.millisToPosix 1568323800000
       , Break
-            { description = "Short Break"
+            { description = "Short break"
             , additionalInfo = Nothing
             }
       )
@@ -192,37 +192,16 @@ events =
       )
     , ( Time.millisToPosix 1568325900000
       , Break
-            { description = "Closing Ceremonies"
+            { description = "Closing ceremonies"
             , additionalInfo = Nothing
             }
       )
     , ( Time.millisToPosix finalEventTime
       , Break
-            { description = "Strange Loop Party"
+            { description = "Strange Loop party"
             , additionalInfo = Nothing
             }
       )
-
-    -- , ( "4:35 PM", "Katja Mordaunt" )
-    -- , ( "5:05 PM", "Closing Ceremonies" )
-    -- , ( "7:00 PM", "Strange Loop Party" )
-    -- , ( "9:35 AM", "Abadi Kurniawan" )
-    -- , ( "10:05 AM", "Short Break" )
-    -- , ( "10:10 AM", "Brooke Angel" )
-    -- , ( "10:40 AM", "Long Break" )
-    -- , ( "11:10 AM", "Jim Carlson" )
-    -- , ( "11:40 AM", "Short Break" )
-    -- , ( "11:45 AM", "Ryan Frazier" )
-    -- , ( "12:15 PM", "Lunch" )
-    -- , ( "1:45 PM", "elm-conf resumes after lunch" )
-    -- , ( "1:50 PM", "Liz Krane" )
-    -- , ( "2:20 PM", "Short Break" )
-    -- , ( "2:25 PM", "James Gary" )
-    -- , ( "2:55 PM", "Long Break" )
-    -- , ( "3:25 PM", "Katie Hughes" )
-    -- , ( "3:55 PM", "Short Break" )
-    -- , ( "4:00 PM", "Ian Mackenzie" )
-    -- , ( "4:30 PM", "Short Break" )
     ]
 
 
