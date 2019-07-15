@@ -224,26 +224,11 @@ viewEvent ( startTime, event ) =
 
             else
                 100
-    in
-    Html.styled Html.div
-        [ Ui.desktopOnly
-            [ Css.property "display" "grid"
-            , Css.property "grid-template-columns" "158px minmax(auto, 650px)"
-            , Css.marginLeft <| Css.px -158
-            , Css.minHeight <| Css.px 120
-            ]
-        ]
-        []
-        [ Html.styled Html.div
-            [ Ui.desktopOnly
-                [ Css.property "display" "grid"
-                , Css.property "grid-template-rows" "30px 1fr"
-                ]
-            ]
-            []
-            [ Html.styled Html.div
+
+        viewEventTime =
+            Html.styled Html.div
                 [ Css.displayFlex
-                , Css.property "align-self" "center"
+                , Css.alignItems Css.center
                 ]
                 []
                 [ Html.styled Html.div
@@ -263,7 +248,9 @@ viewEvent ( startTime, event ) =
                     []
                 , viewTime startTime
                 ]
-            , Html.styled Html.div
+
+        viewLine =
+            Html.styled Html.div
                 [ Ui.responsive
                     { desktop =
                         [ Css.width <| Css.px 3
@@ -277,40 +264,81 @@ viewEvent ( startTime, event ) =
                 ]
                 []
                 []
+
+        viewEventTitle =
+            case event of
+                Talk { speakerName } ->
+                    Html.styled Html.h2
+                        [ Css.margin Css.zero
+                        , Css.fontSize <| Css.px 36
+                        , Css.lineHeight <| Css.px 50
+                        , Css.fontWeight <| Css.int 500
+                        , Ui.serifFont
+                        , Css.color Ui.primaryColor
+                        ]
+                        []
+                        [ Html.text speakerName ]
+
+                Break { description } ->
+                    Html.styled Html.span
+                        [ Ui.bodyCopyStyle ]
+                        []
+                        [ Html.text description ]
+    in
+    Html.styled Html.div
+        [ Ui.desktopOnly
+            [ Css.marginLeft <| Css.px -158 ]
+        ]
+        []
+        [ Html.styled Html.div
+            [ Ui.desktopOnly
+                [ Css.property "display" "grid"
+                , Css.property "grid-template-columns" "158px 1fr"
+                , Css.property "align-content" "center"
+                , Css.minHeight <| Css.px 50
+                ]
+            ]
+            []
+            [ viewEventTime
+            , viewEventTitle
             ]
         , Html.styled Html.div
+            [ Ui.desktopOnly
+                [ Css.property "display" "grid"
+                , Css.property "grid-template-columns" "158px 1fr"
+                , Css.minHeight <| Css.px 120
+                ]
+            ]
             []
-            []
-            (viewDescription event)
+            [ viewLine
+            , viewDescription event
+            ]
         ]
 
 
-viewDescription : Event -> List (Html msg)
+viewDescription : Event -> Html msg
 viewDescription event =
     case event of
-        Talk { speakerName, speakerBio, moreText, moreLink } ->
-            [ Ui.markdown True
-                ("## "
-                    ++ speakerName
-                    ++ "\n\n"
-                    ++ speakerBio
-                    ++ "\n\n["
-                    ++ moreText
-                    ++ " »]("
-                    ++ moreLink
-                    ++ ")"
-                )
-            ]
+        Talk { speakerBio, moreText, moreLink } ->
+            Html.styled Html.div
+                [ Css.marginTop <| Css.px 10 ]
+                []
+                [ Ui.markdown False
+                    (speakerBio
+                        ++ "\n\n["
+                        ++ moreText
+                        ++ " »]("
+                        ++ moreLink
+                        ++ ")"
+                    )
+                ]
 
-        Break { description, additionalInfo } ->
-            [ Ui.markdown False
-                (description
-                    ++ (additionalInfo
-                            |> Maybe.map ((++) "\n\n")
-                            |> Maybe.withDefault ""
-                       )
+        Break { additionalInfo } ->
+            Ui.markdown False
+                (additionalInfo
+                    |> Maybe.map ((++) "\n\n")
+                    |> Maybe.withDefault ""
                 )
-            ]
 
 
 viewTime : Posix -> Html msg
