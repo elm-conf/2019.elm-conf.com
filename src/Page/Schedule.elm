@@ -225,10 +225,19 @@ viewEvent ( startTime, event ) =
             else
                 100
 
+        titleRowHeight =
+            case event of
+                Talk _ ->
+                    50
+
+                Break _ ->
+                    30
+
         viewEventTime =
             Html.styled Html.div
                 [ Css.displayFlex
                 , Css.alignItems Css.center
+                , Css.justifyContent Css.center
                 ]
                 []
                 [ Html.styled Html.div
@@ -243,10 +252,10 @@ viewEvent ( startTime, event ) =
                     , Css.width <| Css.px 20
                     , Css.height <| Css.px 20
                     , Css.marginRight <| Css.px 4
+                    , Css.position Css.relative
                     ]
                     []
-                    []
-                , viewTime startTime
+                    [ viewTime startTime ]
                 ]
 
         viewLine =
@@ -284,33 +293,41 @@ viewEvent ( startTime, event ) =
                         [ Ui.bodyCopyStyle ]
                         []
                         [ Html.text description ]
+
+        viewSpeakerPhoto =
+            case event of
+                Talk { speakerPhoto } ->
+                    Html.styled Html.div
+                        [ Ui.desktopOnly
+                            [ Css.marginTop <| Css.px 5
+                            , Css.marginBottom <| Css.px 50
+                            ]
+                        ]
+                        []
+                        [ Ui.image (Just speakerPhoto) ]
+
+                Break _ ->
+                    Html.text ""
     in
     Html.styled Html.div
         [ Ui.desktopOnly
-            [ Css.marginLeft <| Css.px -158 ]
+            [ Css.marginLeft <| Css.px -230 ]
         ]
         []
         [ Html.styled Html.div
             [ Ui.desktopOnly
                 [ Css.property "display" "grid"
-                , Css.property "grid-template-columns" "158px 1fr"
-                , Css.property "align-content" "center"
-                , Css.minHeight <| Css.px 50
+                , Css.property "grid-template-columns" "200px 1fr"
+                , Css.property "grid-template-rows"
+                    (String.fromInt titleRowHeight ++ "px minmax(" ++ String.fromInt timeHeight ++ "px, 1fr)")
+                , Css.property "grid-column-gap" "30px"
+                , Css.property "grid-row-gap" "10px"
                 ]
             ]
             []
             [ viewEventTime
             , viewEventTitle
-            ]
-        , Html.styled Html.div
-            [ Ui.desktopOnly
-                [ Css.property "display" "grid"
-                , Css.property "grid-template-columns" "158px 1fr"
-                , Css.minHeight <| Css.px 120
-                ]
-            ]
-            []
-            [ viewLine
+            , viewSpeakerPhoto
             , viewDescription event
             ]
         ]
@@ -320,18 +337,14 @@ viewDescription : Event -> Html msg
 viewDescription event =
     case event of
         Talk { speakerBio, moreText, moreLink } ->
-            Html.styled Html.div
-                [ Css.marginTop <| Css.px 10 ]
-                []
-                [ Ui.markdown
-                    (speakerBio
-                        ++ "\n\n["
-                        ++ moreText
-                        ++ " »]("
-                        ++ moreLink
-                        ++ ")"
-                    )
-                ]
+            Ui.markdown
+                (speakerBio
+                    ++ "\n\n["
+                    ++ moreText
+                    ++ " »]("
+                    ++ moreLink
+                    ++ ")"
+                )
 
         Break { additionalInfo } ->
             Ui.markdown
@@ -365,6 +378,9 @@ viewTime time =
         , Css.fontSize <| Css.px 18
         , Css.color <| Css.hex "444444"
         , Css.letterSpacing <| Css.px -0.6
+        , Css.minWidth Css.maxContent
+        , Css.position Css.absolute
+        , Css.transform <| Css.translate2 (Css.px 20) (Css.px -5)
         ]
         []
         [ hour12 |> String.fromInt |> Html.text

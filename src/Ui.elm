@@ -216,7 +216,14 @@ page { setFocus, photo, content } =
         ]
         []
         [ skipToContent (setFocus mainContentId)
-        , Html.header [] [ image photo ]
+        , Html.styled Html.header
+            [ responsive
+                { desktop = [ Css.marginTop (Css.px -21) ]
+                , mobile = [ Css.margin2 Css.zero Css.auto ]
+                }
+            ]
+            []
+            [ image photo ]
         , Html.styled Html.main_
             [ desktopOnly
                 [ Css.property "grid-row" "1"
@@ -298,10 +305,6 @@ image : Maybe String -> Html msg
 image src =
     Html.styled Html.img
         [ Css.width <| Css.px 200
-        , desktopOnly
-            [ Css.property "grid-row" "1"
-            , Css.property "grid-column" "1"
-            ]
         , case src of
             Nothing ->
                 Css.height (Css.px 200)
@@ -310,10 +313,6 @@ image src =
                 Css.batch
                     [ Css.height (Css.px 242)
                     , Css.borderRadius (Css.px 30)
-                    , responsive
-                        { desktop = [ Css.marginTop (Css.px -21) ]
-                        , mobile = [ Css.margin2 Css.zero Css.auto ]
-                        }
                     ]
         ]
         [ src
