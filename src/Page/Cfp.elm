@@ -354,7 +354,7 @@ view pageModel topContent =
 viewEditor : LoadedModel -> String -> Html Msg
 viewEditor ({ author, proposal } as model) topContent =
     Html.div []
-        [ Ui.markdown False topContent
+        [ Ui.markdown topContent
         , Html.div []
             [ viewSection
                 { label = "Contact Info"

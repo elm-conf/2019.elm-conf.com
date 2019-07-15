@@ -83,7 +83,7 @@ view model topContent =
 viewList : LoadedModel -> String -> Html Msg
 viewList { proposals } topContent =
     Html.main_ []
-        [ Ui.markdown False topContent
+        [ Ui.markdown topContent
         , case proposals of
             [] ->
                 Html.styled Html.p

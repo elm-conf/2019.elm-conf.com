@@ -208,7 +208,7 @@ events =
 view : String -> Html msg
 view topContent =
     Html.div []
-        [ Ui.markdown False topContent
+        [ Ui.markdown topContent
         , events
             |> List.map viewEvent
             |> Html.div []
@@ -323,7 +323,7 @@ viewDescription event =
             Html.styled Html.div
                 [ Css.marginTop <| Css.px 10 ]
                 []
-                [ Ui.markdown False
+                [ Ui.markdown
                     (speakerBio
                         ++ "\n\n["
                         ++ moreText
@@ -334,7 +334,7 @@ viewDescription event =
                 ]
 
         Break { additionalInfo } ->
-            Ui.markdown False
+            Ui.markdown
                 (additionalInfo
                     |> Maybe.map ((++) "\n\n")
                     |> Maybe.withDefault ""

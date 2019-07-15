@@ -273,7 +273,7 @@ verifyPassword =
 view : Model -> String -> Html Msg
 view model topContent =
     Html.main_ []
-        [ Ui.markdown False topContent
+        [ Ui.markdown topContent
         , case model.errors of
             [] ->
                 Html.text ""

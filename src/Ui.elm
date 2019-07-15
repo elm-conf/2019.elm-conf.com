@@ -130,16 +130,8 @@ linkStyle =
         ]
 
 
-markdown : Bool -> String -> Html msg
-markdown isEvent raw =
-    let
-        h2MarginTop =
-            if isEvent then
-                Css.px 0
-
-            else
-                Css.px 90
-    in
+markdown : String -> Html msg
+markdown raw =
     Html.styled Html.div
         [ bodyCopyStyle
         , Global.descendants
@@ -166,7 +158,7 @@ markdown isEvent raw =
             , Global.h2
                 [ Css.fontSize <| Css.px 36
                 , Css.lineHeight <| Css.px 50
-                , Css.marginTop <| h2MarginTop
+                , Css.marginTop <| Css.px 90
                 , Css.marginBottom <| Css.px 10
                 ]
             , Global.p

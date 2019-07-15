@@ -338,7 +338,7 @@ view model =
                         Schedule.view
 
                     _ ->
-                        Ui.markdown False
+                        Ui.markdown
         in
         Ui.page
             { setFocus = SetFocus
