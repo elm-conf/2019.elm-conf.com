@@ -334,7 +334,7 @@ view model =
                     Just Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
 
-                    Routes.Schedule ->
+                    Just Routes.Schedule ->
                         Schedule.view
 
                     _ ->
