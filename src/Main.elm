@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import Browser exposing (Document)
+import Browser.Dom as Dom
 import Browser.Navigation as Navigation exposing (Key)
 import CfpJwt exposing (Token)
 import Html as RootHtml exposing (Html)
@@ -43,7 +44,7 @@ type alias Session =
 
 type alias Model =
     { key : Key
-    , route : Route
+    , route : Maybe Route
     , page : Maybe Page
 
     -- JWT
@@ -80,7 +81,7 @@ init { graphqlEndpoint, token } url key =
             onUrlChange url
                 { key = key
                 , page = Nothing
-                , route = Routes.NotFound
+                , route = Nothing
 
                 -- JWT
                 , session = session
@@ -124,6 +125,8 @@ type Msg
     | CfpMsg Cfp.Msg
     | ProposalsMsg Proposals.Msg
     | TokenWasFine
+    | SetFocus String
+    | NoOp
 
 
 onUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -134,29 +137,33 @@ onUrlChange url model =
                 |> parse Routes.parser
                 |> Maybe.withDefault Routes.NotFound
     in
-    case ( model.session, route ) of
-        ( _, Routes.Cfp ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+    if model.route == Just route then
+        ( model, Cmd.none )
 
-        ( _, Routes.CfpProposals ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+    else
+        case ( model.session, route ) of
+            ( _, Routes.Cfp ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
 
-        ( _, Routes.Register ) ->
-            ( model
-            , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-            )
+            ( _, Routes.CfpProposals ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
 
-        _ ->
-            ( { model
-                | route = route
-                , page = Nothing
-              }
-            , loadMarkdown route
-            )
+            ( _, Routes.Register ) ->
+                ( model
+                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
+                )
+
+            _ ->
+                ( { model
+                    | route = Just route
+                    , page = Nothing
+                  }
+                , loadMarkdown route
+                )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -213,7 +220,7 @@ update msg model =
             let
                 routeCmd =
                     case model.route of
-                        Routes.Cfp ->
+                        Just Routes.Cfp ->
                             Navigation.pushUrl model.key <| Routes.path Routes.Register []
 
                         _ ->
@@ -266,6 +273,16 @@ update msg model =
         TokenWasFine ->
             ( model, Cmd.none )
 
+        SetFocus toFocus ->
+            ( model
+            , Task.attempt
+                (\_ -> NoOp)
+                (Dom.focus toFocus)
+            )
+
+        NoOp ->
+            ( model, Cmd.none )
+
 
 loadMarkdown : Route -> Cmd Msg
 loadMarkdown route =
@@ -308,13 +325,13 @@ view model =
 
             contentView =
                 case model.route of
-                    Routes.Cfp ->
+                    Just Routes.Cfp ->
                         Cfp.view model.cfp >> Html.map CfpMsg
 
-                    Routes.CfpProposals ->
+                    Just Routes.CfpProposals ->
                         Proposals.view model.proposals >> Html.map ProposalsMsg
 
-                    Routes.Register ->
+                    Just Routes.Register ->
                         Register.view model.register >> Html.map RegisterChanged
 
                     Routes.Schedule ->
@@ -323,8 +340,11 @@ view model =
                     _ ->
                         Ui.markdown False
         in
-        contentView content
-            |> Ui.page (Maybe.andThen .photo model.page)
+        Ui.page
+            { setFocus = SetFocus
+            , photo = Maybe.andThen .photo model.page
+            , content = contentView content
+            }
             |> Html.toUnstyled
             |> List.singleton
     }
