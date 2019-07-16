@@ -266,6 +266,7 @@ viewEvent ( startTime, event ) =
                     [ Css.borderRadius <| Css.pct 50
                     , Css.padding2 (Css.px 5) Css.zero
                     , Css.backgroundColor <| Css.hex "FFF"
+                    , Css.marginRight <| Css.px 100
                     ]
                     []
                     [ Html.styled Html.div
@@ -291,11 +292,18 @@ viewEvent ( startTime, event ) =
                 Talk { speakerName } ->
                     Html.styled Html.h2
                         [ Css.margin Css.zero
-                        , Css.fontSize <| Css.px 36
-                        , Css.lineHeight <| Css.px 50
                         , Css.fontWeight <| Css.int 500
                         , Ui.serifFont
                         , Css.color Ui.primaryColor
+                        , Ui.responsive
+                            { desktop =
+                                [ Css.fontSize <| Css.px 36
+                                , Css.lineHeight <| Css.px 50
+                                ]
+                            , mobile =
+                                [ Css.lineHeight <| Css.px 30
+                                ]
+                            }
                         ]
                         []
                         [ Html.text speakerName ]
@@ -310,10 +318,16 @@ viewEvent ( startTime, event ) =
             case event of
                 Talk { speakerPhoto } ->
                     Html.styled Html.div
-                        [ Ui.desktopOnly
-                            [ Css.marginTop <| Css.px 5
-                            , Css.marginBottom <| Css.px 50
-                            ]
+                        [ Ui.responsive
+                            { desktop =
+                                [ Css.marginTop <| Css.px 5
+                                , Css.marginBottom <| Css.px 50
+                                ]
+                            , mobile =
+                                [ Css.displayFlex
+                                , Css.justifyContent Css.center
+                                ]
+                            }
                         ]
                         []
                         [ Html.styled Html.div
@@ -334,14 +348,22 @@ viewEvent ( startTime, event ) =
         ]
         []
         [ Html.styled Html.div
-            [ Ui.desktopOnly
-                [ Css.property "display" "grid"
-                , Css.property "grid-template-columns" "200px 1fr"
-                , Css.property "grid-template-rows"
-                    (String.fromInt titleRowHeight ++ "px minmax(" ++ String.fromInt timeHeight ++ "px, 1fr)")
-                , Css.property "grid-column-gap" "30px"
-                , Css.property "grid-row-gap" "10px"
-                ]
+            [ Css.property "display" "grid"
+            , Ui.responsive
+                { desktop =
+                    [ Css.property "grid-template-columns" "200px 1fr"
+                    , Css.property "grid-template-rows"
+                        (String.fromInt titleRowHeight ++ "px minmax(" ++ String.fromInt timeHeight ++ "px, 1fr)")
+                    , Css.property "grid-column-gap" "30px"
+                    , Css.property "grid-row-gap" "10px"
+                    ]
+                , mobile =
+                    [ Css.property "grid-template-columns" "100px 1fr"
+                    , Css.property "grid-template-rows" ("30px minmax(" ++ String.fromInt timeHeight ++ "px, 1fr)")
+                    , Css.property "grid-column-gap" "10px"
+                    , Css.property "grid-row-gap" "10px"
+                    ]
+                }
             ]
             []
             [ viewEventTime
