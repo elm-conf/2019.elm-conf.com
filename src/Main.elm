@@ -312,10 +312,13 @@ parsePage raw =
 
 view : Model -> Document Msg
 view model =
-    { title =
-        model.page
-            |> Maybe.map .title
-            |> Maybe.withDefault ""
+    let
+        title =
+            model.page
+                |> Maybe.map .title
+                |> Maybe.withDefault ""
+    in
+    { title = title
     , body =
         let
             content =
@@ -343,6 +346,7 @@ view model =
         Ui.page
             { setFocus = SetFocus
             , photo = Maybe.andThen .photo model.page
+            , title = title
             , content = contentView content
             }
             |> Html.toUnstyled
