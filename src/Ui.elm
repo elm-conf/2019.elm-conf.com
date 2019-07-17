@@ -23,8 +23,6 @@ import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Markdown
 import Routes
-import Svg.Styled as Svg
-import Svg.Styled.Attributes as SvgAttributes
 
 
 type alias Checkbox =
