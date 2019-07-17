@@ -225,8 +225,8 @@ mainContentId =
     "main"
 
 
-page : { setFocus : String -> msg, photo : Maybe String, content : Html msg } -> Html msg
-page { setFocus, photo, content } =
+page : { setFocus : String -> msg, photo : Maybe String, title : String, content : Html msg } -> Html msg
+page { setFocus, photo, title, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
@@ -252,7 +252,7 @@ page { setFocus, photo, content } =
         []
         [ skipToContent (setFocus mainContentId)
         , navigation
-        , header photo
+        , header photo title
         , Html.styled Html.main_
             [ responsive
                 { desktop =
@@ -341,8 +341,8 @@ navigation =
         ]
 
 
-header : Maybe String -> Html msg
-header photo =
+header : Maybe String -> String -> Html msg
+header photo title =
     Html.styled Html.header
         [ responsive
             { desktop =
@@ -360,27 +360,51 @@ header photo =
             }
         ]
         []
-        [ image photo ]
+        [ image
+            (case photo of
+                Just src ->
+                    { src = src
+                    , altText = "Photo of " ++ title
+                    , width = 200
+                    , height = 242
+                    , rounded = True
+                    }
 
-
-image : Maybe String -> Html msg
-image src =
-    Html.styled Html.img
-        [ Css.width <| Css.px 200
-        , case src of
-            Nothing ->
-                Css.height (Css.px 200)
-
-            Just _ ->
-                Css.batch
-                    [ Css.height (Css.px 242)
-                    , Css.borderRadius (Css.px 30)
-                    ]
+                Nothing ->
+                    { src = "/images/elm-logo.svg"
+                    , altText = "Elm logo"
+                    , width = 200
+                    , height = 200
+                    , rounded = False
+                    }
+            )
         ]
-        [ src
-            |> Maybe.withDefault "/images/elm-logo.svg"
-            |> Attributes.src
-        , Attributes.alt ""
+
+
+type alias ImageConfig =
+    { src : String
+    , altText : String
+    , width : Float
+    , height : Float
+    , rounded : Bool
+    }
+
+
+image : ImageConfig -> Html msg
+image config =
+    Html.styled Html.img
+        ([ Css.width <| Css.px config.width
+         , Css.height <| Css.px config.height
+         ]
+            ++ (if config.rounded then
+                    [ Css.borderRadius (Css.px 30) ]
+
+                else
+                    []
+               )
+        )
+        [ Attributes.src config.src
+        , Attributes.alt config.altText
         ]
         []
 

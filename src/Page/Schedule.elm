@@ -323,7 +323,7 @@ viewEvent ( startTime, event ) =
 
         viewSpeakerPhoto =
             case event of
-                Talk { speakerPhoto } ->
+                Talk { speakerPhoto, speakerName } ->
                     Html.styled Html.div
                         [ Ui.responsive
                             { desktop =
@@ -348,7 +348,14 @@ viewEvent ( startTime, event ) =
                                 ]
                             ]
                             []
-                            [ Ui.image (Just speakerPhoto) ]
+                            [ Ui.image
+                                { src = speakerPhoto
+                                , altText = "Photo of " ++ speakerName
+                                , width = 200
+                                , height = 242
+                                , rounded = True
+                                }
+                            ]
                         ]
 
                 Break _ ->
