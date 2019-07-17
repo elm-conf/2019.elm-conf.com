@@ -360,6 +360,7 @@ navigation =
         [ navLink "Home" <| Routes.path Routes.Index []
         , navLink "About" <| Routes.path Routes.About []
         , navLink "Travel and Venue" <| Routes.path Routes.TravelAndVenue []
+        , navLink "Schedule" <| Routes.path Routes.Schedule []
         , navLink "Buy Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
