@@ -370,7 +370,7 @@ header photo title =
 
                 Nothing ->
                     { src = "/images/elm-logo.svg"
-                    , altText = "Elm logo"
+                    , altText = "elm-conf"
                     , width = 200
                     , height = 200
                     , rounded = False
