@@ -254,10 +254,13 @@ page { setFocus, photo, content } =
         , navigation
         , header photo
         , Html.styled Html.main_
-            [ desktopOnly
-                [ Css.property "grid-row" "2"
-                , Css.property "grid-column" "2"
-                ]
+            [ responsive
+                { desktop =
+                    [ Css.property "grid-row" "2"
+                    , Css.property "grid-column" "2"
+                    ]
+                , mobile = [ Css.marginTop (Css.px 25) ]
+                }
             , Css.marginBottom (Css.px 50)
 
             -- we remote the outline of this div. It's not a input element, but
@@ -315,13 +318,19 @@ navigation =
         , Css.justifyContent Css.flexStart
         , Css.alignItems Css.center
         , sansSerifFont
-        , desktopOnly
-            [ Css.property "grid-row" "1"
-            , Css.property "grid-column" "2"
+        , responsive
+            { desktop =
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "2"
 
-            -- compensate for the first link target having a left margin
-            , Css.marginLeft (Css.px -10)
-            ]
+                -- compensate for the first link target having a left margin
+                , Css.marginLeft (Css.px -10)
+                ]
+            , mobile =
+                [ Css.flexDirection Css.column
+                , Css.marginBottom (Css.px 25)
+                ]
+            }
         ]
         []
         [ navLink "Home" <| Routes.path Routes.Index []
