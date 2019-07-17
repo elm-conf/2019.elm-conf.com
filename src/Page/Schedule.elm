@@ -231,7 +231,11 @@ view topContent =
         []
         [ Ui.markdown topContent
         , Html.styled Html.div
-            [ Ui.desktopOnly [ Css.position Css.relative ] ]
+            [ Ui.responsive
+                { desktop = [ Css.position Css.relative ]
+                , mobile = [ Css.margin2 Css.zero Css.auto ]
+                }
+            ]
             []
             ([ viewLine ] ++ List.map viewEvent events)
         ]
@@ -266,7 +270,10 @@ viewEvent ( startTime, event ) =
                     [ Css.borderRadius <| Css.pct 50
                     , Css.padding2 (Css.px 5) Css.zero
                     , Css.backgroundColor <| Css.hex "FFF"
-                    , Css.marginRight <| Css.px 100
+                    , Ui.responsive
+                        { desktop = []
+                        , mobile = [ Css.marginRight <| Css.px 100 ]
+                        }
                     ]
                     []
                     [ Html.styled Html.div
@@ -326,14 +333,19 @@ viewEvent ( startTime, event ) =
                             , mobile =
                                 [ Css.displayFlex
                                 , Css.justifyContent Css.center
+                                , Css.property "grid-row" "2"
+                                , Css.property "grid-column-start" "1"
+                                , Css.property "grid-column-end" "3"
                                 ]
                             }
                         ]
                         []
                         [ Html.styled Html.div
-                            [ Css.borderTop3 (Css.px 5) Css.solid (Css.hex "FFF")
-                            , Css.borderBottom3 (Css.px 5) Css.solid (Css.hex "FFF")
-                            , Css.height <| Css.px 252
+                            [ Ui.desktopOnly
+                                [ Css.borderTop3 (Css.px 5) Css.solid (Css.hex "FFF")
+                                , Css.borderBottom3 (Css.px 5) Css.solid (Css.hex "FFF")
+                                , Css.height <| Css.px 252
+                                ]
                             ]
                             []
                             [ Ui.image (Just speakerPhoto) ]
@@ -359,7 +371,7 @@ viewEvent ( startTime, event ) =
                     ]
                 , mobile =
                     [ Css.property "grid-template-columns" "100px 1fr"
-                    , Css.property "grid-template-rows" ("30px minmax(" ++ String.fromInt timeHeight ++ "px, 1fr)")
+                    , Css.property "grid-template-rows" "minmax(30px, max-content) minmax(min-content, max-content) 1fr"
                     , Css.property "grid-column-gap" "10px"
                     , Css.property "grid-row-gap" "10px"
                     ]
@@ -376,23 +388,35 @@ viewEvent ( startTime, event ) =
 
 viewDescription : Event -> Html msg
 viewDescription event =
-    case event of
-        Talk { speakerBio, moreText, moreLink } ->
-            Ui.markdown
-                (speakerBio
-                    ++ "\n\n["
-                    ++ moreText
-                    ++ " »]("
-                    ++ moreLink
-                    ++ ")"
-                )
+    Html.styled Html.div
+        [ Ui.responsive
+            { desktop = []
+            , mobile =
+                [ Css.property "grid-row" "3"
+                , Css.property "grid-column-start" "1"
+                , Css.property "grid-column-end" "3"
+                ]
+            }
+        ]
+        []
+        [ case event of
+            Talk { speakerBio, moreText, moreLink } ->
+                Ui.markdown
+                    (speakerBio
+                        ++ "\n\n["
+                        ++ moreText
+                        ++ " »]("
+                        ++ moreLink
+                        ++ ")"
+                    )
 
-        Break { additionalInfo } ->
-            Ui.markdown
-                (additionalInfo
-                    |> Maybe.map ((++) "\n\n")
-                    |> Maybe.withDefault ""
-                )
+            Break { additionalInfo } ->
+                Ui.markdown
+                    (additionalInfo
+                        |> Maybe.map ((++) "\n\n")
+                        |> Maybe.withDefault ""
+                    )
+        ]
 
 
 viewTime : Posix -> Html msg
