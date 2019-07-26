@@ -5,6 +5,7 @@ module Ui exposing
     , checkbox
     , desktopOnly
     , errorColor
+    , image
     , linkStyle
     , markdown
     , page
@@ -22,8 +23,6 @@ import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Markdown
 import Routes
-import Svg.Styled as Svg
-import Svg.Styled.Attributes as SvgAttributes
 
 
 type alias Checkbox =
@@ -129,45 +128,80 @@ linkStyle =
         ]
 
 
+bigHeaderStyle : Css.Style
+bigHeaderStyle =
+    Css.batch
+        [ Css.margin Css.zero
+        , serifFont
+        , Css.fontWeight <| Css.int 500
+        , Css.color primaryColor
+        ]
+
+
+h1Style : Css.Style
+h1Style =
+    Css.batch
+        [ bigHeaderStyle
+        , Css.fontSize <| Css.px 72
+        , Css.lineHeight <| Css.px 90
+        , Css.marginBottom <| Css.px 25
+        , Global.adjacentSiblings
+            [ Global.p
+                [ Css.lineHeight <| Css.px 40
+                , Css.fontSize <| Css.px 24
+                , Css.letterSpacing <| Css.px -0.8
+                , Css.color <| Css.hex "444444"
+                ]
+            ]
+        ]
+
+
+h2Style : Css.Style
+h2Style =
+    Css.batch
+        [ bigHeaderStyle
+        , Css.fontSize <| Css.px 36
+        , Css.lineHeight <| Css.px 50
+        , Css.marginTop <| Css.px 90
+        , Css.marginBottom <| Css.px 10
+        ]
+
+
+h3Style : Css.Style
+h3Style =
+    Css.batch
+        [ Css.fontSize <| Css.px 18
+        , Css.fontWeight <| Css.int 500
+        , sansSerifFont
+        ]
+
+
+pStyle : Css.Style
+pStyle =
+    Css.batch
+        [ Css.margin Css.zero
+        , Css.marginBottom <| Css.px 30
+        ]
+
+
+ulStyle : Css.Style
+ulStyle =
+    Css.batch
+        [ Css.paddingLeft <| Css.em 1
+        , Css.marginBottom <| Css.px 30
+        ]
+
+
 markdown : String -> Html msg
 markdown raw =
     Html.styled Html.div
         [ bodyCopyStyle
         , Global.descendants
-            [ Global.each [ Global.h1, Global.h2 ]
-                [ Css.margin Css.zero
-                , serifFont
-                , Css.fontWeight <| Css.int 500
-                , Css.color primaryColor
-                ]
-            , Global.h1
-                [ Css.fontSize <| Css.px 72
-                , Css.lineHeight <| Css.px 90
-                , Css.marginTop <| Css.px 50
-                , Css.marginBottom <| Css.px 25
-                , Global.adjacentSiblings
-                    [ Global.p
-                        [ Css.lineHeight <| Css.px 40
-                        , Css.fontSize <| Css.px 24
-                        , Css.letterSpacing <| Css.px -0.8
-                        , Css.color <| Css.hex "444444"
-                        ]
-                    ]
-                ]
-            , Global.h2
-                [ Css.fontSize <| Css.px 36
-                , Css.lineHeight <| Css.px 50
-                , Css.marginTop <| Css.px 90
-                , Css.marginBottom <| Css.px 10
-                ]
-            , Global.p
-                [ Css.margin Css.zero
-                , Css.marginBottom <| Css.px 30
-                ]
-            , Global.ul
-                [ Css.paddingLeft <| Css.em 1
-                , Css.marginBottom <| Css.px 30
-                ]
+            [ Global.h1 [ h1Style ]
+            , Global.h2 [ h2Style ]
+            , Global.h3 [ h3Style ]
+            , Global.p [ pStyle ]
+            , Global.ul [ ulStyle ]
             , Global.a [ linkStyle ]
             ]
         ]
@@ -184,8 +218,13 @@ markdown raw =
         ]
 
 
-page : Maybe String -> Html msg -> Html msg
-page photo content =
+mainContentId : String
+mainContentId =
+    "main"
+
+
+page : { setFocus : String -> msg, photo : Maybe String, title : String, content : Html msg } -> Html msg
+page { setFocus, photo, title, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
         , Css.backgroundImage <| Css.url "/images/waves.svg"
@@ -199,7 +238,7 @@ page photo content =
             { desktop =
                 [ Css.padding <| Css.px 100
                 , Css.property "grid-template-columns" "200px minmax(auto, 650px)"
-                , Css.property "grid-template-rows" "1fr 100px"
+                , Css.property "grid-template-rows" "50px 1fr 100px"
                 , Css.property "grid-column-gap" "48px"
                 ]
             , mobile =
@@ -209,71 +248,167 @@ page photo content =
             }
         ]
         []
-        [ Html.header []
-            [ Html.styled Html.img
-                [ Css.width <| Css.px 200
-                , desktopOnly
-                    [ Css.property "grid-row" "1"
-                    , Css.property "grid-column" "1"
+        [ skipToContent (setFocus mainContentId)
+        , navigation
+        , header photo title
+        , Html.styled Html.main_
+            [ responsive
+                { desktop =
+                    [ Css.property "grid-row" "2"
+                    , Css.property "grid-column" "2"
                     ]
-                , case photo of
-                    Nothing ->
-                        Css.height (Css.px 200)
-
-                    Just _ ->
-                        Css.batch
-                            [ Css.height (Css.px 242)
-                            , Css.borderRadius (Css.px 30)
-                            , responsive
-                                { desktop = [ Css.marginTop (Css.px -21) ]
-                                , mobile = [ Css.margin2 Css.zero Css.auto ]
-                                }
-                            ]
-                ]
-                [ photo
-                    |> Maybe.withDefault "/images/elm-logo.svg"
-                    |> Attributes.src
-                , Attributes.alt ""
-                ]
-                []
-            ]
-        , Html.styled Html.div
-            [ desktopOnly
-                [ Css.property "grid-row" "1"
-                , Css.property "grid-column" "2"
-                ]
+                , mobile = [ Css.marginTop (Css.px 25) ]
+                }
             , Css.marginBottom (Css.px 50)
+
+            -- we remote the outline of this div. It's not a input element, but
+            -- we need to be able to change the focus so that we can properly
+            -- skip to content for keyboard and screen reader nav.
+            , Css.focus [ Css.outline Css.none ]
             ]
-            [ Attributes.attribute "role" "main" ]
+            [ Attributes.id mainContentId
+            , Attributes.tabindex -1
+            ]
             [ content ]
-        , Html.styled Html.nav
-            [ -- appearance
-              Css.width (Css.pct 100)
-            , Css.borderTop3 (Css.px 3) Css.solid primaryHighContrastColor
-            , Css.backgroundColor (Css.hex "FFFFFF")
-
-            -- position
-            , Css.position Css.fixed
-            , Css.left Css.zero
-            , Css.bottom Css.zero
-
-            -- contents
-            , Css.displayFlex
-            , Css.justifyContent Css.center
-            , Css.alignItems Css.center
-            , sansSerifFont
-            ]
-            [ Attributes.attribute "role" "navigation" ]
-            [ footerLink "Home" <| Routes.path Routes.Index []
-            , footerLink "Speak" <| Routes.path Routes.SpeakAtElmConf []
-            , footerLink "Twitter" "https://twitter.com/elmconf"
-            , footerLink "Instagram" "https://instagram.com/elmconf"
-            ]
+        , footer
         ]
 
 
-footerLink : String -> String -> Html msg
-footerLink title url =
+skipToContent : msg -> Html msg
+skipToContent focusOnContent =
+    Html.styled Html.a
+        [ Css.position Css.absolute
+        , Css.color primaryHighContrastColor
+        , Css.textDecoration Css.none
+
+        -- hidden by default
+        , Css.left (Css.px -1000)
+        , Css.top (Css.px -1000)
+        , Css.height (Css.px 1)
+        , Css.width (Css.px 1)
+        , Css.overflow Css.hidden
+
+        -- shown when the link is active, focused, and hovering
+        , [ Css.focus, Css.active, Css.hover ]
+            |> List.map
+                (\pseudoSelector ->
+                    pseudoSelector
+                        [ Css.left Css.zero
+                        , Css.top (Css.px 5)
+                        , Css.width Css.auto
+                        , Css.height Css.auto
+                        , Css.overflow Css.visible
+                        , Css.padding (Css.px 25)
+                        ]
+                )
+            |> Css.batch
+        ]
+        [ Attributes.href ("#" ++ mainContentId)
+        , Events.onClick focusOnContent
+        ]
+        [ Html.text "Skip to content" ]
+
+
+navigation : Html msg
+navigation =
+    Html.styled Html.nav
+        [ Css.displayFlex
+        , Css.justifyContent Css.flexStart
+        , Css.alignItems Css.center
+        , sansSerifFont
+        , responsive
+            { desktop =
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "2"
+
+                -- compensate for the first link target having a left margin
+                , Css.marginLeft (Css.px -10)
+                ]
+            , mobile =
+                [ Css.flexDirection Css.column
+                , Css.marginBottom (Css.px 25)
+                ]
+            }
+        ]
+        []
+        [ navLink "Home" <| Routes.path Routes.Index []
+        , navLink "About" <| Routes.path Routes.About []
+        , navLink "Travel and Venue" <| Routes.path Routes.TravelAndVenue []
+        , navLink "Schedule" <| Routes.path Routes.Schedule []
+        , navLink "Buy Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
+        ]
+
+
+header : Maybe String -> String -> Html msg
+header photo title =
+    Html.styled Html.header
+        [ responsive
+            { desktop =
+                [ Css.property "grid-row" "1"
+                , Css.property "grid-column" "1"
+                ]
+                    ++ (case photo of
+                            Just _ ->
+                                [ Css.marginTop <| Css.px -21 ]
+
+                            Nothing ->
+                                []
+                       )
+            , mobile = [ Css.margin2 Css.zero Css.auto ]
+            }
+        ]
+        []
+        [ image
+            (case photo of
+                Just src ->
+                    { src = src
+                    , altText = "Photo of " ++ title
+                    , width = 200
+                    , height = 242
+                    , rounded = True
+                    }
+
+                Nothing ->
+                    { src = "/images/elm-logo.svg"
+                    , altText = "elm-conf"
+                    , width = 200
+                    , height = 200
+                    , rounded = False
+                    }
+            )
+        ]
+
+
+type alias ImageConfig =
+    { src : String
+    , altText : String
+    , width : Float
+    , height : Float
+    , rounded : Bool
+    }
+
+
+image : ImageConfig -> Html msg
+image config =
+    Html.styled Html.img
+        ([ Css.width <| Css.px config.width
+         , Css.height <| Css.px config.height
+         ]
+            ++ (if config.rounded then
+                    [ Css.borderRadius (Css.px 30) ]
+
+                else
+                    []
+               )
+        )
+        [ Attributes.src config.src
+        , Attributes.alt config.altText
+        ]
+        []
+
+
+navLink : String -> String -> Html msg
+navLink title url =
     Html.styled Html.a
         [ Css.fontSize <| Css.px 18
         , Css.color primaryHighContrastColor
@@ -283,6 +418,78 @@ footerLink title url =
         ]
         [ Attributes.href url ]
         [ Html.text title ]
+
+
+footer : Html msg
+footer =
+    Html.styled Html.footer
+        [ desktopOnly
+            [ Css.property "grid-row" "3"
+            , Css.property "grid-column" "2"
+            , Css.property "display" "grid"
+            , Css.property "grid-template-columns" "2fr 2fr 1fr"
+            , Css.property "grid-column-gap" "10px"
+            ]
+        ]
+        []
+        [ Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Code of Conduct" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.text "Participation in elm-conf is governed by the "
+                , Html.styled Html.a [ linkStyle ] [ Attributes.href "https://thestrangeloop.com/policies.html" ] [ Html.text "Strange Loop Code of Conduct" ]
+                , Html.text "."
+                ]
+            ]
+        , Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Sponsorships" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.text "elm-conf sponsorships are available at a variety of levels. See the "
+                , Html.styled Html.a
+                    [ linkStyle ]
+                    [ Attributes.href "/elm-conf_2019_Sponsorship_Prospectus.pdf" ]
+                    [ Html.text "sponsorship prospectus" ]
+                , Html.text " or "
+                , Html.styled Html.a
+                    [ linkStyle ]
+                    [ Attributes.href "mailto:elm-conf@thestrangeloop.com" ]
+                    [ Html.text "email elm-conf@thestrangeloop.com" ]
+                , Html.text " for more information."
+                ]
+            ]
+        , Html.section []
+            [ Html.styled Html.h2 [ h3Style ] [] [ Html.text "Contact" ]
+            , Html.styled Html.p
+                [ bodyCopyStyle ]
+                []
+                [ Html.styled Html.ul
+                    [ ulStyle ]
+                    []
+                    [ Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "mailto:elm-conf@thestrangeloop.com" ]
+                            [ Html.text "Email" ]
+                        ]
+                    , Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "https://twitter.com/elmconf" ]
+                            [ Html.text "Twitter" ]
+                        ]
+                    , Html.li []
+                        [ Html.styled Html.a
+                            [ linkStyle ]
+                            [ Attributes.href "https://instagram.com/elmconf" ]
+                            [ Html.text "Instagram" ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
 
 
 primaryColor : Css.Color
