@@ -5,6 +5,8 @@
 
 # elm-conf 2019 Sponsorship Prospectus
 
+[(download this page as a PDF)](./elm-conf_2019_Sponsorship_Prospectus.pdf)
+
 Overview:
 
 elm-conf is a single-day, one-track conference for the Elm programming language community. As in prior years, elm-conf takes place on the Strange Loop preconference day, September 12, at Union Station in St. Louis.
