@@ -450,7 +450,7 @@ footer =
                 [ Html.text "elm-conf sponsorships are available at a variety of levels. See the "
                 , Html.styled Html.a
                     [ linkStyle ]
-                    [ Attributes.href "/elm-conf_2019_Sponsorship_Prospectus.pdf" ]
+                    [ Attributes.href "/sponsorship" ]
                     [ Html.text "sponsorship prospectus" ]
                 , Html.text " or "
                 , Html.styled Html.a
