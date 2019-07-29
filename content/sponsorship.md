@@ -1,9 +1,9 @@
 {
-    "title": "Sponsorship"
+    "title": "Sponsor elm-conf"
 }
 ---
 
-# elm-conf 2019 Sponsorship Prospectus
+# Sponsor elm-conf
 
 [(download this page as a PDF)](./elm-conf_2019_Sponsorship_Prospectus.pdf)
 
@@ -18,8 +18,8 @@ Please contact the organizing team at [elm-conf@thestrangeloop.com](mailto:elm-c
 ### Tier 1 ($2,500)
 
 - **Exclusive to this tier, you get to choose a method of outreach and recruiting through one of the following:**
-    - A table/booth in the conference venue
-    - An announcement during one of the breaks between talks
+  - A table/booth in the conference venue
+  - An announcement during one of the breaks between talks
 - Placement of your own free-standing banner near the main conference stage
 - Primary placement of your logo, link, and a message of your choice on elm-conf.com
 - Primary placement of logo on slides between talks
