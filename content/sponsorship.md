@@ -15,7 +15,7 @@ As a sponsor of elm-conf, you’ll have the opportunity to connect and recruit a
 
 Please contact the organizing team at [elm-conf@thestrangeloop.com](mailto:elm-conf@thestrangeloop.com) with any questions or to purchase sponsorship packages.
 
-### Tier 1 ($2,500)
+## Tier 1 ($2,500)
 
 - **Exclusive to this tier, you get to choose a method of outreach and recruiting through one of the following:**
   - A table/booth in the conference venue
@@ -26,7 +26,7 @@ Please contact the organizing team at [elm-conf@thestrangeloop.com](mailto:elm-c
 - 5 tickets to elm-conf
 - A "thank you" tweet from @elmconf
 
-### Tier 2 ($1,500)
+## Tier 2 ($1,500)
 
 - Placement of your own free-standing banner in the conference venue
 - Secondary placement of logo on slides between talks
@@ -34,7 +34,7 @@ Please contact the organizing team at [elm-conf@thestrangeloop.com](mailto:elm-c
 - 3 tickets to elm-conf
 - A "thank you" tweet from @elmconf
 
-### Video Sponsorship ($3,000)
+## Video Sponsorship ($3,000)
 
 Video sponsorship allows all the talks at elm-conf to be recorded and released for public consumption online. This will happen as soon as possible after the conference. Published videos get over 40,000 views a year, so this sponsorship level expands your reach beyond the conference day for years.
 
@@ -44,7 +44,7 @@ Video sponsorship allows all the talks at elm-conf to be recorded and released f
 - 1 ticket to elm-conf
 - A "thank you" tweet from @elmconf
 
-### Captioning Sponsorship ($3,000)
+## Captioning Sponsorship ($3,000)
 
 Captioning sponsorship allows us to live-caption all the talks at elm-conf and make those captions available on recorded video as well. Captioning makes elm-conf more accessible to all members of the community and is an important part of elm-conf’s commitment to inclusion. Sponsoring captioning allows you to feature your logo in our recorded videos and
 expand your reach beyond the conference day.
@@ -55,7 +55,7 @@ expand your reach beyond the conference day.
 - 1 ticket to elm-conf
 - A "thank you" tweet from @elmconf
 
-### Additional Sponsorship Opportunities
+## Additional Sponsorship Opportunities
 
 Additional small sponsorships can be purchased à la carte. These are things like badges, lanyards, t-shirts, or socks. Please contact us for the estimated cost of any of these sponsorship items—they depend on the final attendance count!
 
