@@ -34,7 +34,8 @@ Please contact the organizing team at [elm-conf@thestrangeloop.com](mailto:elm-c
 - 3 tickets to elm-conf
 - A "thank you" tweet from @elmconf
 
-## Video Sponsorship ($3,000)
+## Video Sponsorship <del>($3,000)</del>
+### Taken. Thanks HubTran!
 
 Video sponsorship allows all the talks at elm-conf to be recorded and released for public consumption online. This will happen as soon as possible after the conference. Published videos get over 40,000 views a year, so this sponsorship level expands your reach beyond the conference day for years.
 
