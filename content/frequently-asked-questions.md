@@ -1,9 +1,11 @@
 {
-    "title": "Travel and Venue"
+    "title": "Frequently Asked Questions"
 }
 ---
 
-# Travel and Venue
+# Frequently Asked Questions
+
+## Travel and Venue
 
 elm-conf will take place on September 12, 2019 at St. Louis Union Station in St. Louis, MO.
 We are returning as a Strange Loop pre-conference event, and attendees are welcome at the Strange Loop party at City Museum during the evening of the 12th.
@@ -71,7 +73,7 @@ If you're a first-time conference-goer and nervous about what to wear, business 
 The weather in September in St. Louis is unpredictable.
 Pack for a variety of weather conditions, and check the forecast before you leave!
 
-## Frequently Asked Questions
+## The Elm community
 
 ### What's this Slack everyone is talking about? Can I get in on that?
 
