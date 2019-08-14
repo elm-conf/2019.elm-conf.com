@@ -203,6 +203,24 @@ markdown raw =
             , Global.p [ pStyle ]
             , Global.ul [ ulStyle ]
             , Global.a [ linkStyle ]
+            , Global.div
+                [ Global.withClass "sponsor-row"
+                    [ Css.property "display" "grid"
+                    , responsive
+                        { desktop =
+                            [ Css.property "grid-template-columns" "33% 66%"
+                            , Css.property "grid-column-gap" "12px"
+                            ]
+                        , mobile =
+                            [ Css.property "grid-template-columns" "1fr"
+                            , Css.property "grid-row-gap" "12px"
+                            ]
+                        }
+                    , Global.descendants
+                        [ Global.img [ Css.width (Css.pct 100) ]
+                        ]
+                    ]
+                ]
             ]
         ]
         []
@@ -331,11 +349,11 @@ navigation =
             }
         ]
         []
-        [ navLink "Home" <| Routes.path Routes.Index []
-        , navLink "About" <| Routes.path Routes.About []
-        , navLink "Travel and Venue" <| Routes.path Routes.TravelAndVenue []
+        [ navLink "About" <| Routes.path Routes.About []
+        , navLink "F.A.Q." <| Routes.path Routes.FrequentlyAskedQuestions []
         , navLink "Schedule" <| Routes.path Routes.Schedule []
-        , navLink "Buy Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
+        , navLink "Sponsors" <| Routes.path Routes.Sponsors []
+        , navLink "Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
 
@@ -450,7 +468,7 @@ footer =
                 [ Html.text "elm-conf sponsorships are available at a variety of levels. See the "
                 , Html.styled Html.a
                     [ linkStyle ]
-                    [ Attributes.href "/elm-conf_2019_Sponsorship_Prospectus.pdf" ]
+                    [ Attributes.href "/sponsorship" ]
                     [ Html.text "sponsorship prospectus" ]
                 , Html.text " or "
                 , Html.styled Html.a

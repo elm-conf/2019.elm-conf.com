@@ -7,8 +7,11 @@ STATIC=$(STATIC_SRC:static/%=public/%)
 PHOTOS_SRC=$(shell find speaker-photos/ -type f)
 PHOTOS=$(PHOTOS_SRC:speaker-photos/%=public/images/speakers/%)
 
+SPONSOR_PHOTOS_SRC=$(shell find sponsor-photos/ -type f)
+SPONSOR_PHOTOS=$(SPONSOR_PHOTOS_SRC:sponsor-photos/%=public/images/sponsors/%)
+
 # content dependencies are generated!
-public: public/index.min.js $(STATIC) $(PHOTOS)
+public: public/index.min.js $(STATIC) $(PHOTOS) $(SPONSOR_PHOTOS)
 	touch -m $@
 
 public/index.js: elm.json src/Api $(ELM_SRC) src/Routes.elm public/404.html
@@ -37,6 +40,10 @@ Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
 public/images/speakers/%: speaker-photos/%
 	@mkdir -p $(@D)
 	convert $< -resize 400x484^ -gravity center -extent 400x484 $@
+
+public/images/sponsors/%: sponsor-photos/%
+	@mkdir -p $(@D)
+	convert $< -resize 400x $@
 
 # package management
 
