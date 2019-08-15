@@ -87,11 +87,11 @@ events =
       )
     , ( Time.millisToPosix 1568304600000
       , Talk
-            { speakerName = "James Carlson"
-            , speakerPhoto = "/images/speakers/james-carlson.jpg"
-            , speakerBio = "James Carlson worked for many years as a math professor.  Since he retired an undisclosed number of years ago, he has been dabbling in functional programing, mostly Elm, but also (lately) some Futhark, a functional language that compiles to optimized GPU code.  He is trying to learn type theory, which combines philosophy, logic, mathematics, and functional programming.  What more could one ask for?  His main contributions to Elm are the jxxcarlson/elm-tar and minilatex packages. The function of the latter is to parse a subset of LaTeX and render it to HTML."
-            , moreText = "James' Talk: *Making Elm talk to your personal Supercomputer*"
-            , moreLink = "/speakers/james-carlson"
+            { speakerName = "Ryan Frazier"
+            , speakerPhoto = "/images/speakers/ryan-frazier.jpg"
+            , speakerBio = "Before switching careers to programming web applications, Ryan Frazier was an aspiring concert pianist. Recently, he discovered the power of Elm and SVG to do music stuff in the browser."
+            , moreText = "Ryan's Talk: *Building a Music Theory API with Types*"
+            , moreLink = "/speakers/ryan-frazier"
             }
       )
     , ( Time.millisToPosix 1568306400000
@@ -102,11 +102,11 @@ events =
       )
     , ( Time.millisToPosix 1568306700000
       , Talk
-            { speakerName = "Ryan Frazier"
-            , speakerPhoto = "/images/speakers/ryan-frazier.jpg"
-            , speakerBio = "Before switching careers to programming web applications, Ryan Frazier was an aspiring concert pianist. Recently, he discovered the power of Elm and SVG to do music stuff in the browser."
-            , moreText = "Ryan's Talk: *Building a Music Theory API with Types*"
-            , moreLink = "/speakers/ryan-frazier"
+            { speakerName = "James Carlson"
+            , speakerPhoto = "/images/speakers/james-carlson.jpg"
+            , speakerBio = "James Carlson worked for many years as a math professor.  Since he retired an undisclosed number of years ago, he has been dabbling in functional programing, mostly Elm, but also (lately) some Futhark, a functional language that compiles to optimized GPU code.  He is trying to learn type theory, which combines philosophy, logic, mathematics, and functional programming.  What more could one ask for?  His main contributions to Elm are the jxxcarlson/elm-tar and minilatex packages. The function of the latter is to parse a subset of LaTeX and render it to HTML."
+            , moreText = "James' Talk: *Making Elm talk to your personal Supercomputer*"
+            , moreLink = "/speakers/james-carlson"
             }
       )
     , ( Time.millisToPosix 1568308500000
