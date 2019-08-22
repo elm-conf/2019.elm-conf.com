@@ -1,6 +1,6 @@
 [build]
-command = "make public"
-publish = "public"
+command = "make dist"
+publish = "dist"
 
 [context.production.environment]
 GRAPHQL_ENDPOINT = "/graphql"

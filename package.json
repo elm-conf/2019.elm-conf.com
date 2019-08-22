@@ -4,18 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "elm-pages develop",
+    "start:prod": "npm run build && http-server ./dist -a localhost -p 3000 -c-1",
+    "build": "elm-pages build && mv dist/404/index.html dist/404.html"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "elm-pages": "1.0.27"
+  },
+  "devDependencies": {
     "@dillonkearns/elm-graphql": "^3.3.0",
     "axe-core": "^3.3.0",
     "cypress": "^3.3.2",
     "cypress-axe": "^0.5.1",
     "cypress-plugin-tab": "^1.0.1",
-    "elm": "0.19.0-bugfix6",
     "elm-format": "^0.8.1",
-    "uglify-js": "3.5.2"
+    "elm-test": "^0.19.0-rev6",
+    "elm": "^0.19.0-no-deps"
   }
 }

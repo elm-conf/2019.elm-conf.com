@@ -1,375 +1,301 @@
 port module Main exposing (main)
 
-import Browser exposing (Document)
-import Browser.Dom as Dom
-import Browser.Navigation as Navigation exposing (Key)
-import CfpJwt exposing (Token)
+import Browser
+import Color exposing (Color)
+import Dict exposing (Dict)
+import Head
+import Head.OpenGraph as OpenGraph
+import Head.SocialMeta as SocialMeta
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
-import Http
-import Json.Decode as Decode exposing (Decoder, Value)
-import Jwt exposing (JwtError)
-import Page.Cfp as Cfp
-import Page.Cfp.Proposals as Proposals
-import Page.Register as Register
-import Page.Schedule as Schedule
-import Routes exposing (Route)
-import Task
-import Time
+import Json.Decode
+import Json.Encode
+import List.Extra
+import Mark
+import Page.Schedule
+import Pages
+import Pages.Content as Content exposing (Content)
+import Pages.Document
+import Pages.Manifest as Manifest
+import Pages.Manifest.Category
+import Pages.Parser exposing (Page)
+import PagesNew exposing (imageUrl, images)
+import RawContent
 import Ui
 import Url exposing (Url)
-import Url.Parser as Parser exposing ((<?>), parse)
-import Url.Parser.Query as Query
 
 
-port tokenChanges : (Maybe String -> msg) -> Sub msg
+main : Pages.Program Model Msg Metadata (Html.Html Msg)
+main =
+    PagesNew.application
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        , documents = [ markdownDocument ]
+        , head = head
+        , manifest = manifest
+        }
 
 
-port setToken : Maybe String -> Cmd msg
+markdownDocument : Pages.Document.DocumentParser Metadata (Html.Html Msg)
+markdownDocument =
+    Pages.Document.parser
+        { extension = "md"
+        , metadata = frontmatterParser
+        , body = \content -> Ok (Ui.markdown content)
+        }
 
 
-port removeToken : () -> Cmd msg
-
-
-type alias Page =
-    { content : String
-    , title : String
-    , photo : Maybe String
+manifest =
+    { backgroundColor = Just Color.white
+    , categories = [ Pages.Manifest.Category.education ]
+    , displayMode = Manifest.MinimalUi
+    , orientation = Manifest.Portrait
+    , description = siteTagline
+    , iarcRatingId = Nothing
+    , name = "elm-conf 2019"
+    , themeColor = Just Color.white
+    , startUrl = PagesNew.pages.schedule
+    , shortName = Just "elm-conf 2019"
+    , sourceIcon = images.elmLogo
     }
 
 
-type alias Session =
-    ( String, CfpJwt.Token )
+type Metadata
+    = SpeakerPage
+        { name : String
+        , photo : String
+        }
+    | RegularPage
+        { title : String
+        , description : Maybe String
+        }
+    | SchedulePage
+        { title : String
+        , description : Maybe String
+        }
+
+
+frontmatterParser : Json.Decode.Decoder Metadata
+frontmatterParser =
+    Json.Decode.oneOf
+        [ Json.Decode.map2
+            (\name photo ->
+                SpeakerPage
+                    { name = name
+                    , photo = photo
+                    }
+            )
+            (Json.Decode.field "title" Json.Decode.string)
+            (Json.Decode.field "photo" Json.Decode.string)
+        , Json.Decode.maybe (Json.Decode.field "type" Json.Decode.string)
+            |> Json.Decode.andThen
+                (\type_ ->
+                    let
+                        constructor =
+                            if type_ == Just "schedule" then
+                                SchedulePage
+
+                            else
+                                RegularPage
+                    in
+                    Json.Decode.map2
+                        (\title description ->
+                            constructor
+                                { title = title
+                                , description = description
+                                }
+                        )
+                        (Json.Decode.field "title" Json.Decode.string)
+                        (Json.Decode.field "description" Json.Decode.string |> Json.Decode.maybe)
+                )
+        ]
 
 
 type alias Model =
-    { key : Key
-    , route : Maybe Route
-    , page : Maybe Page
-
-    -- JWT
-    , session : Maybe Session
-
-    -- graphql information
-    , graphqlEndpoint : String
-
-    -- application-y pages
-    , register : Register.Model
-    , cfp : Cfp.Model
-    , proposals : Proposals.Model
-    }
+    {}
 
 
-type alias Flags =
-    { graphqlEndpoint : String
-    , token : Maybe String
-    }
-
-
-init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init { graphqlEndpoint, token } url key =
-    let
-        route =
-            url
-                |> parse Routes.parser
-                |> Maybe.withDefault Routes.NotFound
-
-        session =
-            CfpJwt.fromFlags token
-
-        ( model, cmd ) =
-            onUrlChange url
-                { key = key
-                , page = Nothing
-                , route = Nothing
-
-                -- JWT
-                , session = session
-
-                -- graphql information
-                , graphqlEndpoint = graphqlEndpoint
-
-                -- application-y pages
-                , register = Register.empty
-                , cfp = Cfp.empty
-                , proposals = Proposals.empty
-                }
-
-        checkToken =
-            case session of
-                Just ( material, { expires } ) ->
-                    Task.perform
-                        (\now ->
-                            if Time.posixToMillis now >= Time.posixToMillis expires then
-                                TokenChanged Nothing
-
-                            else
-                                TokenWasFine
-                        )
-                        Time.now
-
-                Nothing ->
-                    Cmd.none
-    in
-    ( model
-    , Cmd.batch [ checkToken, cmd ]
-    )
+init : ( Model, Cmd Msg )
+init =
+    ( Model, Cmd.none )
 
 
 type Msg
-    = UrlChange Url
-    | UrlRequest Browser.UrlRequest
-    | MarkdownRequestFinished (Result Http.Error String)
-    | RegisterChanged Register.Msg
-    | TokenChanged (Maybe String)
-    | CfpMsg Cfp.Msg
-    | ProposalsMsg Proposals.Msg
-    | TokenWasFine
-    | SetFocus String
-    | NoOp
-
-
-onUrlChange : Url -> Model -> ( Model, Cmd Msg )
-onUrlChange url model =
-    let
-        route =
-            url
-                |> parse Routes.parser
-                |> Maybe.withDefault Routes.NotFound
-    in
-    if model.route == Just route then
-        ( model, Cmd.none )
-
-    else
-        case ( model.session, route ) of
-            ( _, Routes.Cfp ) ->
-                ( model
-                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-                )
-
-            ( _, Routes.CfpProposals ) ->
-                ( model
-                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-                )
-
-            ( _, Routes.Register ) ->
-                ( model
-                , Navigation.replaceUrl model.key <| Routes.path Routes.SpeakAtElmConf []
-                )
-
-            _ ->
-                ( { model
-                    | route = Just route
-                    , page = Nothing
-                  }
-                , loadMarkdown route
-                )
+    = SetFocus String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        UrlChange url ->
-            onUrlChange url model
-
-        UrlRequest (Browser.Internal url) ->
-            if String.endsWith "pdf" url.path then
-                ( model, Navigation.load (Url.toString url) )
-
-            else
-                ( model
-                , Navigation.pushUrl model.key (Url.toString url)
-                )
-
-        UrlRequest (Browser.External url) ->
-            ( model
-            , Navigation.load url
-            )
-
-        MarkdownRequestFinished result ->
-            ( { model
-                | page =
-                    result
-                        |> Result.toMaybe
-                        |> Maybe.andThen parsePage
-              }
-            , Cmd.none
-            )
-
-        RegisterChanged registerMsg ->
-            let
-                ( newRegister, cmds, result ) =
-                    Register.update
-                        { graphqlUrl = model.graphqlEndpoint }
-                        registerMsg
-                        model.register
-            in
-            case result of
-                Register.Continue ->
-                    ( { model | register = newRegister }
-                    , Cmd.map RegisterChanged cmds
-                    )
-
-                Register.Authenticated token ->
-                    ( { model | register = newRegister }
-                    , setToken (Just token)
-                    )
-
-        TokenChanged (Just token) ->
-            ( { model | session = CfpJwt.fromFlags (Just token) }
-            , Navigation.pushUrl model.key <| Routes.path Routes.Cfp []
-            )
-
-        TokenChanged Nothing ->
-            let
-                routeCmd =
-                    case model.route of
-                        Just Routes.Cfp ->
-                            Navigation.pushUrl model.key <| Routes.path Routes.Register []
-
-                        _ ->
-                            Cmd.none
-            in
-            ( { model | session = Nothing }
-            , Cmd.batch [ routeCmd, removeToken () ]
-            )
-
-        CfpMsg cfpMsg ->
-            case model.session of
-                Just ( tokenMaterial, token ) ->
-                    let
-                        ( newCfp, cmd ) =
-                            Cfp.update
-                                { graphqlUrl = model.graphqlEndpoint
-                                , token = tokenMaterial
-                                , userId = token.userId
-                                , key = model.key
-                                }
-                                cfpMsg
-                                model.cfp
-                    in
-                    ( { model | cfp = newCfp }
-                    , Cmd.map CfpMsg cmd
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        ProposalsMsg proposalsMsg ->
-            case model.session of
-                Just ( tokenMaterial, _ ) ->
-                    let
-                        ( newProposals, cmd ) =
-                            Proposals.update
-                                { graphqlUrl = model.graphqlEndpoint
-                                , token = tokenMaterial
-                                }
-                                proposalsMsg
-                                model.proposals
-                    in
-                    ( { model | proposals = newProposals }
-                    , Cmd.map ProposalsMsg cmd
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        TokenWasFine ->
-            ( model, Cmd.none )
-
-        SetFocus toFocus ->
-            ( model
-            , Task.attempt
-                (\_ -> NoOp)
-                (Dom.focus toFocus)
-            )
-
-        NoOp ->
-            ( model, Cmd.none )
-
-
-loadMarkdown : Route -> Cmd Msg
-loadMarkdown route =
-    Http.get
-        { url = Routes.markdown route
-        , expect = Http.expectString MarkdownRequestFinished
-        }
-
-
-parsePage : String -> Maybe Page
-parsePage raw =
-    let
-        decoder contentHolder =
-            Decode.map2 contentHolder
-                (Decode.field "title" Decode.string)
-                (Decode.maybe (Decode.field "photo" Decode.string))
-    in
-    case String.split "---" raw of
-        frontMatter :: rest ->
-            frontMatter
-                |> Decode.decodeString (decoder (Page (String.join "---" rest)))
-                |> Result.toMaybe
-
-        _ ->
-            Nothing
-
-
-view : Model -> Document Msg
-view model =
-    let
-        title =
-            model.page
-                |> Maybe.map .title
-                |> Maybe.withDefault ""
-    in
-    { title = title
-    , body =
-        let
-            content =
-                model.page
-                    |> Maybe.map .content
-                    |> Maybe.withDefault ""
-
-            contentView =
-                case model.route of
-                    Just Routes.Cfp ->
-                        Cfp.view model.cfp >> Html.map CfpMsg
-
-                    Just Routes.CfpProposals ->
-                        Proposals.view model.proposals >> Html.map ProposalsMsg
-
-                    Just Routes.Register ->
-                        Register.view model.register >> Html.map RegisterChanged
-
-                    Just Routes.Schedule ->
-                        Schedule.view
-
-                    _ ->
-                        Ui.markdown
-        in
-        Ui.page
-            { setFocus = SetFocus
-            , photo = Maybe.andThen .photo model.page
-            , title = title
-            , content = contentView content
-            }
-            |> Html.toUnstyled
-            |> List.singleton
-    }
+    ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    tokenChanges TokenChanged
+    Sub.none
 
 
-main : Program Flags Model Msg
-main =
-    Browser.application
-        { init = init
-        , update = update
-        , view = view
-        , subscriptions = subscriptions
-        , onUrlChange = UrlChange
-        , onUrlRequest = UrlRequest
-        }
+view : Model -> List ( List String, Metadata ) -> Page Metadata (Html.Html Msg) -> { title : String, body : Html Msg }
+view model siteMetadata page =
+    let
+        { title, body } =
+            pageView model siteMetadata page
+
+        photo =
+            case page.metadata of
+                SpeakerPage speaker ->
+                    Just speaker.photo
+
+                _ ->
+                    Nothing
+
+        content =
+            case page.metadata of
+                SchedulePage _ ->
+                    Page.Schedule.view page.view
+
+                _ ->
+                    page.view
+
+        -- case model.route of
+        --     Just Routes.Cfp ->
+        --         Cfp.view model.cfp >> Html.map CfpMsg
+        --
+        --     Just Routes.CfpProposals ->
+        --         Proposals.view model.proposals >> Html.map ProposalsMsg
+        --
+        --     Just Routes.Register ->
+        --         Register.view model.register >> Html.map RegisterChanged
+        --
+        --     Just Routes.Schedule ->
+        --         Schedule.view
+        --
+        --     _ ->
+        --         Ui.markdown
+        -- |> List.singleton
+    in
+    { title = title
+    , body =
+        Ui.page
+            { setFocus = SetFocus
+            , photo = photo
+            , title = title
+            , content = content
+            }
+            |> Html.toUnstyled
+    }
+
+
+pageView : Model -> List ( List String, Metadata ) -> Page Metadata (Html.Html Msg) -> { title : String, body : Html Msg }
+pageView model siteMetadata page =
+    case page.metadata of
+        RegularPage metadata ->
+            { title = metadata.title
+            , body =
+                page.view
+                    |> Html.toUnstyled
+            }
+
+        SpeakerPage metadata ->
+            { title = metadata.name
+            , body =
+                page.view
+                    |> Html.toUnstyled
+            }
+
+        SchedulePage metadata ->
+            { title = metadata.title
+            , body =
+                page.view
+                    |> Html.toUnstyled
+            }
+
+
+rootUrl =
+    "https://2019.elm-conf.com"
+
+
+siteTagline =
+    "elm-conf is a one-day conference for the Elm programming language, returning September 12 2019 to St. Louis, MO."
+
+
+siteName =
+    "elm-conf 2019"
+
+
+{-| <https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/abouts-cards>
+<https://htmlhead.dev>
+<https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names>
+<https://ogp.me/>
+-}
+head : Metadata -> List Head.Tag
+head metadata =
+    case metadata of
+        RegularPage page ->
+            OpenGraph.website
+                (OpenGraph.buildCommon
+                    { url = rootUrl
+                    , siteName = siteName
+                    , image =
+                        { url = rootUrl ++ imageUrl images.elmLogo
+                        , alt = "elm-conf logo"
+                        }
+                    , description = page.description |> Maybe.withDefault siteTagline
+                    , title = page.title
+                    }
+                )
+                ++ [ Head.description (page.description |> Maybe.withDefault siteTagline)
+                   ]
+                ++ SocialMeta.summaryLarge
+                    { title = page.title
+                    , description = page.description |> Maybe.withDefault siteTagline |> Just
+                    , image =
+                        Just
+                            { url = rootUrl ++ imageUrl images.elmLogo
+                            , alt = "elm-conf logo"
+                            }
+                    , siteUser = Nothing
+                    }
+
+        SpeakerPage speaker ->
+            OpenGraph.website
+                (OpenGraph.buildCommon
+                    { url = rootUrl
+                    , siteName = siteName
+                    , image =
+                        { url = rootUrl ++ speaker.photo
+                        , alt = speaker.name
+                        }
+                    , description = siteTagline
+                    , title = speaker.name
+                    }
+                )
+                ++ [ Head.description speaker.name
+                   ]
+                ++ SocialMeta.summaryLarge
+                    { title = speaker.name
+                    , description = Just siteTagline
+                    , image =
+                        Just
+                            { url = rootUrl ++ speaker.photo
+                            , alt = speaker.name
+                            }
+                    , siteUser = Nothing
+                    }
+
+        SchedulePage page ->
+            OpenGraph.website
+                (OpenGraph.buildCommon
+                    { url = rootUrl
+                    , siteName = siteName
+                    , image =
+                        { url = rootUrl ++ imageUrl images.elmLogo
+                        , alt = "elm-conf logo"
+                        }
+                    , description = siteTagline
+                    , title = page.title
+                    }
+                )
+                ++ [ Head.description (page.description |> Maybe.withDefault siteTagline)
+                   ]

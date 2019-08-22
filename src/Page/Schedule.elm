@@ -205,7 +205,7 @@ events =
     ]
 
 
-view : String -> Html msg
+view : Html msg -> Html msg
 view topContent =
     let
         viewLine =
@@ -229,7 +229,7 @@ view topContent =
     in
     Html.div
         []
-        [ Ui.markdown topContent
+        [ topContent
         , Html.styled Html.div
             [ Ui.responsive
                 { desktop = [ Css.position Css.relative ]
@@ -285,8 +285,8 @@ viewEvent ( startTime, event ) =
                             Talk _ ->
                                 Css.border3 (Css.px 5) Css.solid Ui.primaryColor
                         , Css.backgroundColor <| Css.hex "FFF"
-                        , Css.width <| Css.px 20
-                        , Css.height <| Css.px 20
+                        , Css.width <| Css.px 10
+                        , Css.height <| Css.px 10
                         , Css.position Css.relative
                         ]
                         []
