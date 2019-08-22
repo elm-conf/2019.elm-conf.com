@@ -1,3 +1,4 @@
+---
 {
     "title": "Abadi Kurniawan",
     "photo": "/images/speakers/abadi-kurniawan.jpg"

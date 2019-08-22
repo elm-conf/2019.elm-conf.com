@@ -1,3 +1,4 @@
+---
 {
     "title": "James Carlson",
     "photo": "/images/speakers/james-carlson.jpg"

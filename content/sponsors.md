@@ -1,6 +1,8 @@
+---
 {
-    "title": "Sponsors"
+"title": "Sponsors"
 }
+
 ---
 
 # Sponsors
