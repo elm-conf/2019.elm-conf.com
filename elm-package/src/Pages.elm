@@ -1,4 +1,4 @@
-module Pages exposing (Flags, Parser, Program, application, cliApplication)
+module Pages exposing (Flags, Model, Msg, Page, Parser, Program, application, cliApplication)
 
 import Browser
 import Browser.Navigation
@@ -13,10 +13,15 @@ import Pages.Content as Content exposing (Content)
 import Pages.ContentCache as ContentCache exposing (ContentCache)
 import Pages.Document
 import Pages.Manifest as Manifest
-import Pages.Parser exposing (Page)
 import Result.Extra
 import Task exposing (Task)
 import Url exposing (Url)
+
+
+type alias Page metadata view =
+    { metadata : metadata
+    , view : view
+    }
 
 
 type alias Content =
@@ -34,7 +39,7 @@ mainView :
 mainView pageView model =
     case model.contentCache of
         Ok site ->
-            pageViewOrError pageView model (Ok site)
+            pageViewOrError pageView model model.contentCache
 
         -- TODO these lookup helpers should not need it to be a Result
         Err errorView ->
@@ -52,14 +57,22 @@ pageViewOrError pageView model cache =
     case ContentCache.lookup cache model.url of
         Just entry ->
             case entry of
-                ContentCache.Parsed metadata viewList ->
-                    pageView model.userModel
-                        (Result.map ContentCache.extractMetadata cache |> Result.withDefault []
-                         -- TODO handle error better
-                        )
-                        { metadata = metadata
-                        , view = viewList
-                        }
+                ContentCache.Parsed metadata viewResult ->
+                    case viewResult of
+                        Ok viewList ->
+                            pageView model.userModel
+                                (Result.map ContentCache.extractMetadata cache
+                                    |> Result.withDefault []
+                                 -- TODO handle error better
+                                )
+                                { metadata = metadata
+                                , view = viewList
+                                }
+
+                        Err error ->
+                            { title = "Parsing error"
+                            , body = Html.text error
+                            }
 
                 ContentCache.NeedContent extension _ ->
                     { title = "", body = Html.text "" }
@@ -142,10 +155,6 @@ init document toJsPort head content initUserModel flags url key =
                 flags.imageAssets
                 |> Result.withDefault Dict.empty
 
-        -- metadata =
-        --     Pages.Document.parseMetadata document
-        --         content
-        --         |> combineTupleResults
         contentCache =
             ContentCache.init document content
     in
@@ -177,7 +186,7 @@ init document toJsPort head content initUserModel flags url key =
               , url = url
               , imageAssets = imageAssets
               , userModel = userModel
-              , contentCache = Ok Dict.empty -- TODO use ContentCache.init
+              , contentCache = contentCache
               }
             , Cmd.batch
                 [ userCmd |> Cmd.map UserMsg
@@ -287,7 +296,7 @@ application :
     , content : Content
     , toJsPort : Json.Encode.Value -> Cmd (Msg userMsg metadata view)
     , head : metadata -> List Head.Tag
-    , manifest : Manifest.Config
+    , manifest : Manifest.Config pathKey
     }
     -> Program userModel userMsg metadata view
 application config =
@@ -337,7 +346,7 @@ cliApplication :
     , content : Content
     , toJsPort : Json.Encode.Value -> Cmd (Msg userMsg metadata view)
     , head : metadata -> List Head.Tag
-    , manifest : Manifest.Config
+    , manifest : Manifest.Config pathKey
     }
     -> Program userModel userMsg metadata view
 cliApplication config =

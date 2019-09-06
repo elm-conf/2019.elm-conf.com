@@ -13,13 +13,13 @@ import Json.Encode
 import List.Extra
 import Mark
 import Page.Schedule
-import Pages
+import Pages exposing (Page)
 import Pages.Content as Content exposing (Content)
 import Pages.Document
 import Pages.Manifest as Manifest
 import Pages.Manifest.Category
-import Pages.Parser exposing (Page)
-import PagesNew exposing (imageUrl, images)
+import Pages.Path as Path
+import PagesNew exposing (images)
 import RawContent
 import Ui
 import Url exposing (Url)
@@ -234,13 +234,16 @@ head metadata =
     case metadata of
         RegularPage page ->
             OpenGraph.website
-                (OpenGraph.buildCommon
+                (OpenGraph.summaryLarge
                     { url = rootUrl
                     , siteName = siteName
                     , image =
-                        { url = rootUrl ++ imageUrl images.elmLogo
+                        { url = rootUrl ++ Path.toString images.elmLogo
                         , alt = "elm-conf logo"
+                        , dimensions = Nothing
+                        , mimeType = Nothing
                         }
+                    , locale = Nothing
                     , description = page.description |> Maybe.withDefault siteTagline
                     , title = page.title
                     }
@@ -252,7 +255,7 @@ head metadata =
                     , description = page.description |> Maybe.withDefault siteTagline |> Just
                     , image =
                         Just
-                            { url = rootUrl ++ imageUrl images.elmLogo
+                            { url = rootUrl ++ Path.toString images.elmLogo
                             , alt = "elm-conf logo"
                             }
                     , siteUser = Nothing
@@ -260,13 +263,16 @@ head metadata =
 
         SpeakerPage speaker ->
             OpenGraph.website
-                (OpenGraph.buildCommon
+                (OpenGraph.summaryLarge
                     { url = rootUrl
                     , siteName = siteName
                     , image =
                         { url = rootUrl ++ speaker.photo
                         , alt = speaker.name
+                        , dimensions = Nothing
+                        , mimeType = Nothing
                         }
+                    , locale = Nothing
                     , description = siteTagline
                     , title = speaker.name
                     }
@@ -286,14 +292,17 @@ head metadata =
 
         SchedulePage page ->
             OpenGraph.website
-                (OpenGraph.buildCommon
+                (OpenGraph.summaryLarge
                     { url = rootUrl
                     , siteName = siteName
                     , image =
-                        { url = rootUrl ++ imageUrl images.elmLogo
+                        { url = rootUrl ++ Path.toString images.elmLogo
                         , alt = "elm-conf logo"
+                        , dimensions = Nothing
+                        , mimeType = Nothing
                         }
                     , description = siteTagline
+                    , locale = Nothing
                     , title = page.title
                     }
                 )

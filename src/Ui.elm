@@ -22,7 +22,8 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Markdown
-import PagesNew exposing (imageUrl, images, pages, routeToString)
+import Pages.Path as Path
+import PagesNew exposing (images, pages)
 
 
 type alias Checkbox =
@@ -245,7 +246,7 @@ page : { setFocus : String -> msg, photo : Maybe String, title : String, content
 page { setFocus, photo, title, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
-        , Css.backgroundImage <| Css.url (imageUrl images.waves)
+        , Css.backgroundImage <| Css.url (Path.toString images.waves)
         , Css.minHeight <| Css.pct 100
         , Css.backgroundRepeat Css.noRepeat
         , Css.backgroundSize Css.contain
@@ -349,10 +350,10 @@ navigation =
             }
         ]
         []
-        [ navLink "About" <| routeToString pages.about
-        , navLink "F.A.Q" <| routeToString pages.frequentlyAskedQuestions
-        , navLink "Schedule" <| routeToString pages.schedule
-        , navLink "Sponsors" <| routeToString pages.sponsors
+        [ navLink "About" <| Path.toString pages.about
+        , navLink "F.A.Q" <| Path.toString pages.frequentlyAskedQuestions
+        , navLink "Schedule" <| Path.toString pages.schedule
+        , navLink "Sponsors" <| Path.toString pages.sponsors
         , navLink "Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
@@ -387,7 +388,7 @@ header photo title =
                     }
 
                 Nothing ->
-                    { src = imageUrl images.elmLogo
+                    { src = Path.toString images.elmLogo
                     , altText = "elm-conf"
                     , width = 200
                     , height = 200
