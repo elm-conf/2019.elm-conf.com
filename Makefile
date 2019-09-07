@@ -16,6 +16,7 @@ static: $(STATIC) $(PHOTOS) $(SPONSOR_PHOTOS)
 
 dist: elm.json src/Api $(ELM_SRC) $(STATIC) $(PHOTOS)
 	npm run build
+	touch -m $@
 
 public/%: static/%
 	@mkdir -p $(@D)
