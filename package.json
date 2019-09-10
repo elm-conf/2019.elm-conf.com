@@ -6,7 +6,7 @@
   "scripts": {
     "start": "elm-pages develop",
     "start:prod": "npm run build && http-server ./dist -a localhost -p 3000 -c-1",
-    "build": "rm -rf elm-stuff/elm-pages && mkdir elm-stuff && elm-pages build && mv dist/404/index.html dist/404.html"
+    "build": "rm -rf elm-stuff/elm-pages && mkdir -p elm-stuff && elm-pages build && mv dist/404/index.html dist/404.html"
   },
   "author": "",
   "license": "ISC",
