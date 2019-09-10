@@ -1,11 +1,14 @@
 {
     "type": "application",
     "source-directories": [
-        "src"
+        "src",
+        "elm-package/src",
+        "gen"
     ],
     "elm-version": "0.19.0",
     "dependencies": {
         "direct": {
+            "avh4/elm-color": "1.0.0",
             "dillonkearns/elm-graphql": "4.3.1",
             "elm/browser": "1.0.1",
             "elm/core": "1.0.2",
@@ -16,7 +19,14 @@
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
+            "elm-community/list-extra": "8.2.0",
+            "elm-community/result-extra": "2.2.1",
+            "elm-community/string-extra": "4.0.1",
             "elm-explorations/markdown": "1.0.0",
+            "lukewestby/elm-string-interpolate": "1.0.3",
+            "mdgriffith/elm-markup": "3.0.1",
+            "mdgriffith/elm-ui": "1.1.4",
+            "noahzgordon/elm-color-extra": "1.0.2",
             "rtfeldman/elm-css": "16.0.1",
             "simonh1000/elm-jwt": "7.0.0",
             "stoeffel/elm-verify": "5.0.0"
@@ -24,19 +34,20 @@
         "indirect": {
             "Skinney/murmur3": "2.0.8",
             "elm/bytes": "1.0.8",
-            "elm/file": "1.0.4",
+            "elm/file": "1.0.5",
+            "elm/parser": "1.1.0",
             "elm/virtual-dom": "1.0.2",
-            "elm-community/list-extra": "8.1.0",
-            "lukewestby/elm-string-interpolate": "1.0.3",
+            "fredcy/elm-parseint": "2.0.1",
             "rtfeldman/elm-hex": "1.0.0",
             "truqu/elm-base64": "2.0.4"
         }
     },
     "test-dependencies": {
-        "direct": {},
+        "direct": {
+            "elm-explorations/test": "1.2.2"
+        },
         "indirect": {
-            "elm/parser": "1.1.0",
-            "mdgriffith/elm-ui": "1.1.0"
+            "elm/random": "1.0.0"
         }
     }
 }

@@ -1,3 +1,4 @@
+---
 {
     "title": "Brooke Angel",
     "photo": "/images/speakers/brooke-angel.jpg"

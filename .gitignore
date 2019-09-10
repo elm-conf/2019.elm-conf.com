@@ -1,7 +1,9 @@
+/.cache/
 /Makefile.public
 /cypress/integration/a11y_spec.js
 /cypress/screenshots
 /cypress/videos
+/dist/
 /elm-stuff
 /node_modules
 /public

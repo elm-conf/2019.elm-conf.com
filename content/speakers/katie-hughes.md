@@ -1,3 +1,4 @@
+---
 {
     "title": "Katie Hughes",
     "photo": "/images/speakers/katie-hughes.jpeg"

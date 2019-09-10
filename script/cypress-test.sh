@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-make public
+make dist
 
-cd public
+cd dist
 python -m http.server 8001 > /dev/null 2>&1 &
 SERVER=$!
 cd -
 
-echo "serving /public on PID $SERVER"
+echo "serving /dist on PID $SERVER"
 
 cleanup() {
     kill "$SERVER"

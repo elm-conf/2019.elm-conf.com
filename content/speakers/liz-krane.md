@@ -1,3 +1,4 @@
+---
 {
     "title": "Liz Krane",
     "photo": "/images/speakers/liz-krane.jpg"

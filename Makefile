@@ -5,23 +5,18 @@ STATIC_SRC=$(shell find static/ -type f)
 STATIC=$(STATIC_SRC:static/%=public/%)
 
 PHOTOS_SRC=$(shell find speaker-photos/ -type f)
-PHOTOS=$(PHOTOS_SRC:speaker-photos/%=public/images/speakers/%)
+PHOTOS=$(PHOTOS_SRC:speaker-photos/%=images/speakers/%)
 
 SPONSOR_PHOTOS_SRC=$(shell find sponsor-photos/ -type f)
-SPONSOR_PHOTOS=$(SPONSOR_PHOTOS_SRC:sponsor-photos/%=public/images/sponsors/%)
+SPONSOR_PHOTOS=$(SPONSOR_PHOTOS_SRC:sponsor-photos/%=images/sponsors/%)
 
 # content dependencies are generated!
-public: public/index.min.js $(STATIC) $(PHOTOS) $(SPONSOR_PHOTOS)
+static: $(STATIC) $(PHOTOS) $(SPONSOR_PHOTOS)
 	touch -m $@
 
-public/index.js: elm.json src/Api $(ELM_SRC) src/Routes.elm public/404.html
-	npx elm make src/Main.elm --output $@ --optimize
-
-public/index.min.js: public/index.js node_modules
-	./node_modules/.bin/uglifyjs $< --compress "pure_funcs=[F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9],pure_getters,keep_fargs=false,unsafe_comps,unsafe" | ./node_modules/.bin/uglifyjs --mangle > $@
-
-public/404.html: public/not-found/index.html
-	cp $< $@
+dist: elm.json src/Api $(ELM_SRC) $(STATIC) $(PHOTOS)
+	npm run build
+	touch -m $@
 
 public/%: static/%
 	@mkdir -p $(@D)
@@ -30,18 +25,13 @@ public/%: static/%
 src/Api: node_modules
 	npx elm-graphql https://cfp.elm-conf.com/graphql --base Api
 
-include Makefile.public
-
-Makefile.public: script/generate-makefile.py $(CONTENT_SRC)
-	$< $(CONTENT_SRC) > $@
-
 # photos
 
-public/images/speakers/%: speaker-photos/%
+images/speakers/%: speaker-photos/%
 	@mkdir -p $(@D)
 	convert $< -resize 400x484^ -gravity center -extent 400x484 $@
 
-public/images/sponsors/%: sponsor-photos/%
+images/sponsors/%: sponsor-photos/%
 	@mkdir -p $(@D)
 	convert $< -resize 400x $@
 
@@ -52,16 +42,16 @@ node_modules: package.json package-lock.json
 	@touch -m $@
 
 clean:
-	rm -rf public Makefile.public src/Routes.elm
+	rm -rf dist
 
 # testing
 
 test: cypress/integration/a11y_spec.js
 	./script/cypress-test.sh
 
-cypress/integration/a11y_spec.js: cypress/a11y_runner.js public
+cypress/integration/a11y_spec.js: cypress/a11y_runner.js dist
 	@mkdir -p $(@D)
 	echo 'const URLS = `\\' > $@
-	find public -name 'index.html' -type f | sed -E 's/^public//' | xargs dirname >> $@
+	find dist -name 'index.html' -type f | sed -E 's/^dist//' | xargs dirname >> $@
 	echo '`;' >> $@
 	cat $< >> $@

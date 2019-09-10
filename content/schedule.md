@@ -1,6 +1,8 @@
+---
 {
     "title": "Speakers and Schedule",
-    "description": "elm-conf will take place September 12, 2019 at Union Station in St. Louis, MO as part of the Strange Loop preconference."
+    "description": "elm-conf will take place September 12, 2019 at Union Station in St. Louis, MO as part of the Strange Loop preconference.",
+    "type": "schedule"
 }
 ---
 
