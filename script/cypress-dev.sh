@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-make public
+make dist
 
-cd public
+cd dist
 python -m http.server 8001 &
 SERVER=$!
 cd -

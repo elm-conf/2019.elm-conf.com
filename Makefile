@@ -52,6 +52,6 @@ test: cypress/integration/a11y_spec.js
 cypress/integration/a11y_spec.js: cypress/a11y_runner.js dist
 	@mkdir -p $(@D)
 	echo 'const URLS = `\\' > $@
-	find public -name 'index.html' -type f | sed -E 's/^public//' | xargs dirname >> $@
+	find dist -name 'index.html' -type f | sed -E 's/^dist//' | xargs dirname >> $@
 	echo '`;' >> $@
 	cat $< >> $@
