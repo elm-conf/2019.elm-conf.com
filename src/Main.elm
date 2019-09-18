@@ -65,6 +65,7 @@ type Metadata
     = SpeakerPage
         { name : String
         , photo : String
+        , video : String
         }
     | RegularPage
         { title : String
@@ -79,15 +80,17 @@ type Metadata
 frontmatterParser : Json.Decode.Decoder Metadata
 frontmatterParser =
     Json.Decode.oneOf
-        [ Json.Decode.map2
-            (\name photo ->
+        [ Json.Decode.map3
+            (\name photo video ->
                 SpeakerPage
                     { name = name
                     , photo = photo
+                    , video = video
                     }
             )
             (Json.Decode.field "title" Json.Decode.string)
             (Json.Decode.field "photo" Json.Decode.string)
+            (Json.Decode.succeed "VIDEO URL!")
         , Json.Decode.maybe (Json.Decode.field "type" Json.Decode.string)
             |> Json.Decode.andThen
                 (\type_ ->
