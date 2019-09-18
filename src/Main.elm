@@ -46,6 +46,38 @@ markdownDocument =
         }
 
 
+markupDocument : Pages.Document.DocumentParser Metadata (Html.Html Msg)
+markupDocument =
+    Pages.Document.markupParser
+        (Mark.document identity speakerMetadata)
+        speakerPage
+
+
+speakerPage : Mark.Document (Html.Html Msg)
+speakerPage =
+    Mark.documentWith (\metadata body -> Html.text "TODO (doc)")
+        { metadata = speakerMetadata
+        , body =
+            Mark.manyOf
+                [ Mark.textWith
+                    { view = \_ _ -> Html.text "TODO (text)"
+                    , replacements = Mark.commonReplacements
+                    , inlines = []
+                    }
+                ]
+        }
+
+
+speakerMetadata : Mark.Block Metadata
+speakerMetadata =
+    Mark.record "Speaker"
+        (\name photo video -> SpeakerPage { name = name, photo = photo, video = video })
+        |> Mark.field "name" Mark.string
+        |> Mark.field "photo" Mark.string
+        |> Mark.field "video" Mark.string
+        |> Mark.toBlock
+
+
 manifest =
     { backgroundColor = Just Color.white
     , categories = [ Pages.Manifest.Category.education ]
