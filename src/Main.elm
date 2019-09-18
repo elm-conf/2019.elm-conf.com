@@ -1,4 +1,4 @@
-port module Main exposing (main)
+port module Main exposing (main, speakerPage)
 
 import Browser
 import Color exposing (Color)
@@ -31,7 +31,7 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , documents = [ markdownDocument ]
+        , documents = [ markdownDocument, markupDocument ]
         , head = head
         , manifest = manifest
         }
