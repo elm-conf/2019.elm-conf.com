@@ -305,12 +305,6 @@ content =
     , extension = "md"
     } )
   ,
-  ( ["speakers", "tessa-kelly"]
-    , { frontMatter = """{"title":"Tessa Kelly","photo":"/images/speakers/tessa-kelly.png"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
   ( ["sponsors"]
     , { frontMatter = """{"title":"Sponsors"}
 """ , body = Nothing
@@ -321,6 +315,12 @@ content =
     , { frontMatter = """{"title":"Sponsor elm-conf"}
 """ , body = Nothing
     , extension = "md"
+    } )
+  ,
+  ( ["speakers", "tessa-kelly"]
+    , { frontMatter = """
+""" , body = Nothing
+    , extension = "emu"
     } )
   
     ]
