@@ -1,19 +1,4 @@
-module Ui exposing
-    ( Checkbox
-    , bodyCopyStyle
-    , buttonStyle
-    , checkbox
-    , desktopOnly
-    , errorColor
-    , image
-    , linkStyle
-    , markdown
-    , page
-    , primaryColor
-    , responsive
-    , sansSerifFont
-    , serifFont
-    )
+module Ui exposing (..)
 
 import Css exposing (Style)
 import Css.Global as Global
