@@ -1,13 +1,15 @@
-port module Main exposing (main)
+port module Main exposing (main, markupPage)
 
 import Browser
 import Color exposing (Color)
+import Css
 import Dict exposing (Dict)
 import Head
 import Head.OpenGraph as OpenGraph
 import Head.SocialMeta as SocialMeta
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
+import Html.Styled.Attributes as Attributes exposing (css)
 import Json.Decode
 import Json.Encode
 import List.Extra
@@ -31,7 +33,7 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , documents = [ markdownDocument ]
+        , documents = [ markdownDocument, markupDocument ]
         , head = head
         , manifest = manifest
         }
@@ -44,6 +46,116 @@ markdownDocument =
         , metadata = frontmatterParser
         , body = \content -> Ok (Ui.markdown content)
         }
+
+
+markupDocument : Pages.Document.DocumentParser Metadata (Html.Html Msg)
+markupDocument =
+    Pages.Document.markupParser
+        (Mark.document identity speakerMetadata)
+        markupPage
+
+
+markupPage : Mark.Document (Html.Html Msg)
+markupPage =
+    Mark.manyOf
+        [ Mark.map
+            (Html.p
+                [ css
+                    [ Ui.bodyCopyStyle
+                    , Ui.pStyle
+                    ]
+                ]
+            )
+            markupText
+        , Mark.record "H1"
+            (Html.h1 [ css [ Ui.h1Style ] ])
+            |> Mark.field "text" markupText
+            |> Mark.toBlock
+        , Mark.record "H2"
+            (Html.h2 [ css [ Ui.h2Style ] ])
+            |> Mark.field "text" markupText
+            |> Mark.toBlock
+        , Mark.record "YouTube"
+            (\id ->
+                Html.div
+                    [ css
+                        [ Css.position Css.relative
+                        , Css.paddingBottom (Css.pct 56.25)
+                        , Css.height Css.zero
+                        , Css.overflow Css.hidden
+                        , Css.maxWidth (Css.pct 100)
+                        , Css.marginBottom (Css.px 10)
+                        ]
+                    ]
+                    [ Html.iframe
+                        [ Attributes.src ("https://www.youtube-nocookie.com/embed/" ++ id)
+                        , Attributes.attribute "frameBorder" "0"
+                        , Attributes.attribute "allowFullscreen" "true"
+                        , css
+                            [ Css.position Css.absolute
+                            , Css.top Css.zero
+                            , Css.left Css.zero
+                            , Css.width (Css.pct 100)
+                            , Css.height (Css.pct 100)
+                            ]
+                        ]
+                        []
+                    ]
+            )
+            |> Mark.field "id" Mark.string
+            |> Mark.toBlock
+        ]
+        |> Mark.document (Html.section [])
+
+
+markupText : Mark.Block (List (Html.Html Msg))
+markupText =
+    Mark.textWith
+        { view = \styles text -> styledText (stylesFromMarkStyles styles) text
+        , replacements = Mark.commonReplacements
+        , inlines = []
+        }
+
+
+type Style
+    = Bold
+    | Italic
+    | Strike
+
+
+stylesFromMarkStyles : Mark.Styles -> List Style
+stylesFromMarkStyles { bold, italic, strike } =
+    [ ( Bold, bold )
+    , ( Italic, italic )
+    , ( Strike, strike )
+    ]
+        |> List.filter Tuple.second
+        |> List.map Tuple.first
+
+
+styledText : List Style -> String -> Html.Html msg
+styledText styles text =
+    case styles of
+        [] ->
+            Html.text text
+
+        Bold :: rest ->
+            Html.strong [] [ styledText rest text ]
+
+        Italic :: rest ->
+            Html.em [] [ styledText rest text ]
+
+        Strike :: rest ->
+            Html.s [] [ styledText rest text ]
+
+
+speakerMetadata : Mark.Block Metadata
+speakerMetadata =
+    Mark.record "Speaker"
+        (\name photo -> SpeakerPage { name = name, photo = photo })
+        |> Mark.field "name" Mark.string
+        |> Mark.field "photo" Mark.string
+        |> Mark.toBlock
 
 
 manifest =

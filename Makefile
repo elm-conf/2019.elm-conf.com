@@ -10,6 +10,8 @@ PHOTOS=$(PHOTOS_SRC:speaker-photos/%=images/speakers/%)
 SPONSOR_PHOTOS_SRC=$(shell find sponsor-photos/ -type f)
 SPONSOR_PHOTOS=$(SPONSOR_PHOTOS_SRC:sponsor-photos/%=images/sponsors/%)
 
+all: dist
+
 # content dependencies are generated!
 static: $(STATIC) $(PHOTOS) $(SPONSOR_PHOTOS)
 	touch -m $@

@@ -251,66 +251,6 @@ content =
     , extension = "md"
     } )
   ,
-  ( ["speakers", "abadi-kurniawan"]
-    , { frontMatter = """{"title":"Abadi Kurniawan","photo":"/images/speakers/abadi-kurniawan.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "brooke-angel"]
-    , { frontMatter = """{"title":"Brooke Angel","photo":"/images/speakers/brooke-angel.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "ian-mackenzie"]
-    , { frontMatter = """{"title":"Ian Mackenzie","photo":"/images/speakers/ian-mackenzie.jpeg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "james-carlson"]
-    , { frontMatter = """{"title":"James Carlson","photo":"/images/speakers/james-carlson.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "james-gary"]
-    , { frontMatter = """{"title":"James Gary","photo":"/images/speakers/james-gary.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "katie-hughes"]
-    , { frontMatter = """{"title":"Katie Hughes","photo":"/images/speakers/katie-hughes.jpeg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "katja-mordaunt"]
-    , { frontMatter = """{"title":"Katja Mordaunt","photo":"/images/speakers/katja-mordaunt.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "liz-krane"]
-    , { frontMatter = """{"title":"Liz Krane","photo":"/images/speakers/liz-krane.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "ryan-frazier"]
-    , { frontMatter = """{"title":"Ryan Frazier","photo":"/images/speakers/ryan-frazier.jpg"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
-  ( ["speakers", "tessa-kelly"]
-    , { frontMatter = """{"title":"Tessa Kelly","photo":"/images/speakers/tessa-kelly.png"}
-""" , body = Nothing
-    , extension = "md"
-    } )
-  ,
   ( ["sponsors"]
     , { frontMatter = """{"title":"Sponsors"}
 """ , body = Nothing
@@ -321,6 +261,96 @@ content =
     , { frontMatter = """{"title":"Sponsor elm-conf"}
 """ , body = Nothing
     , extension = "md"
+    } )
+  ,
+  ( ["speakers", "abadi-kurniawan"]
+    , { frontMatter = """
+|> Speaker
+    name = Abadi Kurniawan
+    photo = /images/speakers/abadi-kurniawan.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "brooke-angel"]
+    , { frontMatter = """
+|> Speaker
+    name = Brooke Angel
+    photo = /images/speakers/brooke-angel.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "ian-mackenzie"]
+    , { frontMatter = """
+|> Speaker
+    name = Ian Mackenzie
+    photo = /images/speakers/ian-mackenzie.jpeg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "james-carlson"]
+    , { frontMatter = """
+|> Speaker
+    name = James Carlson
+    photo = /images/speakers/james-carlson.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "james-gary"]
+    , { frontMatter = """
+|> Speaker
+    name = James Gary
+    photo = /images/speakers/james-gary.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "katie-hughes"]
+    , { frontMatter = """
+|> Speaker
+    name = Katie Hughes
+    photo = /images/speakers/katie-hughes.jpeg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "katja-mordaunt"]
+    , { frontMatter = """
+|> Speaker
+    name = Katja Mordaunt
+    photo = /images/speakers/katja-mordaunt.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "liz-krane"]
+    , { frontMatter = """
+|> Speaker
+    name = Liz Krane
+    photo = /images/speakers/liz-krane.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "ryan-frazier"]
+    , { frontMatter = """
+|> Speaker
+    name = Ryan Frazier
+    photo = /images/speakers/ryan-frazier.jpg
+""" , body = Nothing
+    , extension = "emu"
+    } )
+  ,
+  ( ["speakers", "tessa-kelly"]
+    , { frontMatter = """
+|> Speaker
+    name = Tessa Kelly
+    photo = /images/speakers/tessa-kelly.png
+""" , body = Nothing
+    , extension = "emu"
     } )
   
     ]
