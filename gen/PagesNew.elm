@@ -319,6 +319,9 @@ content =
   ,
   ( ["speakers", "tessa-kelly"]
     , { frontMatter = """
+|> Speaker
+    name = Tessa Kelly
+    photo = /images/speakers/tessa-kelly.png
 """ , body = Nothing
     , extension = "emu"
     } )
