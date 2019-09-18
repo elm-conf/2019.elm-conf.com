@@ -1,7 +1,8 @@
 ---
 {
     "title": "Tessa Kelly",
-    "photo": "/images/speakers/tessa-kelly.png"
+    "photo": "/images/speakers/tessa-kelly.png",
+    "video": "https://www.youtube.com/watch?v=rIxCwPPA-D8"
 }
 ---
 
