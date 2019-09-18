@@ -19,8 +19,9 @@
     "cypress": "^3.3.2",
     "cypress-axe": "^0.5.1",
     "cypress-plugin-tab": "^1.0.1",
+    "elm": "^0.19.0-no-deps",
     "elm-format": "^0.8.1",
-    "elm-test": "^0.19.0-rev6",
-    "elm": "^0.19.0-no-deps"
+    "elm-markup": "^0.1.1",
+    "elm-test": "^0.19.0-rev6"
   }
 }
