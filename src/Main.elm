@@ -71,10 +71,9 @@ speakerPage =
 speakerMetadata : Mark.Block Metadata
 speakerMetadata =
     Mark.record "Speaker"
-        (\name photo video -> SpeakerPage { name = name, photo = photo, video = video })
+        (\name photo -> SpeakerPage { name = name, photo = photo })
         |> Mark.field "name" Mark.string
         |> Mark.field "photo" Mark.string
-        |> Mark.field "video" Mark.string
         |> Mark.toBlock
 
 
@@ -97,7 +96,6 @@ type Metadata
     = SpeakerPage
         { name : String
         , photo : String
-        , video : String
         }
     | RegularPage
         { title : String
@@ -112,17 +110,15 @@ type Metadata
 frontmatterParser : Json.Decode.Decoder Metadata
 frontmatterParser =
     Json.Decode.oneOf
-        [ Json.Decode.map3
-            (\name photo video ->
+        [ Json.Decode.map2
+            (\name photo ->
                 SpeakerPage
                     { name = name
                     , photo = photo
-                    , video = video
                     }
             )
             (Json.Decode.field "title" Json.Decode.string)
             (Json.Decode.field "photo" Json.Decode.string)
-            (Json.Decode.succeed "VIDEO URL!")
         , Json.Decode.maybe (Json.Decode.field "type" Json.Decode.string)
             |> Json.Decode.andThen
                 (\type_ ->
