@@ -76,7 +76,7 @@ markupPage =
             |> Mark.field "text" markupText
             |> Mark.toBlock
         , Mark.record "YouTube"
-            (\link ->
+            (\id ->
                 Html.div
                     [ css
                         [ Css.position Css.relative
@@ -88,7 +88,7 @@ markupPage =
                         ]
                     ]
                     [ Html.iframe
-                        [ Attributes.src link
+                        [ Attributes.src ("https://www.youtube-nocookie.com/embed/" ++ id)
                         , Attributes.attribute "frameBorder" "0"
                         , Attributes.attribute "allowFullscreen" "true"
                         , css
@@ -102,7 +102,7 @@ markupPage =
                         []
                     ]
             )
-            |> Mark.field "link" Mark.string
+            |> Mark.field "id" Mark.string
             |> Mark.toBlock
         ]
         |> Mark.document (Html.section [])
