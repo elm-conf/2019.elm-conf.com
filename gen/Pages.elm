@@ -1,34 +1,47 @@
-port module PagesNew exposing (PathKey, all, allImages, application, buildPage, images, isValidRoute, pages)
+port module Pages exposing (PathKey, allPages, allImages, application, images, isValidRoute, pages)
 
-import Dict exposing (Dict)
 import Color exposing (Color)
 import Head
 import Html exposing (Html)
 import Json.Decode
 import Json.Encode
 import Mark
-import Pages
+import Pages.Platform
 import Pages.ContentCache exposing (Page)
 import Pages.Manifest exposing (DisplayMode, Orientation)
 import Pages.Manifest.Category as Category exposing (Category)
 import Url.Parser as Url exposing ((</>), s)
-import Pages.Document
-import Pages.Path as Path exposing (Path)
+import Pages.Document as Document
+import Pages.ImagePath as ImagePath exposing (ImagePath)
+import Pages.PagePath as PagePath exposing (PagePath)
+import Pages.Directory as Directory exposing (Directory)
 
 
 type PathKey
     = PathKey
 
 
-buildImage : List String -> Path PathKey Path.ToImage
+buildImage : List String -> ImagePath PathKey
 buildImage path =
-    Path.buildImage PathKey ("images" :: path)
+    ImagePath.build PathKey ("images" :: path)
 
 
 
-buildPage : List String -> Path PathKey Path.ToPage
+buildPage : List String -> PagePath PathKey
 buildPage path =
-    Path.buildPage PathKey path
+    PagePath.build PathKey path
+
+
+directoryWithIndex : List String -> Directory PathKey Directory.WithIndex
+directoryWithIndex path =
+    Directory.withIndex PathKey allPages path
+
+
+directoryWithoutIndex : List String -> Directory PathKey Directory.WithoutIndex
+directoryWithoutIndex path =
+    Directory.withoutIndex PathKey allPages path
+
+
 port toJsPort : Json.Encode.Value -> Cmd msg
 
 
@@ -36,29 +49,32 @@ application :
     { init : ( userModel, Cmd userMsg )
     , update : userMsg -> userModel -> ( userModel, Cmd userMsg )
     , subscriptions : userModel -> Sub userMsg
-    , view : userModel -> List ( List String, metadata ) -> Page metadata view -> { title : String, body : Html userMsg }
-    , head : metadata -> List Head.Tag
-    , documents : List (Pages.Document.DocumentParser metadata view)
+    , view : userModel -> List ( PagePath PathKey, metadata ) -> Page metadata view PathKey -> { title : String, body : Html userMsg }
+    , head : metadata -> List (Head.Tag PathKey)
+    , documents : List ( String, Document.DocumentHandler metadata view )
     , manifest : Pages.Manifest.Config PathKey
+    , canonicalSiteUrl : String
     }
-    -> Pages.Program userModel userMsg metadata view
+    -> Pages.Platform.Program userModel userMsg metadata view
 application config =
-    Pages.application
+    Pages.Platform.application
         { init = config.init
         , view = config.view
         , update = config.update
         , subscriptions = config.subscriptions
-        , document = Dict.fromList config.documents
+        , document = Document.fromList config.documents
         , content = content
         , toJsPort = toJsPort
         , head = config.head
         , manifest = config.manifest
+        , canonicalSiteUrl = config.canonicalSiteUrl
+        , pathKey = PathKey
         }
 
 
 
-all : List (Path PathKey Path.ToPage)
-all =
+allPages : List (PagePath PathKey)
+allPages =
     [ (buildPage [ "about" ])
     , (buildPage [ "cfp" ])
     , (buildPage [ "cfp", "proposals" ])
@@ -100,37 +116,12 @@ pages =
         , lizKrane = (buildPage [ "speakers", "liz-krane" ])
         , ryanFrazier = (buildPage [ "speakers", "ryan-frazier" ])
         , tessaKelly = (buildPage [ "speakers", "tessa-kelly" ])
-        , all = [ (buildPage [ "speakers", "abadi-kurniawan" ]), (buildPage [ "speakers", "brooke-angel" ]), (buildPage [ "speakers", "ian-mackenzie" ]), (buildPage [ "speakers", "james-carlson" ]), (buildPage [ "speakers", "james-gary" ]), (buildPage [ "speakers", "katie-hughes" ]), (buildPage [ "speakers", "katja-mordaunt" ]), (buildPage [ "speakers", "liz-krane" ]), (buildPage [ "speakers", "ryan-frazier" ]), (buildPage [ "speakers", "tessa-kelly" ]) ]
+        , directory = directoryWithoutIndex ["speakers"]
         }
     , sponsors = (buildPage [ "sponsors" ])
     , sponsorship = (buildPage [ "sponsorship" ])
-    , all = [ (buildPage [ "about" ]), (buildPage [ "cfp" ]), (buildPage [ "frequently-asked-questions" ]), (buildPage [  ]), (buildPage [ "register" ]), (buildPage [ "schedule" ]), (buildPage [ "speak-at-elm-conf" ]), (buildPage [ "sponsors" ]), (buildPage [ "sponsorship" ]) ]
+    , directory = directoryWithIndex []
     }
-
-urlParser : Url.Parser (Path PathKey Path.ToPage -> a) a
-urlParser =
-    Url.oneOf
-        [ Url.map (buildPage [ "about" ]) (s "about")
-        , Url.map (buildPage [ "cfp" ]) (s "cfp")
-        , Url.map (buildPage [ "cfp", "proposals" ]) (s "cfp" </> s "proposals")
-        , Url.map (buildPage [ "frequently-asked-questions" ]) (s "frequently-asked-questions")
-        , Url.map (buildPage [  ]) (s "index")
-        , Url.map (buildPage [ "register" ]) (s "register")
-        , Url.map (buildPage [ "schedule" ]) (s "schedule")
-        , Url.map (buildPage [ "speak-at-elm-conf" ]) (s "speak-at-elm-conf")
-        , Url.map (buildPage [ "speakers", "abadi-kurniawan" ]) (s "speakers" </> s "abadi-kurniawan")
-        , Url.map (buildPage [ "speakers", "brooke-angel" ]) (s "speakers" </> s "brooke-angel")
-        , Url.map (buildPage [ "speakers", "ian-mackenzie" ]) (s "speakers" </> s "ian-mackenzie")
-        , Url.map (buildPage [ "speakers", "james-carlson" ]) (s "speakers" </> s "james-carlson")
-        , Url.map (buildPage [ "speakers", "james-gary" ]) (s "speakers" </> s "james-gary")
-        , Url.map (buildPage [ "speakers", "katie-hughes" ]) (s "speakers" </> s "katie-hughes")
-        , Url.map (buildPage [ "speakers", "katja-mordaunt" ]) (s "speakers" </> s "katja-mordaunt")
-        , Url.map (buildPage [ "speakers", "liz-krane" ]) (s "speakers" </> s "liz-krane")
-        , Url.map (buildPage [ "speakers", "ryan-frazier" ]) (s "speakers" </> s "ryan-frazier")
-        , Url.map (buildPage [ "speakers", "tessa-kelly" ]) (s "speakers" </> s "tessa-kelly")
-        , Url.map (buildPage [ "sponsors" ]) (s "sponsors")
-        , Url.map (buildPage [ "sponsorship" ]) (s "sponsorship")
-        ] 
 
 images =
     { elmLogo = (buildImage [ "elm-logo.svg" ])
@@ -145,17 +136,17 @@ images =
         , lizKrane = (buildImage [ "speakers", "liz-krane.jpg" ])
         , ryanFrazier = (buildImage [ "speakers", "ryan-frazier.jpg" ])
         , tessaKelly = (buildImage [ "speakers", "tessa-kelly.png" ])
-        , all = [ (buildImage [ "speakers", "abadi-kurniawan.jpg" ]), (buildImage [ "speakers", "brooke-angel.jpg" ]), (buildImage [ "speakers", "ian-mackenzie.jpeg" ]), (buildImage [ "speakers", "james-carlson.jpg" ]), (buildImage [ "speakers", "james-gary.jpg" ]), (buildImage [ "speakers", "katie-hughes.jpeg" ]), (buildImage [ "speakers", "katja-mordaunt.jpg" ]), (buildImage [ "speakers", "liz-krane.jpg" ]), (buildImage [ "speakers", "ryan-frazier.jpg" ]), (buildImage [ "speakers", "tessa-kelly.png" ]) ]
+        , directory = directoryWithoutIndex ["speakers"]
         }
     , sponsors =
         { hubtran = (buildImage [ "sponsors", "hubtran.png" ])
-        , all = [ (buildImage [ "sponsors", "hubtran.png" ]) ]
+        , directory = directoryWithoutIndex ["sponsors"]
         }
     , waves = (buildImage [ "waves.svg" ])
-    , all = [ (buildImage [ "elm-logo.svg" ]), (buildImage [ "waves.svg" ]) ]
+    , directory = directoryWithoutIndex []
     }
 
-allImages : List (Path PathKey Path.ToImage)
+allImages : List (ImagePath PathKey)
 allImages =
     [(buildImage [ "elm-logo.svg" ])
     , (buildImage [ "speakers", "abadi-kurniawan.jpg" ])
@@ -177,7 +168,7 @@ isValidRoute : String -> Result String ()
 isValidRoute route =
     let
         validRoutes =
-            List.map Path.toString all
+            List.map PagePath.toString allPages
     in
     if
         (route |> String.startsWith "http://")
