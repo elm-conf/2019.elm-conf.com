@@ -7,8 +7,9 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Markdown
-import Pages.Path as Path
-import PagesNew exposing (images, pages)
+import Pages exposing (images, pages)
+import Pages.ImagePath as ImagePath exposing (ImagePath)
+import Pages.PagePath as PagePath
 
 
 type alias Checkbox =
@@ -227,11 +228,11 @@ mainContentId =
     "main"
 
 
-page : { setFocus : String -> msg, photo : Maybe String, title : String, content : Html msg } -> Html msg
+page : { setFocus : String -> msg, photo : Maybe (ImagePath Pages.PathKey), title : String, content : Html msg } -> Html msg
 page { setFocus, photo, title, content } =
     Html.styled Html.div
         [ Css.paddingBottom Css.zero
-        , Css.backgroundImage <| Css.url (Path.toString images.waves)
+        , Css.backgroundImage <| Css.url (ImagePath.toString images.waves)
         , Css.minHeight <| Css.pct 100
         , Css.backgroundRepeat Css.noRepeat
         , Css.backgroundSize Css.contain
@@ -335,15 +336,15 @@ navigation =
             }
         ]
         []
-        [ navLink "About" <| Path.toString pages.about
-        , navLink "F.A.Q" <| Path.toString pages.frequentlyAskedQuestions
-        , navLink "Schedule" <| Path.toString pages.schedule
-        , navLink "Sponsors" <| Path.toString pages.sponsors
+        [ navLink "About" <| PagePath.toString pages.about
+        , navLink "F.A.Q" <| PagePath.toString pages.frequentlyAskedQuestions
+        , navLink "Schedule" <| PagePath.toString pages.schedule
+        , navLink "Sponsors" <| PagePath.toString pages.sponsors
         , navLink "Tickets" "https://ti.to/strange-loop/2019/with/6vcn1w2pvic"
         ]
 
 
-header : Maybe String -> String -> Html msg
+header : Maybe (ImagePath Pages.PathKey) -> String -> Html msg
 header photo title =
     Html.styled Html.header
         [ responsive
@@ -365,7 +366,7 @@ header photo title =
         [ image
             (case photo of
                 Just src ->
-                    { src = src
+                    { src = ImagePath.toString src
                     , altText = "Photo of " ++ title
                     , width = 200
                     , height = 242
@@ -373,7 +374,7 @@ header photo title =
                     }
 
                 Nothing ->
-                    { src = Path.toString images.elmLogo
+                    { src = ImagePath.toString images.elmLogo
                     , altText = "elm-conf"
                     , width = 200
                     , height = 200

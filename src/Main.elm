@@ -5,8 +5,7 @@ import Color exposing (Color)
 import Css
 import Dict exposing (Dict)
 import Head
-import Head.OpenGraph as OpenGraph
-import Head.SocialMeta as SocialMeta
+import Head.Seo as Seo
 import Html as RootHtml exposing (Html)
 import Html.Styled as Html
 import Html.Styled.Attributes as Attributes exposing (css)
@@ -15,20 +14,20 @@ import Json.Encode
 import List.Extra
 import Mark
 import Page.Schedule
-import Pages exposing (Page)
-import Pages.Content as Content exposing (Content)
+import Pages exposing (images)
 import Pages.Document
+import Pages.ImagePath as ImagePath exposing (ImagePath)
 import Pages.Manifest as Manifest
 import Pages.Manifest.Category
-import Pages.Path as Path
-import PagesNew exposing (images)
+import Pages.PagePath as PagePath exposing (PagePath)
+import Pages.Platform exposing (Page)
 import Ui
 import Url exposing (Url)
 
 
-main : Pages.Program Model Msg Metadata (Html.Html Msg)
+main : Pages.Platform.Program Model Msg Metadata (Html.Html Msg)
 main =
-    PagesNew.application
+    Pages.application
         { init = init
         , view = view
         , update = update
@@ -36,10 +35,11 @@ main =
         , documents = [ markdownDocument, markupDocument ]
         , head = head
         , manifest = manifest
+        , canonicalSiteUrl = "https://2019.elm-conf.com"
         }
 
 
-markdownDocument : Pages.Document.DocumentParser Metadata (Html.Html Msg)
+markdownDocument : ( String, Pages.Document.DocumentHandler Metadata (Html.Html Msg) )
 markdownDocument =
     Pages.Document.parser
         { extension = "md"
@@ -48,7 +48,7 @@ markdownDocument =
         }
 
 
-markupDocument : Pages.Document.DocumentParser Metadata (Html.Html Msg)
+markupDocument : ( String, Pages.Document.DocumentHandler Metadata (Html.Html Msg) )
 markupDocument =
     Pages.Document.markupParser
         (Mark.document identity speakerMetadata)
@@ -154,8 +154,34 @@ speakerMetadata =
     Mark.record "Speaker"
         (\name photo -> SpeakerPage { name = name, photo = photo })
         |> Mark.field "name" Mark.string
-        |> Mark.field "photo" Mark.string
+        |> Mark.field "photo" imageField
         |> Mark.toBlock
+
+
+imageField =
+    Mark.string
+        |> Mark.verify
+            (\imageAssetPath ->
+                case findMatchingImage imageAssetPath of
+                    Nothing ->
+                        Err
+                            { title = "Couldn't find image."
+                            , message = [ imageAssetPath ++ " is not a valid image." ]
+                            }
+
+                    Just imagePath ->
+                        Ok imagePath
+            )
+
+
+findMatchingImage : String -> Maybe (ImagePath Pages.PathKey)
+findMatchingImage imageAssetPath =
+    Pages.allImages
+        |> List.Extra.find
+            (\image ->
+                ImagePath.toString image
+                    == imageAssetPath
+            )
 
 
 manifest =
@@ -167,7 +193,7 @@ manifest =
     , iarcRatingId = Nothing
     , name = "elm-conf 2019"
     , themeColor = Just Color.white
-    , startUrl = PagesNew.pages.schedule
+    , startUrl = Pages.pages.schedule
     , shortName = Just "elm-conf 2019"
     , sourceIcon = images.elmLogo
     }
@@ -176,7 +202,7 @@ manifest =
 type Metadata
     = SpeakerPage
         { name : String
-        , photo : String
+        , photo : ImagePath Pages.PathKey
         }
     | RegularPage
         { title : String
@@ -199,7 +225,7 @@ frontmatterParser =
                     }
             )
             (Json.Decode.field "title" Json.Decode.string)
-            (Json.Decode.field "photo" Json.Decode.string)
+            (Json.Decode.field "photo" imageDecoder)
         , Json.Decode.maybe (Json.Decode.field "type" Json.Decode.string)
             |> Json.Decode.andThen
                 (\type_ ->
@@ -222,6 +248,20 @@ frontmatterParser =
                         (Json.Decode.field "description" Json.Decode.string |> Json.Decode.maybe)
                 )
         ]
+
+
+imageDecoder : Json.Decode.Decoder (ImagePath Pages.PathKey)
+imageDecoder =
+    Json.Decode.string
+        |> Json.Decode.andThen
+            (\imageAssetPath ->
+                case findMatchingImage imageAssetPath of
+                    Nothing ->
+                        Json.Decode.fail "Couldn't find image."
+
+                    Just imagePath ->
+                        Json.Decode.succeed imagePath
+            )
 
 
 type alias Model =
@@ -247,7 +287,7 @@ subscriptions _ =
     Sub.none
 
 
-view : Model -> List ( List String, Metadata ) -> Page Metadata (Html.Html Msg) -> { title : String, body : Html Msg }
+view : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (Html.Html Msg) Pages.PathKey -> { title : String, body : Html Msg }
 view model siteMetadata page =
     let
         { title, body } =
@@ -298,7 +338,7 @@ view model siteMetadata page =
     }
 
 
-pageView : Model -> List ( List String, Metadata ) -> Page Metadata (Html.Html Msg) -> { title : String, body : Html Msg }
+pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (Html.Html Msg) Pages.PathKey -> { title : String, body : Html Msg }
 pageView model siteMetadata page =
     case page.metadata of
         RegularPage metadata ->
@@ -323,7 +363,7 @@ pageView model siteMetadata page =
             }
 
 
-rootUrl =
+canonicalSiteUrl =
     "https://2019.elm-conf.com"
 
 
@@ -340,16 +380,16 @@ siteName =
 <https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names>
 <https://ogp.me/>
 -}
-head : Metadata -> List Head.Tag
+head : Metadata -> List (Head.Tag Pages.PathKey)
 head metadata =
     case metadata of
         RegularPage page ->
-            OpenGraph.website
-                (OpenGraph.summaryLarge
-                    { url = rootUrl
+            Seo.website
+                (Seo.summaryLarge
+                    { canonicalUrlOverride = Nothing
                     , siteName = siteName
                     , image =
-                        { url = rootUrl ++ Path.toString images.elmLogo
+                        { url = images.elmLogo
                         , alt = "elm-conf logo"
                         , dimensions = Nothing
                         , mimeType = Nothing
@@ -359,26 +399,14 @@ head metadata =
                     , title = page.title
                     }
                 )
-                ++ [ Head.description (page.description |> Maybe.withDefault siteTagline)
-                   ]
-                ++ SocialMeta.summaryLarge
-                    { title = page.title
-                    , description = page.description |> Maybe.withDefault siteTagline |> Just
-                    , image =
-                        Just
-                            { url = rootUrl ++ Path.toString images.elmLogo
-                            , alt = "elm-conf logo"
-                            }
-                    , siteUser = Nothing
-                    }
 
         SpeakerPage speaker ->
-            OpenGraph.website
-                (OpenGraph.summaryLarge
-                    { url = rootUrl
+            Seo.website
+                (Seo.summaryLarge
+                    { canonicalUrlOverride = Nothing
                     , siteName = siteName
                     , image =
-                        { url = rootUrl ++ speaker.photo
+                        { url = speaker.photo
                         , alt = speaker.name
                         , dimensions = Nothing
                         , mimeType = Nothing
@@ -388,26 +416,14 @@ head metadata =
                     , title = speaker.name
                     }
                 )
-                ++ [ Head.description speaker.name
-                   ]
-                ++ SocialMeta.summaryLarge
-                    { title = speaker.name
-                    , description = Just siteTagline
-                    , image =
-                        Just
-                            { url = rootUrl ++ speaker.photo
-                            , alt = speaker.name
-                            }
-                    , siteUser = Nothing
-                    }
 
         SchedulePage page ->
-            OpenGraph.website
-                (OpenGraph.summaryLarge
-                    { url = rootUrl
+            Seo.website
+                (Seo.summaryLarge
+                    { canonicalUrlOverride = Nothing
                     , siteName = siteName
                     , image =
-                        { url = rootUrl ++ Path.toString images.elmLogo
+                        { url = images.elmLogo
                         , alt = "elm-conf logo"
                         , dimensions = Nothing
                         , mimeType = Nothing
@@ -417,5 +433,3 @@ head metadata =
                     , title = page.title
                     }
                 )
-                ++ [ Head.description (page.description |> Maybe.withDefault siteTagline)
-                   ]
