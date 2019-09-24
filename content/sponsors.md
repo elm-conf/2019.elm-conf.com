@@ -18,4 +18,7 @@
 
 ## Community Sponsor: Joel Clermont
 
-Thank you to Joel Clermont for supporting elm-conf!
+<div class="sponsor-row">
+  ![Joel Clermont](/images/sponsors/joelclermont.jpg)
+  <p>Thank you to Joel Clermont for supporting elm-conf!</p>
+</div>

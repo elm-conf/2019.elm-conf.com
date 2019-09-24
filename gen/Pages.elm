@@ -140,6 +140,7 @@ images =
         }
     , sponsors =
         { hubtran = (buildImage [ "sponsors", "hubtran.png" ])
+        , joelclermont = (buildImage [ "sponsors", "joelclermont.jpg" ])
         , directory = directoryWithoutIndex ["sponsors"]
         }
     , waves = (buildImage [ "waves.svg" ])
@@ -160,6 +161,7 @@ allImages =
     , (buildImage [ "speakers", "ryan-frazier.jpg" ])
     , (buildImage [ "speakers", "tessa-kelly.png" ])
     , (buildImage [ "sponsors", "hubtran.png" ])
+    , (buildImage [ "sponsors", "joelclermont.jpg" ])
     , (buildImage [ "waves.svg" ])
     ]
 
